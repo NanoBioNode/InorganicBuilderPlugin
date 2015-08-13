@@ -1,0 +1,7 @@
+ATOM      1  C1  PEGMP   1       0.826   0.020   0.564  1.00  0.00      PEG  
+ATOM      2  H11 PEGMP   1       0.829  -0.833   1.242  1.00  0.00      PEG  
+ATOM      3  H12 PEGMP   1       0.852   0.945   1.141  1.00  0.00      PEG  
+ATOM      4  O1  PEGMP   1       1.972  -0.043  -0.287  1.00  0.00      PEG  
+ATOM      5  C2  PEGMP   1       3.119  -0.011   0.564  1.00  0.00      PEG  
+ATOM      6  H21 PEGMP   1       3.118   0.913   1.141  1.00  0.00      PEG  
+ATOM      7  H22 PEGMP   1       3.094  -0.864   1.243  1.00  0.00      PEG  
