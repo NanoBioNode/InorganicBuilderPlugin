@@ -200,6 +200,7 @@ namespace eval ::inorganicBuilder:: {
     addDNAStrand "1"
     addPEGLength ""
     addPEGTypes ""
+    addSurfTypes ""
     all_struct ""
     atomsBeforeAU 0
     DNATypes ""
@@ -1625,9 +1626,16 @@ proc ::inorganicBuilder::guiBuildSurfaceStructsWin {} {
   incr row
 
 
-  grid [button $w.body3.getsa -text "Get Surface Atoms" \
+  grid [button $w.body3.getsa0 -text "Get Surface Atom Types:" \
+          -command "${ns}::getSurfaceAtomTypes" ] \
+    -row $row -column 0
+  grid [entry $w.body3.selectsas -width 20 \
+    -textvariable ${ns}::guiState(addSurfTypes)] \
+    -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
+  grid [button $w.body3.getsa1 -text "Draw Surface Atoms" \
           -command "${ns}::getSurfaceAtoms" ] \
-    -row $row -column 1
+    -row $row -column 2
+
   incr row
   
 
@@ -3679,6 +3687,8 @@ proc ::inorganicBuilder::AlignDense { } {
     lappend draw_status [molinfo $moll get drawn]
     if {$moll != $surfacemol} {
       mol off $moll
+    } elseif {$moll == $surfacemol} {
+      mol on $moll
     }
   }
   
@@ -4489,7 +4499,7 @@ proc ::inorganicBuilder::guiBuildStructure { } {
 
 
 # *** ADDED ***
-proc ::inorganicBuilder::getSurfaceAtoms {} {
+proc ::inorganicBuilder::getSurfaceAtoms { } {
 
   variable guiState
   set ns [namespace current]
@@ -4520,7 +4530,13 @@ proc ::inorganicBuilder::getSurfaceAtoms {} {
   set guiState(currentMol) $molid
   set guiState(getSurfMol) $molid
 
-  set allsel [atomselect $molid all] 
+  set STypeList ""
+  foreach SType $guiState(addSurfTypes) {
+	  set STypeList "$STypeList \"$SType.*\""
+  }
+  set allsel [atomselect $molid "name $STypeList"] 
+
+  
   set aminmax [measure minmax $allsel]
   set rs [measure surface $allsel 1.5 2.88 1.44 ] 
   $allsel delete
@@ -4528,7 +4544,7 @@ proc ::inorganicBuilder::getSurfaceAtoms {} {
 # Graphically display a highlighted region where Surface Area atoms have been found.
   if {$rs == ""} { return }
   
-  set surface_area [atomselect $molid "index $rs"]
+  set surface_area [atomselect $molid "(index $rs) and (name $STypeList)"]
   set guiState(surfacearea) {}
   set guiState(surfacearea) [concat $guiState(surfacearea) [$surface_area get index]]
 
@@ -4560,7 +4576,7 @@ proc ::inorganicBuilder::getSurfaceAtoms {} {
   mol modstyle 1 $molid Licorice
 
   mol addrep $molid
-  mol modselect 2 $molid "all"
+  mol modselect 2 $molid "name $STypeList"
   mol modcolor 2 $molid name
   mol modmaterial 2 $molid Transparent
   mol colupdate 2 $molid 1 
@@ -4602,6 +4618,58 @@ proc ::inorganicBuilder::getSurfaceAtoms {} {
   }
 
  
+  guiBuildSurfaceStructsWin
+  return
+}
+
+
+proc ::inorganicBuilder::getSurfaceAtomTypes { } {
+
+  variable guiState
+  set ns [namespace current]
+  
+  if { [string equal "$guiState(getSurfacePrevID)" "-1"] } {
+    set molid [mol new]
+    set guiState(getSurfacePrevID) $molid
+  } elseif { ![string equal "$guiState(getSurfacePrevID)" "-1"] } {
+    mol delete $guiState(getSurfacePrevID)
+    set molid [mol new]
+    set guiState(getSurfacePrevID) $molid
+  }
+    
+  if { ![string equal $guiState(psffileA) ""] } {
+    mol addfile $guiState(psffileA) type psf autobonds off filebonds off waitfor all $molid
+    mol rename $molid \
+    "GetSurfaceAtomTypes"
+  }
+  if { ![string equal $guiState(pdbfileA) ""] } {
+    mol addfile $guiState(pdbfileA) type pdb autobonds off filebonds off waitfor all $molid
+    mol rename $molid \
+    "GetSurfaceAtomTypes"
+  } else {
+	return
+  }
+
+  set allsel [atomselect $molid all] 
+
+  set rs [measure surface $allsel 1.5 2.88 1.44 ] 
+  $allsel delete
+
+# Graphically display a highlighted region where Surface Area atoms have been found.
+  if {$rs == ""} { return }
+  
+  set surface_area [atomselect $molid "index $rs"]
+
+  set sa_names {}
+  foreach saname [$surface_area get name] {
+    lappend sa_names [lindex [split $saname {[1,2,3,4,5,6,7,8,9]}] 0]
+  }
+
+  set unique_sa_names [lsort -unique $sa_names]
+  set guiState(addSurfTypes) $unique_sa_names
+
+  mol delete $molid
+
   guiBuildSurfaceStructsWin
   return
 }
@@ -4949,6 +5017,7 @@ proc ::inorganicBuilder::clearStructs {} {
   set guiState(addDNAStrand) "1"
   set guiState(addPEGLength) ""
   set guiState(addPEGTypes) ""
+  set guiState(addSurfTypes) ""
   set guiState(all_struct) ""
   set guiState(DNATypes) ""
   set guiState(PEGTypes) ""
@@ -6069,15 +6138,15 @@ proc ::inorganicBuilder::setVMDPeriodPDB { molid pdbfilename } {
 
   # Remove space if not periodic
   if { $guiState(StructSurfPeriodx) != 1 } {
-      set a "0.000"
+      set a [format "%9.3f" "0.000"]
       set $guiState(boxX2) 1
   }
   if { $guiState(StructSurfPeriody) != 1 } {
-	  set b "0.000"
+	  set b [format "%9.3f" "0.000"]
       set $guiState(boxY2) 1
   }
   if { $guiState(StructSurfPeriodz) != 1 } {
-	  set c "0.000"
+	  set c [format "%9.3f" "0.000"]
       set $guiState(boxZ2) 1
   }
 
@@ -6085,7 +6154,7 @@ proc ::inorganicBuilder::setVMDPeriodPDB { molid pdbfilename } {
   molinfo $molid set {a b c alpha beta gamma} \
     [list $a $b $c $alpha $beta $gamma]
 
-  set cryst "$a $b $c $alpha $beta $gamma"
+  set cryst "$a$b$c$alpha$beta$gamma"
   set p0 [open $pdbfilename r]
   set out [open "tmp_period.pdb" w]
   gets $p0 line
@@ -6095,7 +6164,7 @@ proc ::inorganicBuilder::setVMDPeriodPDB { molid pdbfilename } {
 	  }
 		gets $p0 line
   }
-  puts $out "CRYST1    $cryst P 1           1"  
+  puts $out "CRYST1$cryst P 1           1"  
   puts $out $line
   while {[gets $p0 line] > 0} {
     puts $out $line
