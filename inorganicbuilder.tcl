@@ -3363,7 +3363,8 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
        set molid $guiState(currentMol)
        if { ![string equal $guiState(setVMDSelSurf) ""] } {
 		   set vsurf_atomsel [atomselect $molid $guiState(setVMDSelSurf)]
-           set usurf_atomsel [atomselect $molid [concat "index" $guiState(surfacearea)]]
+           set usurf_atomsel [atomselect $molid [concat "index" $guiState(surfacearea)\
+           "and beta == 0"]]
            
            set vsurface_area [ $vsurf_atomsel get index ]
            set usurface_area [ $usurf_atomsel get index ]
@@ -3375,7 +3376,8 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
            set dsurface_area [subtract_list $dsurface_area $guiState(global_useddense)]
 
 		   } else {
-			 set dsurf_atomsel [atomselect $molid [concat "index" $guiState(surfacearea)]]
+			 set dsurf_atomsel [atomselect $molid [concat "index" $guiState(surfacearea)\
+			 "and beta == 0"]]
 			 set dsurface_area [ $dsurf_atomsel get index ]
 			 $dsurf_atomsel delete
              set dsurface_area [subtract_list $dsurface_area $guiState(global_useddense)]
@@ -3416,7 +3418,8 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
        set molid $guiState(currentMol)
        if { ![string equal $guiState(setVMDSelSurf) ""] } {
 		   set vsurf_atomsel [atomselect $molid $guiState(setVMDSelSurf)]
-           set usurf_atomsel [atomselect $molid [concat "index" $guiState(surfacearea)]]
+           set usurf_atomsel [atomselect $molid [concat "index" $guiState(surfacearea)\
+           "and beta == 0"]]
            
            set vsurface_area [ $vsurf_atomsel get index ]
            set usurface_area [ $usurf_atomsel get index ]
@@ -3427,7 +3430,8 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
 
            set dsurface_area [subtract_list $dsurface_area $guiState(global_useddense)]
 		   } else {
-			 set dsurf_atomsel [atomselect $molid [concat "index" $guiState(surfacearea)]]
+			 set dsurf_atomsel [atomselect $molid [concat "index" $guiState(surfacearea)\
+			 "and beta == 0"]]
 			 set dsurface_area [ $dsurf_atomsel get index ]
 			 $dsurf_atomsel delete
              set dsurface_area [subtract_list $dsurface_area $guiState(global_useddense)]
@@ -3446,7 +3450,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
        set dsa_sel [atomselect $molid [concat "index" $dsurface_area]]
        foreach dsaname [$dsa_sel get name] {
            set dsa_name [lindex [split $dsaname {[1,2,3,4,5,6,7,8,9]}] 0]
-
+ 
            if { [intersect_list $guiState(addPEGTypes) $dsa_name] == "" } {
              set dsurface_area [lreplace $dsurface_area $dsa_index $dsa_index]
              incr dsa_index -1
@@ -4622,7 +4626,7 @@ proc ::inorganicBuilder::getSurfaceAtoms { } {
   return
 }
 
-
+# *** ADDED ***
 proc ::inorganicBuilder::getSurfaceAtomTypes { } {
 
   variable guiState
