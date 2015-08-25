@@ -21,8 +21,6 @@ if {$argc != 5} {
     exit
 }
 
-
-
 # Get total PEG atom number
 set id [mol new [lindex $argv 0]]
 set allSet [atomselect top all]
@@ -38,7 +36,12 @@ while {[gets $p0 line] > 0} {
     if {[lindex $line 0] == "ATOM"} { puts $out $line }
 }
 while {[gets $p1 line] > 0} {
-    if {[lindex $line 0] == "ATOM"} { puts $out $line }
+    if {[lindex $line 0] == "ATOM"} {
+		 puts $out $line
+		 if {[lindex $line 10] != 0} {
+			lappend bau_list [expr [lindex $line 1] + $pegAtomNum - [llength $aulist]-1]
+		 }
+	}
 }
 close $p0
 close $p1
@@ -54,6 +57,7 @@ close $out
 foreach cval $clist auval $aulist {
     lappend c_list $cval
     lappend au_list [expr $auval + $pegAtomNum]
+    lappend bau_list [expr $auval + $pegAtomNum - [llength $aulist]]
 }
 puts $c_list
 puts $au_list
@@ -175,8 +179,18 @@ foreach c_segname $c_segname_list c_resid $c_resid_list au_segname $au_segname_l
 guesscoord ;# guess the coordinates of missing atoms
 regenerate angles dihedrals ;# fixes problems with patching
 
-writepdb [lindex $argv 3].pdb
+writepdb setBetas.pdb
 writepsf [lindex $argv 3].psf
-mol delete $id
+set betas [mol new setBetas.pdb]
+set betasel [atomselect $betas "index $bau_list"]
+set betaful [atomselect $betas all]
+$betasel set beta 1.1
+$betaful writepdb [lindex $argv 3].pdb
 
+
+mol delete $id
+mol delete $betas
+$betasel delete
+$betaful delete
+file delete -force "setBetas.pdb"
 }
