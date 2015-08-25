@@ -35,7 +35,12 @@ while {[gets $p0 line] > 0} {
     if {[lindex $line 0] == "ATOM"} { puts $out $line }
 }
 while {[gets $p1 line] > 0} {
-    if {[lindex $line 0] == "ATOM"} { puts $out $line }
+    if {[lindex $line 0] == "ATOM"} {
+		 puts $out $line
+		 if {[lindex $line 10] != 0} {
+			lappend bau_list [expr [lindex $line 1] + $pegAtomNum - [llength $aulist]-1]
+		 }
+	}
 }
 close $p0
 close $p1
@@ -50,6 +55,7 @@ close $out
 foreach oval $olist auval $aulist {
     lappend o_list $oval
     lappend au_list [expr $auval + $ssDNAAtomNum]
+    lappend bau_list [expr $auval + $ssDNAAtomNum - [llength $aulist]]
 }
 
 puts $o_list
@@ -181,9 +187,17 @@ foreach o_segname $o_segname_list o_resid $o_resid_list au_segname $au_segname_l
 guesscoord ;# guess the coordinates of missing atoms
 regenerate angles dihedrals ;# fixes problems with patching
 
-writepdb [lindex $argv 3].pdb
+writepdb setBetas.pdb
 writepsf [lindex $argv 3].psf
+set betas [mol new setBetas.pdb]
+set betasel [atomselect $betas "index $bau_list"]
+set betaful [atomselect $betas all]
+$betasel set beta 1.1
+$betaful writepdb [lindex $argv 3].pdb
+
 mol delete $id
-
-
+mol delete $betas
+$betasel delete
+$betaful delete
+file delete -force "setBetas.pdb"
 }
