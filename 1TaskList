@@ -1,0 +1,53 @@
+The current list of tasks, bugs, and notes for the InorganicBuilderPlugin that I have come up with is below.
+-AbderRahman (Abby), 8/28/2015
+
+><< Build Device SubMenu >><
+
+- Cannot use both inclusions and exclusions together, although the user can try.
+The result is either that all objects are included or excluded, depending what was selected last.
+
+><< Build Surface Structures SubMenu >><
+
+Bugs:
+- There are 3 fields for added structures: the array position, the struct name, and the structure-type.
+  When an added structure is removed, the struct name repeats upon the next structure add.
+  However, the array position is fine and has no repetitions. Thus, this is only a visual/cosmetic issue.
+
+- <<Add Structure SubSubMenu >> Atom Type Selections does nothing, I believe. It is just a visual entry.
+
+- <<NAMD SubSubMenu>> "Add Ions" button should be disabled if the system has not been solvated yet.
+
+- <<NAMD SubSubMenu>> Solvating a Hex Box produces a good PDB, but a bad PSF.
+  The molecules are moved so re-using the old PSF does not make sense (re-using is what is being done).
+  
+- <<NAMD SubSubMenu >> AutoSolvate fills water molecules inside of hollow shapes.
+  
+- Drawing the surface for molecules that have bonds causes a graphical discrepancy. The bonds stop being drawn.
+  i.e. after hitting the "Draw Surface Atoms" button for a gold surface with a PEG attached.
+  PEG will not have the bonds drawn visually, but otherwise everything is fine.
+  
+Future Implementation:
+- Allow building across both DNA and PEG in one build.
+  This is currently doable by 1.) Building exclusively with one type, then 2.) Resetting the device and 
+  3.) loading in the built system as the loaded molecule followed by 4.) building exclusively with the other type.
+  
+- Re-Open the Custom Structure Menu once it is functional, right now only PEG and DNA menus are shown.
+
+- Setup NAMD to work with NanoHub resources in order to access the remote clusters they have available.
+
+- Overlap detection
+-> Using overlap detection to predict which direction the attachment should be "flipped".
+
+- Periodic Rhomboids in addition to current Hex, Square modes.
+
+- Platform testing Linux/Windows/OSX
+
+
+Non-critical Upgrades:
+
+- Increase the number of segment names available for structures when they are building.
+  In case of super large systems being built.
+  
+- Add DX file scaling for uploaded DX file exclusions
+
+- Estimate vertice selection rate in order to speed up the process even more.
