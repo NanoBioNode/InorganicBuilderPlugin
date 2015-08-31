@@ -27,6 +27,11 @@ set allSet [atomselect top all]
 set pegAtomNum [$allSet num]
 mol delete $id
 $allSet delete
+set id2 [mol new [lindex $argv 1]]
+set allSet2 [atomselect top "not resname AU"]
+set nonAUNum [$allSet2 num]
+mol delete $id2
+$allSet2 delete
 
 # Combine PEG and Au pdb
 set p0 [open [lindex $argv 0] r]
@@ -39,7 +44,7 @@ while {[gets $p1 line] > 0} {
     if {[lindex $line 0] == "ATOM"} {
 		 puts $out $line
 		 if {[lindex $line 10] != 0} {
-			lappend bau_list [expr [lindex $line 1] + $pegAtomNum - [llength $aulist]-1]
+			lappend bau_list [expr [lindex $line 1] + $pegAtomNum + $nonAUNum - [llength $aulist]-1]
 		 }
 	}
 }
@@ -56,8 +61,8 @@ close $out
 
 foreach cval $clist auval $aulist {
     lappend c_list $cval
-    lappend au_list [expr $auval + $pegAtomNum]
-    lappend bau_list [expr $auval + $pegAtomNum - [llength $aulist]]
+    lappend au_list [expr $auval + $pegAtomNum + $nonAUNum]
+    lappend bau_list [expr $auval + $pegAtomNum + $nonAUNum - [llength $aulist]]
 }
 puts $c_list
 puts $au_list
