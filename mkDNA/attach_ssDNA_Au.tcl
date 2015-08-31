@@ -26,6 +26,11 @@ set allSet [atomselect top all]
 set ssDNAAtomNum [$allSet num]
 mol delete top
 $allSet delete
+set id2 [mol new [lindex $argv 1]]
+set allSet2 [atomselect top "not resname AU"]
+set nonAUNum [$allSet2 num]
+mol delete $id2
+$allSet2 delete
 
 # Combine ssDNA and Au pdb
 set p0 [open [lindex $argv 0] r]
@@ -38,7 +43,7 @@ while {[gets $p1 line] > 0} {
     if {[lindex $line 0] == "ATOM"} {
 		 puts $out $line
 		 if {[lindex $line 10] != 0} {
-			lappend bau_list [expr [lindex $line 1] + $pegAtomNum - [llength $aulist]-1]
+			lappend bau_list [expr [lindex $line 1] + $ssDNAAtomNum + $nonAUNum - [llength $aulist]-1]
 		 }
 	}
 }
@@ -54,8 +59,8 @@ close $out
 
 foreach oval $olist auval $aulist {
     lappend o_list $oval
-    lappend au_list [expr $auval + $ssDNAAtomNum]
-    lappend bau_list [expr $auval + $ssDNAAtomNum - [llength $aulist]]
+    lappend au_list [expr $auval + $ssDNAAtomNum + $nonAUNum]
+    lappend bau_list [expr $auval + $ssDNAAtomNum + $nonAUNum - [llength $aulist]]
 }
 
 puts $o_list
