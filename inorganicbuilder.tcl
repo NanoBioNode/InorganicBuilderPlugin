@@ -3613,21 +3613,28 @@ proc ::inorganicBuilder::DensityPDBGen { start_atom } {
 		set rad_sel [atomselect $molid "within $spacer of index $start_atom"]
         set radius_surf [$rad_sel get index]
 
-        if { [llength $radius_surf] > 1} {
+        if { [llength $radius_surf] >= 1} {
 			foreach k $radius_surf {
 		        if { [info exists spacer_usable_surface($k)] } {
 					unset spacer_usable_surface($k)
 				}
 			}
-		}
+		} 
 		
         $rad_sel delete
 
       # set next_usable_start $usable_surface
-        if { [array size spacer_usable_surface] != 0 } {
-          set pop [array startsearch spacer_usable_surface]
-          set start_atom [array nextelement spacer_usable_surface $pop]
-          array donesearch spacer_usable_surface $pop
+        if { [array size spacer_usable_surface] != 0 } {			
+          set start_atom [lindex $usable_surface 0]
+          set usable_surface [lreplace $usable_surface 0 0]         
+          #set pop [array startsearch spacer_usable_surface]
+          #set start_atom [array nextelement spacer_usable_surface $pop]
+          #array donesearch spacer_usable_surface $pop
+          while { ([llength $usable_surface] != 0) && !([info exists spacer_usable_surface($start_atom)])} {
+			set start_atom [lindex $usable_surface 0]
+			set usable_surface [lreplace $usable_surface 0 0]         
+		  }
+
           unset spacer_usable_surface($start_atom)			
           lappend placement_index $start_atom
           
@@ -4520,12 +4527,12 @@ proc ::inorganicBuilder::getSurfaceAtoms { } {
   }
     
   if { ![string equal $guiState(psffileA) ""] } {
-    mol addfile $guiState(psffileA) type psf autobonds off filebonds off waitfor all $molid
+    mol addfile $guiState(psffileA) type psf autobonds off waitfor all $molid
     mol rename $molid \
     "GetSurfaceAtoms"
   }
   if { ![string equal $guiState(pdbfileA) ""] } {
-    mol addfile $guiState(pdbfileA) type pdb autobonds off filebonds off waitfor all $molid
+    mol addfile $guiState(pdbfileA) type pdb autobonds off waitfor all $molid
     mol rename $molid \
     "GetSurfaceAtoms"
   } else {
