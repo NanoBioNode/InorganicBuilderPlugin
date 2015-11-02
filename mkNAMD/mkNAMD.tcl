@@ -1,4 +1,4 @@
-proc mkNAMD { builtPSF builtPDB outDir parDir dimFactor namdFile simFile Temperature Dielectric Damping minimStep simStep setIMD sspVecs} {
+proc mkNAMD { builtPSF builtPDB outDir parDir dimFactor namdFile simFile Temperature Dielectric Damping minimStep simStep setIMD sspVecs exbFile} {
 set argc 10
 set argv {}
 lappend argv $builtPSF
@@ -276,9 +276,9 @@ puts $namdFile "}"
 puts $namdFile ""
 puts $namdFile ""
 puts $namdFile "##Extrabonds for MGHH stability"
-puts $namdFile "if {0} {"
+puts $namdFile "if {1} {"
 puts $namdFile "extraBonds      on"
-puts $namdFile "extraBondsFile  constrain/mghh_extrabonds"
+puts $namdFile "extraBondsFile  $exbFile"
 puts $namdFile "}"
 puts $namdFile ""
 puts $namdFile "##Constraining atoms of DNA bases using elastic networks"
