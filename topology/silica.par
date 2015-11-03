@@ -1,0 +1,7 @@
+BONDS
+SI OSI 1.000 1.600
+
+NONBONDED
+! for SiO2, jcomer2@illinois.edu from Cruz-Chu J.Phys.Chem.B 2006
+SI        0.0       -0.3000    2.1475   0.000000   -0.3000      2.1475
+OSI       0.0       -0.1500    1.75     0.000000   -0.1500      1.75
