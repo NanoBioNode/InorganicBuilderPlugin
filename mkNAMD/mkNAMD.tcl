@@ -192,10 +192,10 @@ puts $namdFile ""
 puts $namdFile "## Force-Field Parameters"
 puts $namdFile "paraTypeCharmm  on  # we always use CHARMM formatted parameters (even when using Amber)"
 # Add paramter files
-set parFiles [exec ls {*}[glob $parDir/*.prm]]
-set parFiles [list {*}$parFiles {*}[exec ls {*}[glob $parDir/*.par]]]
-set parFiles [list {*}$parFiles {*}[exec ls {*}[glob $parDir/*.str]]]
-set parFiles [list {*}$parFiles {*}[exec ls {*}[glob $parDir/*.inp]]]
+set parFiles [glob -nocomplain -- $parDir/*.prm]
+set parFiles [list {*}$parFiles {*}[glob -nocomplain -- $parDir/*.par]]
+set parFiles [list {*}$parFiles {*}[glob -nocomplain -- $parDir/*.str]]
+set parFiles [list {*}$parFiles {*}[glob -nocomplain -- $parDir/*.inp]]
 
 #set parDirFull [string trimright $parDir "topology"]
 
