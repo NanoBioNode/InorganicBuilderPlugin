@@ -1,4 +1,4 @@
-proc mkNAMD { builtPSF builtPDB outDir parDir dimFactor namdFile simFile Temperature Dielectric Damping minimStep simStep setIMD sspVecs exbFile} {
+proc mkNAMD { builtPSF builtPDB outDir parDir dimFactor namdFile simFile Temperature Dielectric Damping minimStep simStep setIMD sspVecs exb exbFile con conFile} {
 set argc 10
 set argv {}
 lappend argv $builtPSF
@@ -192,10 +192,10 @@ puts $namdFile ""
 puts $namdFile "## Force-Field Parameters"
 puts $namdFile "paraTypeCharmm  on  # we always use CHARMM formatted parameters (even when using Amber)"
 # Add paramter files
-set parFiles [exec ls {*}[glob $parDir/*.prm]]
-set parFiles [list {*}$parFiles {*}[exec ls {*}[glob $parDir/*.par]]]
-set parFiles [list {*}$parFiles {*}[exec ls {*}[glob $parDir/*.str]]]
-set parFiles [list {*}$parFiles {*}[exec ls {*}[glob $parDir/*.inp]]]
+set parFiles [glob -nocomplain -- $parDir/*.prm]
+set parFiles [list {*}$parFiles {*}[glob -nocomplain -- $parDir/*.par]]
+set parFiles [list {*}$parFiles {*}[glob -nocomplain -- $parDir/*.str]]
+set parFiles [list {*}$parFiles {*}[glob -nocomplain -- $parDir/*.inp]]
 
 #set parDirFull [string trimright $parDir "topology"]
 
@@ -269,16 +269,16 @@ puts $namdFile "#ExcludeFromPressureCol     B"
 puts $namdFile ""
 puts $namdFile ""
 puts $namdFile "## harmonic restraints"
-puts $namdFile "if {0} {"
+puts $namdFile "if {$con} {"
 puts $namdFile "constraints     on"
-puts $namdFile "consref         constrain/square2plate_1MKCl_reduce_Mg3_SIOConstrain.pdb"
-puts $namdFile "conskfile       constrain/square2plate_1MKCl_reduce_Mg3_SIOConstrain.pdb"
+puts $namdFile "consref         $conFile"
+puts $namdFile "conskfile       $conFile"
 puts $namdFile "conskcol        B"
 puts $namdFile "}"
 puts $namdFile ""
 puts $namdFile ""
 puts $namdFile "##Extrabonds for MGHH stability"
-puts $namdFile "if {1} {"
+puts $namdFile "if {$exb} {"
 puts $namdFile "extraBonds      on"
 puts $namdFile "extraBondsFile  $exbFile"
 puts $namdFile "}"

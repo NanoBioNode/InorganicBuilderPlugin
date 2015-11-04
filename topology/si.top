@@ -15,13 +15,17 @@
 *
 27  1
 
-MASS	 1 AU 	196.9666  AU ! AU
+MASS	 1 SI 	28.0855  SI ! SI
 
-RESI AU4            0.000 
+RESI SI            0.000 
 GROUP
-ATOM AU1  AU 	  0
-ATOM AU2  AU 	  0
-ATOM AU3  AU 	  0
-ATOM AU4  AU 	  0
+ATOM SI1  SI 	  0
+ATOM SI2  SI 	  0
+ATOM SI3  SI 	  0
+ATOM SI4  SI 	  0
+ATOM SI5  SI 	  0
+ATOM SI6  SI 	  0
+ATOM SI7  SI 	  0
+ATOM SI8  SI 	  0
 
 END

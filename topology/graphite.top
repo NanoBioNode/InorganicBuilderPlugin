@@ -15,13 +15,14 @@
 *
 27  1
 
-MASS	 1 AU 	196.9666  AU ! AU
 
-RESI AU4            0.000 
+MASS	 1 C 	 12.0107  C ! C
+
+RESI C            0.000 
 GROUP
-ATOM AU1  AU 	  0
-ATOM AU2  AU 	  0
-ATOM AU3  AU 	  0
-ATOM AU4  AU 	  0
+ATOM C1  C 	  0
+ATOM C2  C 	  0
+ATOM C3  C 	  0
+ATOM C4  C 	  0
 
 END
