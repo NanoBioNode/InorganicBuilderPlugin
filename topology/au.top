@@ -17,7 +17,7 @@
 
 MASS	 1 AU 	196.9666  AU ! AU
 
-RESI AU            0.000 
+RESI AU4            0.000 
 GROUP
 ATOM AU1  AU 	  0
 ATOM AU2  AU 	  0
