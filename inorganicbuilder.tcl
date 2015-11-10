@@ -194,6 +194,9 @@ namespace eval ::inorganicBuilder:: {
     filename_index_glob 0
     answer "yes"
     namdhandle "namd2"
+    addCustomX 0
+    addCustomK 0
+    addCUSTTypes ""
     addDNALength ""
     addDNASEQ "Random"
     addDNATypes ""
@@ -205,6 +208,8 @@ namespace eval ::inorganicBuilder:: {
     atomsBeforeAU 0
     DNATypes ""
     PEGTypes ""
+    CUSTTypes ""
+    CustStructLength 0
     mmod 1.5
     StructHexBox 0
     StructSurfPeriodx 0
@@ -238,8 +243,10 @@ namespace eval ::inorganicBuilder:: {
     previous_SurfDetail ""
     previous_tempsurf ""
     dens_printer ""
+    anc_list ""
     c_list ""
-    o_list ""    
+    o_list ""
+    ancau_list ""
     cau_list ""
     oau_list ""
     global_useddense {}
@@ -268,6 +275,10 @@ namespace eval ::inorganicBuilder:: {
     loadResult 1
     addGenericInclude 0
     addDXFile {}
+    exb 0
+    con 0
+    exbFile ""
+    conFile ""
     relabelBonds 0
     saveParams 0
   }
@@ -2782,8 +2793,10 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
   set ns [namespace current]
   set psfkey_struct "psffile_struct"
   set pdbkey_struct "pdbfile_struct"
+  set topokey_struct "topofile_struct"
   set guiState(addPEGTypes) $guiState(PEGTypes)
   set guiState(addDNATypes) $guiState(DNATypes)
+  set guiState(addCUSTTypes) $guiState(CUSTTypes)
   
   if { [winfo exists $f] } {
     destroy $f
@@ -2846,11 +2859,11 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
     incr row
 
 
-    grid [label $f.pegslabel -text "Available Atom Types for PEG are: $guiState(PEGTypes)"] \
+    grid [label $f.pegslabel -text "Available Atom Types for PEG to bond are: $guiState(PEGTypes)"] \
       -row $row -column 0 -sticky w
     incr row 
 
-    grid [label $f.selectslabel -text "Atom Type Selections (i.e. AU H C):"] \
+    grid [label $f.selectslabel -text "Available Atom Type Selections (i.e. AU H C):"] \
       -row $row -column 0 -sticky w
     grid [entry $f.selects -width 20 \
       -textvariable ${ns}::guiState(addPEGTypes)] \
@@ -2891,11 +2904,11 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
       -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
     incr row
 
-    grid [label $f.dnaslabel -text "Available Atom Types for DNA are: $guiState(DNATypes)"] \
+    grid [label $f.dnaslabel -text "Available Atom Types for DNA to bond are: $guiState(DNATypes)"] \
       -row $row -column 0 -sticky w
     incr row 
 
-    grid [label $f.selectslabel -text "Atom Type Selections (i.e. AU H C):"] \
+    grid [label $f.selectslabel -text "Available Atom Type Selections (i.e. AU H C):"] \
       -row $row -column 0 -sticky w
     grid [entry $f.selects -width 20 \
       -textvariable ${ns}::guiState(addDNATypes)] \
@@ -2905,19 +2918,7 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
     
   } elseif { [string equal $type "custom"] } {
 
-
-    grid [label $f.psflabel -text "PSF: "] \
-      -row $row -column 0 -sticky w
-    grid [entry $f.psfpath -width 30 \
-          -textvariable ${ns}::guiState($psfkey_struct)] \
-      -row $row -column 1 -sticky ew
-    grid [button $f.psfbutton -text "Browse" \
-           -command "set tempfile \[tk_getOpenFile -defaultextension .psf \]; \
-                     if \{!\[string equal \$tempfile \"\"\]\} \{ \
-                       set ${ns}::guiState($psfkey_struct) \$tempfile; \
-                     \};" \
-          ] -row $row -column 2 -sticky e
-    incr row
+    set guiState(addCUSTTypes) $guiState(addSurfTypes)
 	  
     grid [label $f.pdblabel -text "PDB: "] \
       -row $row -column 0 -sticky w
@@ -2931,20 +2932,59 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
 	                   \};" \
           ] -row $row -column 2 -sticky e
     incr row
-
-    grid [label $f.xoriglabel -text "Surface Atom Selection:"] \
+    
+    grid [label $f.topolabel -text "Topology/Parameter CGenFF File: "] \
       -row $row -column 0 -sticky w
-    grid [entry $f.xorig -width 20 \
-      -textvariable ${ns}::guiState(addCustomSurfDetail)] \
+    grid [entry $f.topopath -width 30 \
+            -textvariable ${ns}::guiState($topokey_struct)] \
+      -row $row -column 1 -sticky ew
+    grid [button $f.topobutton -text "Browse" \
+           -command "set tempfile \[tk_getOpenFile -defaultextension .str \]; \
+                     if \{!\[string equal \$tempfile \"\"\]\} \{ \
+                       set ${ns}::guiState($topokey_struct) \$tempfile \
+	                   \};" \
+          ] -row $row -column 2 -sticky e
+    incr row
+
+#    grid [label $f.xoriglabel -text "Surface Atom Selection:"] \
+#      -row $row -column 0 -sticky w
+#    grid [entry $f.xorig -width 20 \
+#      -textvariable ${ns}::guiState(addCustomSurfDetail)] \
+#      -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
+#    incr row
+
+    grid [label $f.dnaslabel -text "Available Atom Types for bonding are: $guiState(addCUSTTypes)"] \
+      -row $row -column 0 -sticky w
+    incr row 
+
+    grid [label $f.selectsclabel -text "Available Atom Type Selections (i.e. AU H C):"] \
+      -row $row -column 0 -sticky w
+    grid [entry $f.selectsc -width 20 \
+      -textvariable ${ns}::guiState(addCUSTTypes)] \
       -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
     incr row
     
-    grid [label $f.xoriglabel2 -text "Structure-Tail Atom Selection:"] \
+    grid [label $f.cxoriglabel -text "Structure's Atom-to-Bond (Atom Number):"] \
       -row $row -column 0 -sticky w
-    grid [entry $f.xorig2 -width 20 \
+    grid [entry $f.cxorig -width 20 \
       -textvariable ${ns}::guiState(addCustomStructDetail)] \
       -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
     incr row
+    
+    grid [label $f.cxoriglabel2 -text "Bond Spring Constant:"] \
+      -row $row -column 0 -sticky w
+    grid [entry $f.cxorig2 -width 20 \
+      -textvariable ${ns}::guiState(addCustomK)] \
+      -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
+    incr row
+    
+    grid [label $f.cxoriglabel3 -text "Bond Equilibrium Distance:"] \
+      -row $row -column 0 -sticky w
+    grid [entry $f.cxorig3 -width 20 \
+      -textvariable ${ns}::guiState(addCustomX)] \
+      -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
+    incr row
+    
   }
     
   
@@ -3460,9 +3500,62 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
 	   $dsa_sel delete
 
 
+  } else {
+       source [file normalize [file join $homePath "mkCUST" "mod_pdb.tcl"]]
+       set pegname CUST$guiState(addCustomStructDetail)
+       mod_pdb $guiState(pdbfile_struct) $guiState(topofile_struct) $pegname
+       
+       set guiState(pdbfile_struct) $pegname.pdb
+       set guiState(psffile_struct) $pegname.psf
+
+       set molid $guiState(currentMol)
+       if { ![string equal $guiState(setVMDSelSurf) ""] } {
+		   set vsurf_atomsel [atomselect $molid $guiState(setVMDSelSurf)]
+           set usurf_atomsel [atomselect $molid [concat "index" $guiState(surfacearea)\
+           "and beta == 0"]]
+           
+           set vsurface_area [ $vsurf_atomsel get index ]
+           set usurface_area [ $usurf_atomsel get index ]
+           set dsurface_area [ intersect_list $vsurface_area $usurface_area ]
+           
+           $vsurf_atomsel delete
+           $usurf_atomsel delete
+
+           set dsurface_area [subtract_list $dsurface_area $guiState(global_useddense)]
+		   } else {
+			 set dsurf_atomsel [atomselect $molid [concat "index" $guiState(surfacearea)\
+			 "and beta == 0"]]
+			 set dsurface_area [ $dsurf_atomsel get index ]
+			 $dsurf_atomsel delete
+             set dsurface_area [subtract_list $dsurface_area $guiState(global_useddense)]
+		   }
+
+
+# Filter out for only requested element types (CUSTOM)
+       if { $dsurface_area == "" } {
+         tk_messageBox -icon error -message \
+           "No valid construction atoms in current selection" \
+           -type ok  
+           set guiState(dens_printer) ""
+         return;
+       }
+       set dsa_index 0
+       set dsa_sel [atomselect $molid [concat "index" $dsurface_area]]
+       foreach dsaname [$dsa_sel get name] {
+           set dsa_name [lindex [split $dsaname {[1,2,3,4,5,6,7,8,9]}] 0]
+ 
+           if { [intersect_list $guiState(addCUSTTypes) $dsa_name] == "" } {
+             set dsurface_area [lreplace $dsurface_area $dsa_index $dsa_index]
+             incr dsa_index -1
+           }
+           incr dsa_index 1
+	   }
+	   $dsa_sel delete
+
+
   }
 
-  if { $guiState(addStructType) != "custom" } {
+  if { $guiState(addStructType) != "DNE_custom" } {
 
   # choose a starting, valid placement point by shuffling the surface area points. 
 
@@ -3933,6 +4026,8 @@ proc ::inorganicBuilder::AlignDense { } {
       set pegnam DNA$guiState(addDNALength)_$guiState(structureIndex)
     } elseif { $guiState(addStructType) == "peg" } {
       set pegnam PEG$guiState(addPEGLength)_$guiState(structureIndex)
+    } elseif { $guiState(addStructType) == "custom" } {
+      set pegnam CUST$guiState(addCustomStructDetail)_$guiState(structureIndex)
     }
     file copy -force $guiState(pdbfile_struct) $pegnam.pdb
     file copy -force $guiState(psffile_struct) $pegnam.psf
@@ -4066,6 +4161,9 @@ proc ::inorganicBuilder::AlignDense { } {
 
       lappend guiState(cau_list) $atom
 
+	# CUSTOM
+    } elseif { $guiState(addStructType) == "custom" } {
+      lappend guiState(ancau_list) $atom
     }
 
 
@@ -4274,6 +4372,13 @@ proc ::inorganicBuilder::AlignDense { } {
 
   writepsf [lindex $structnames 0]_all.psf
   writepdb [lindex $structnames 0]_all.pdb
+
+  # quickly save the length of the custom structure before losing its reference
+  set getLength [mol new $guiState(pdbfile_struct)]
+  set GL [atomselect $getLength all]
+  set guiState(CustStructLength) [llength [$GL get index]]
+  mol delete $getLength
+  $GL delete
  
   set guiState(pdbfile_struct) [lindex $structnames 0]_all.pdb
   set guiState(psffile_struct) [lindex $structnames 0]_all.psf
@@ -4361,6 +4466,10 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
   } elseif {[lindex [lindex $guiState(structlist) $deletelist] 0] == "peg"} {
 
     set guiState(cau_list) [lreplace $guiState(cau_list) $moldel_start $moldel_end]
+    
+  } elseif {[lindex [lindex $guiState(structlist) $deletelist] 0] == "custom"} {
+
+    set guiState(ancau_list) [lreplace $guiState(ancau_list) $moldel_start $moldel_end]
     
   }
 
@@ -4966,10 +5075,11 @@ proc ::inorganicBuilder::RunNAMD { type } {
 
 #  file copy --force $readmepath $namdpackpath
   # build and copy the NAMD file with appropriate pathing
-  mkNAMD $guiState(structedFile).psf $guiState(structedFile).pdb $namdpackpath $parDir\
-   $dimFactor $namdFile $guiState(simFile) $guiState(setNAMDtemp) $guiState(setNAMDdiel)\
-    $guiState(setNAMDpress) $guiState(setNAMDminimStep) $guiState(setNAMDsimStep)\
-     $guiState(setNAMDIMD) $guiState(sspVecs)
+  mkNAMD $guiState(structedFile).psf $guiState(structedFile).pdb $namdpackpath\
+   $parDir $dimFactor $namdFile $guiState(simFile) $guiState(setNAMDtemp)\
+    $guiState(setNAMDdiel) $guiState(setNAMDpress) $guiState(setNAMDminimStep)\
+     $guiState(setNAMDsimStep) $guiState(setNAMDIMD) $guiState(sspVecs)\
+      $guiState(exb) $guiState(exbFile) $guiState(con) $guiState(conFile)
 
   file copy -force $namdfilepath $namdpackpath
 
@@ -5010,8 +5120,10 @@ proc ::inorganicBuilder::clearStructs {} {
   set guiState(previous_SurfDetail) ""
   set guiState(previous_tempsurf) ""
   set guiState(dens_printer) ""
+  set guiState(anc_list) ""
   set guiState(c_list) ""
   set guiState(o_list) ""
+  set guiState(ancau_list) ""
   set guiState(cau_list) ""
   set guiState(oau_list) ""
   set guiState(global_useddense) {}
@@ -5029,9 +5141,11 @@ proc ::inorganicBuilder::clearStructs {} {
   set guiState(addPEGLength) ""
   set guiState(addPEGTypes) ""
   set guiState(addSurfTypes) ""
+  set guiState(addCUSTTypes) ""
   set guiState(all_struct) ""
   set guiState(DNATypes) ""
   set guiState(PEGTypes) ""
+  set guiState(CUSTTypes) ""
 
   set guiState(addMoleculeOrientX) ""
   set guiState(addMoleculeOrientY) ""
@@ -8648,6 +8762,7 @@ proc ::inorganicBuilder::buildStructs { molid } {
 
   source [file normalize [file join $homePath "mkPEG" "attach_PEG_Au.tcl"  ]]
   source [file normalize [file join $homePath "mkDNA" "attach_ssDNA_Au.tcl"]]
+  source [file normalize [file join $homePath "mkCUST" "attach_exb.tcl"]]
   
   resetpsf
   foreach entry $guiState(all_struct) {
@@ -8680,7 +8795,8 @@ proc ::inorganicBuilder::buildStructs { molid } {
 	}
 
    
-    attach_ssDNA_Au All_DNA.pdb Surf.pdb $guiState(o_list) $guiState(oau_list) $guiState(structedFile) $homePath
+    attach_ssDNA_Au All_DNA.pdb Surf.pdb $guiState(o_list)\
+     $guiState(oau_list) $guiState(structedFile) $homePath
     file delete -force "tmp.pdb"
     file delete -force "Surf.pdb"
     file delete -force "Surf.psf"
@@ -8709,12 +8825,41 @@ proc ::inorganicBuilder::buildStructs { molid } {
 		
 	}
 
-    attach_PEG_Au All_PEG.pdb Surf.pdb $guiState(c_list) $guiState(cau_list) $guiState(structedFile) $homePath
+    attach_PEG_Au All_PEG.pdb Surf.pdb $guiState(c_list) $guiState(cau_list)\
+     $guiState(structedFile) $homePath
     file delete -force "tmp.pdb"
     file delete -force "Surf.pdb"
     file delete -force "Surf.psf"
     file delete -force "All_PEG.pdb"
     file delete -force "All_PEG.psf"
+    
+  } elseif { $guiState(addStructType) == "custom" } {
+
+    writepsf All_CUST.psf
+    writepdb All_CUST.pdb
+
+    set guiState(anc_list) ""
+    set tempAll [mol new All_CUST.pdb]
+    set anclist [atomselect $tempAll all]
+    set tempAtomCount [llength [$anclist get index]]
+    $anclist delete
+    
+    for {set iC $guiState(addCustomStructDetail)} { $iC < $tempAtomCount+1 } { set iC [expr $iC + $guiState(CustStructLength)] } {
+		lappend guiState(anc_list) $iC
+    }
+
+    set guiState(exbFile) "${guiState(structedFile)}_exb"
+    set guiState(conFile) "${guiState(structedFile)}_con"
+    set guiState(exb) 1
+    set guiState(con) 1
+    attach_exb All_CUST.pdb Surf.pdb $guiState(anc_list) $guiState(ancau_list)\
+     $guiState(structedFile) $homePath $guiState(exbFile) $guiState(addCustomK)\
+      $guiState(addCustomX) $guiState(conFile)
+    file delete -force "tmp.pdb"
+    file delete -force "Surf.pdb"
+    file delete -force "Surf.psf"
+    file delete -force "All_CUST.pdb"
+    file delete -force "All_CUST.psf"
   }
 
 
