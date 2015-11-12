@@ -14,7 +14,6 @@ lappend argv $outDir
 lappend argv $parDir
 lappend argv $dimFactor
 lappend argv $namdFile
-lappend argv $simFile
 lappend argv $Temperature
 lappend argv $Dielectric
 lappend argv $Damping
@@ -27,6 +26,7 @@ lappend argv $exbFile
 lappend argv $con
 lappend argv $conFile
 lappend argv $topoFile
+lappend argv $simFile
 
 if {$argc != 19} {
     puts "vmd -dispdev text -e mkNAMD.tcl -args psf pdb outDir parDir dimFactor namdFile"
