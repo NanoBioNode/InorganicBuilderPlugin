@@ -3502,6 +3502,8 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
 
   } else {
        source [file normalize [file join $homePath "mkCUST" "mod_pdb.tcl"]]
+       set guiState(topofile_struct) [file normalize $guiState(topofile_struct)]
+       set guiState(pdbfile_struct) [file normalize $guiState(pdbfile_struct)]
        set pegname CUST$guiState(addCustomStructDetail)
        mod_pdb $guiState(pdbfile_struct) $guiState(topofile_struct) $pegname
        
@@ -5079,7 +5081,8 @@ proc ::inorganicBuilder::RunNAMD { type } {
    $parDir $dimFactor $namdFile $guiState(simFile) $guiState(setNAMDtemp)\
     $guiState(setNAMDdiel) $guiState(setNAMDpress) $guiState(setNAMDminimStep)\
      $guiState(setNAMDsimStep) $guiState(setNAMDIMD) $guiState(sspVecs)\
-      $guiState(exb) $guiState(exbFile) $guiState(con) $guiState(conFile)
+      $guiState(exb) $guiState(exbFile) $guiState(con) $guiState(conFile)\
+       $guiState(topofile_struct)
 
   file copy -force $namdfilepath $namdpackpath
 
@@ -8854,7 +8857,7 @@ proc ::inorganicBuilder::buildStructs { molid } {
     set guiState(con) 1
     attach_exb All_CUST.pdb Surf.pdb $guiState(anc_list) $guiState(ancau_list)\
      $guiState(structedFile) $homePath $guiState(exbFile) $guiState(addCustomK)\
-      $guiState(addCustomX) $guiState(conFile)
+      $guiState(addCustomX) $guiState(conFile) $guiState(topofile_struct)
     file delete -force "tmp.pdb"
     file delete -force "Surf.pdb"
     file delete -force "Surf.psf"
