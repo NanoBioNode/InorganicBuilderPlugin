@@ -1,17 +1,34 @@
-proc mkNAMD { builtPSF builtPDB outDir parDir dimFactor namdFile simFile Temperature Dielectric Damping minimStep simStep setIMD sspVecs exb exbFile con conFile} {
-set argc 10
+# Usage: vmd -dispdev text -e mkNAMD.tcl -args builtPSF builtPDB outDir parDir dimFactor namdFile simFile Temperature Dielectric Damping minimStep simStep setIMD sspVecs exb exbFile con conFile
+# Generate a NAMD config file
+# Author: Chen-Yu Li <cli56@illinois.edu>
+# 2015/6/30
+#
+
+proc mkNAMD { builtPSF builtPDB outDir parDir dimFactor namdFile simFile Temperature Dielectric Damping minimStep simStep setIMD sspVecs exb exbFile con conFile topoFile} {
+set argc 19
 set argv {}
+
 lappend argv $builtPSF
 lappend argv $builtPDB
 lappend argv $outDir
 lappend argv $parDir
 lappend argv $dimFactor
 lappend argv $namdFile
+lappend argv $simFile
 lappend argv $Temperature
 lappend argv $Dielectric
 lappend argv $Damping
+lappend argv $minimStep
+lappend argv $simStep
+lappend argv $setIMD
+lappend argv $sspVecs
+lappend argv $exb
+lappend argv $exbFile
+lappend argv $con
+lappend argv $conFile
+lappend argv $topoFile
 
-if {$argc != 10} {
+if {$argc != 19} {
     puts "vmd -dispdev text -e mkNAMD.tcl -args psf pdb outDir parDir dimFactor namdFile"
     puts "psf: psf file"
     puts "pdb: pdb file"
@@ -196,6 +213,7 @@ set parFiles [glob -nocomplain -- $parDir/*.prm]
 set parFiles [list {*}$parFiles {*}[glob -nocomplain -- $parDir/*.par]]
 set parFiles [list {*}$parFiles {*}[glob -nocomplain -- $parDir/*.str]]
 set parFiles [list {*}$parFiles {*}[glob -nocomplain -- $parDir/*.inp]]
+set parFiles [list {*}$parFiles {*}[glob -nocomplain -- $topoFile]]
 
 #set parDirFull [string trimright $parDir "topology"]
 
