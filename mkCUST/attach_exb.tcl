@@ -1,11 +1,11 @@
-# Usage: vmd -dispdev text -e attach_exb.tcl -args funPdb subPdb AnchorAtomList AnchorAUList combineName parDir exbFile k x conFile
+# Usage: vmd -dispdev text -e attach_exb.tcl -args funPdb subPdb AnchorAtomList AnchorAUList combineName parDir exbFile k x conFile topoFile
 # Combine funPdb and subPdb, make psf file, extrabond file and constrain file
 # Author: Chen-Yu Li <cli56@illinois.edu>
 # 2015/11/2
 
 
-proc attach_exb { funPdb subPdb anclist ancaulist combineName parDir exbFile k x conFile } {
-set argc 10
+proc attach_exb { funPdb subPdb anclist ancaulist combineName parDir exbFile k x conFile topoFile} {
+set argc 11
 set argv {}
 lappend argv $funPdb
 lappend argv $subPdb
@@ -16,8 +16,9 @@ lappend argv $exbFile
 lappend argv $k
 lappend argv $x
 lappend argv $conFile
+lappend argv $topoFile
 
-if {$argc != 10} {
+if {$argc != 11} {
     puts "Usage: vmd -dispdev text -e attach_exb.tcl -args funPdb subPdb indexFile combineName parDir exbFile k x conFile"
     puts "funPdb: The pdb file containing all the functional molecules."
     puts "subPdb: The pdb file containing the substrate."
@@ -143,6 +144,7 @@ set parDir [file normalize [file join [lindex $argv 4] "topology"]]
 set topFiles [exec ls {*}[glob -nocomplain $parDir/*.top]]
 set topFiles [list {*}$topFiles {*}[exec ls {*}[glob -nocomplain $parDir/*.str]]]
 set topFiles [list {*}$topFiles {*}[exec ls {*}[glob -nocomplain $parDir/*.rtf]]]
+set topFiles [list {*}$topFiles {*}[exec ls {*}[glob -nocomplain $topoFile]]]
 
 foreach top $topFiles {
    topology $top
