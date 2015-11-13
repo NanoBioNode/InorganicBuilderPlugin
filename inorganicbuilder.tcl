@@ -8847,7 +8847,7 @@ proc ::inorganicBuilder::buildStructs { molid } {
     set tempAtomCount [llength [$anclist get index]]
     $anclist delete
     
-    for {set iC $guiState(addCustomStructDetail)} { $iC < $tempAtomCount+1 } { set iC [expr $iC + $guiState(CustStructLength)] } {
+    for {set iC $guiState(addCustomStructDetail)} { $iC < $tempAtomCount } { set iC [expr $iC + $guiState(CustStructLength)] } {
 		lappend guiState(anc_list) $iC
     }
 
