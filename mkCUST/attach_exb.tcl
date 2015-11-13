@@ -162,8 +162,8 @@ foreach seg $segnames {
 guesscoord ;# guess the coordinates of missing atoms
 regenerate angles dihedrals ;# fixes problems with patching
 
-#writepdb setBetas.pdb
-#writepsf [lindex $argv 3].psf
+writepdb setBetas.pdb
+writepsf [lindex $argv 3].psf
 #set betas [mol new setBetas.pdb]
 #set betasel [atomselect $betas "index $bau_list"]
 #set betaful [atomselect $betas all]
