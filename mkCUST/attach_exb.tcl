@@ -111,24 +111,17 @@ set sub_segname_list ""
 set sub_resid_list ""
 set sub_name_list ""
 foreach i0 $fun_list i1 $sub_list {
-	set fsl [atomselect top "index $i0"]
-	set frl [atomselect top "index $i0"]
-	set fnl [atomselect top "index $i0"]
-	set ssl [atomselect top "index $i1"]
-	set srl [atomselect top "index $i1"]
-	set snl [atomselect top "index $i1"]
-    lappend fun_segname_list [$fsl get segname]
-    lappend fun_resid_list   [$frl get resid]
-    lappend fun_name_list    [$fnl get name]
-    lappend sub_segname_list [$ssl get segname]
-    lappend sub_resid_list   [$srl get resid]
-    lappend sub_name_list    [$snl get name]
-    $fsl delete
-    $frl delete
-    $fnl delete
-    $ssl delete
-    $srl delete
-    $snl delete
+	set fl [atomselect top "index $i0"]
+	set sl [atomselect top "index $i1"]
+
+    lappend fun_segname_list [$fl get segname]
+    lappend fun_resid_list   [$fl get resid]
+    lappend fun_name_list    [$fl get name]
+    lappend sub_segname_list [$sl get segname]
+    lappend sub_resid_list   [$sl get resid]
+    lappend sub_name_list    [$sl get name]
+    $fl delete
+    $sl delete
 }
 
 
@@ -169,21 +162,21 @@ foreach seg $segnames {
 guesscoord ;# guess the coordinates of missing atoms
 regenerate angles dihedrals ;# fixes problems with patching
 
-writepdb setBetas.pdb
-writepsf [lindex $argv 3].psf
-set betas [mol new setBetas.pdb]
-set betasel [atomselect $betas "index $bau_list"]
-set betaful [atomselect $betas all]
-$betasel set beta 1.1
-$betaful writepdb [lindex $argv 3].pdb
+#writepdb setBetas.pdb
+#writepsf [lindex $argv 3].psf
+#set betas [mol new setBetas.pdb]
+#set betasel [atomselect $betas "index $bau_list"]
+#set betaful [atomselect $betas all]
+#$betasel set beta 1.1
+#$betaful writepdb [lindex $argv 3].pdb
 
-mol delete $id
-mol delete $betas
-$betasel delete
-$betaful delete
-file delete -force "setBetas.pdb"
-file delete -force "tmp.pdb"
-mol delete top
+#mol delete $id
+#mol delete $betas
+#$betasel delete
+#$betaful delete
+#file delete -force "setBetas.pdb"
+#file delete -force "tmp.pdb"
+#mol delete top
 
 ####################### make extrabond file #########################################
 
