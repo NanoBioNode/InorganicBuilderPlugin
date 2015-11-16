@@ -134,13 +134,14 @@ namespace eval ::inorganicBuilder:: {
 
 
   variable materialList
-  variable materialPath [file join $env(INORGANICBUILDERDIR) materials]
-  variable homePath $env(INORGANICBUILDERDIR)
-  variable surfingPath [lindex [glob [file join $env(INORGANICBUILDERDIR) ../../../../surf_*] ] 0]
-#  variable surfingPath [file join $env(INORGANICBUILDERDIR) ../../../../lib/surf/]
+  variable materialPath   [file join $env(INORGANICBUILDERDIR) materials]
+  variable homePath       $env(INORGANICBUILDERDIR)
+  variable surfingPath    [lindex [glob [ file join $env(INORGANICBUILDERDIR) .. .. .. .. surf_* ] ] 0]
+# variable surfingPath    [file join $env(INORGANICBUILDERDIR) ../../../../lib/surf/]
   variable compvacuumPath [file join $env(INORGANICBUILDERDIR) compvacuum]
-  variable guiStateVers 1.0
+  variable guiStateVers   1.0
   variable guiState
+
   ### TODO: ADD DESCRIPTION TO EVERY KEYWORD/VALUE IN THE ARRAY (-Max)
   array set guiState {
     stateVersion $guiStateVers
@@ -323,7 +324,7 @@ proc ::inorganicBuilder::inorganicBuilder_mainwin {} {
   initMaterials
   
   set w [toplevel ".inorganicBuilder"]
-#  puts "InorganicBuilder)w is $w"
+#  puts "InorganicBuilder) w is $w"
   wm title $w "InorganicBuilder"
   wm resizable $w yes yes
   
@@ -751,7 +752,7 @@ proc ::inorganicBuilder::guiViewEditMaterialWin { menuwin shortname viewonly } {
   }
   set guiState(newMatParams) [list newMatParams newMatShortName newMatLongName newMatUCName newMatTopName newMatAX newMatAY newMatAZ newMatBX newMatBY newMatBZ newMatCX newMatCY newMatCZ newMatCutoff newMatHex]
 
-#  puts "InorganicBuilder)Building periodic bonds"
+#  puts "InorganicBuilder) Building periodic bonds"
   set ns [namespace current]
   foreach child [winfo children $w] {
     if { ![string equal "$child" "${w}.menubar"] } {
@@ -868,7 +869,7 @@ proc ::inorganicBuilder::guiBuildBondsWin {} {
   variable guiState
   variable w
   
-#  puts "InorganicBuilder)Finding specific bonds"
+#  puts "InorganicBuilder) Finding specific bonds"
   set ns [namespace current]
   set guiState(curWin) ${ns}::guiBondsWin
   
@@ -1075,7 +1076,7 @@ proc ::inorganicBuilder::guiFindSurfaceAtomsWin {} {
   variable guiState
   variable w
   
-#  puts "InorganicBuilder)Finding surface"
+#  puts "InorganicBuilder) Finding surface"
   set ns [namespace current]
   set guiState(curWin) ${ns}::FindSurfaceAtomsWin
 
@@ -1128,7 +1129,7 @@ proc ::inorganicBuilder::guiMergeSurfInteriorWin {} {
   variable guiState
   variable w
   
-#  puts "InorganicBuilder)Merging molecules"
+#  puts "InorganicBuilder) Merging molecules"
   set ns [namespace current]
   set guiState(curWin) ${ns}::guiMergeSurfInteriorWin
 
@@ -1167,7 +1168,7 @@ proc ::inorganicBuilder::guiMergeSurfInteriorWin {} {
   }
   incr row
 
-#  puts "InorganicBuilder)Built menu"
+#  puts "InorganicBuilder) Built menu"
   
   grid [label $w.body3.mergedfilelabel -text "Merged file (.pdb,.psf):"] -row $row -column 0 -sticky w
   grid [entry $w.body3.mergedfile -width 5 -textvariable ${ns}::guiState(mergedFile)] -row $row -column 1 -sticky ew
@@ -1189,7 +1190,7 @@ proc ::inorganicBuilder::guiSolvateBoxWin {} {
   variable guiState
   variable w
   
-#  puts "InorganicBuilder)Solvating structure"
+#  puts "InorganicBuilder) Solvating structure"
   set ns [namespace current]
   set guiState(curWin) ${ns}::guiSolvateBoxWin
 
@@ -1610,7 +1611,7 @@ proc ::inorganicBuilder::guiSelectLoadedMolWin { psffile pdbfile { fileflag "-al
   set guiState(molMenuName) [menu $aw.type.menub.menu -tearoff no]
   guiFillMolMenu $fileflag
   set def_label [$aw.type.menub.menu entrycget 0 -label]
-  #puts "InorganicBuilder)Label is $def_label"
+  #puts "InorganicBuilder) Label is $def_label"
   #$aw.type.menub configure -text "$def_label"
   incr row 2
   
@@ -1769,7 +1770,7 @@ proc ::inorganicBuilder::guiRepackSelectMol { } {
   set aw ".ibselectmol"
   grid $aw.type -row 0
   grid $aw.buttons -row 2
-#  puts "InorganicBuilder)Repacking select mol"
+#  puts "InorganicBuilder) Repacking select mol"
 }
 
 proc ::inorganicBuilder::guiAddBlockParams { f } {
@@ -2307,7 +2308,7 @@ proc ::inorganicBuilder::guiCreateBox { } {
 
 proc ::inorganicBuilder::guiStoreBlock { } {
   variable guiState
-#  puts "InorganicBuilder)Storing block"
+#  puts "InorganicBuilder) Storing block"
 
   set btype $guiState(addBlockType)
   set bname $guiState(addBlockName)
@@ -2808,7 +2809,6 @@ proc ::inorganicBuilder::AlignDense { } {
   variable guiState
   variable homePath
   variable surfingPath
-  global M_PI  
 
   mol delete $guiState(linemols)
   
@@ -3542,7 +3542,7 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
 
 proc ::inorganicBuilder::guiStoreBond { } {
   variable guiState
-#  puts "InorganicBuilder)Storing bond"
+#  puts "InorganicBuilder) Storing bond"
   lappend guiState(bondlist) [list $guiState(bondAtom1) $guiState(bondAtom2) $guiState(bondcutoff)]
   guiBuildBondsWin
   return
@@ -3550,7 +3550,7 @@ proc ::inorganicBuilder::guiStoreBond { } {
 
 proc ::inorganicBuilder::guiRemoveBond { listid } {
   variable guiState
-#  puts "InorganicBuilder)Removing bond"
+#  puts "InorganicBuilder) Removing bond"
   set deletelist [lsort -integer -decreasing [$listid curselection]]
   
   foreach bnum $deletelist {
@@ -3564,7 +3564,7 @@ proc ::inorganicBuilder::guiRemoveBond { listid } {
 
 proc ::inorganicBuilder::guiStoreMol { psffile pdbfile } {
   variable guiState
-#  puts "InorganicBuilder)Storing molecule"
+#  puts "InorganicBuilder) Storing molecule"
   if {  [llength $guiState(surfacearea)] != 0  } {
     set guiState(surfacearea) {}
     if { $guiState(curWin) == "::inorganicBuilder::BuildSurfaceStructsWin" } {
@@ -3627,12 +3627,12 @@ proc ::inorganicBuilder::guiUpdateMaterial { shortname } {
 
 proc ::inorganicBuilder::guiBuildStructure { } {
   variable guiState
-#  puts "InorganicBuilder)Building structure"
+#  puts "InorganicBuilder) Building structure"
   
   set blist [concat $guiState(blocklist) $guiState(selectionlist)]
   set fname $guiState(fname)
   foreach block $blist {
-#    puts "InorganicBuilder)Storing $block"
+#    puts "InorganicBuilder) Storing $block"
     storeBlock guiState(currentBox) $block
   }
   buildBox $guiState(currentBox) $fname
@@ -4277,27 +4277,27 @@ proc ::inorganicBuilder::guiFillMolMenuInt { molMenuName currentMol filetypes } 
   #which in turn ripped it off from the PME plugin
   variable guiState
   
-#  puts "InorganicBuilder)Processing $molMenuName $guiState($molMenuName)"
+#  puts "InorganicBuilder) Processing $molMenuName $guiState($molMenuName)"
   set name $guiState($molMenuName)
   if { ![winfo exists $name] } {
     return
   }
-#  puts "InorganicBuilder)name parent is [winfo parent $name]"
+#  puts "InorganicBuilder) name parent is [winfo parent $name]"
   
   if { [$name index end] != 0 } {
     $name delete 0 end
   }
 
   set molList ""
-#  puts "InorganicBuilder)Processing $molMenuName"
+#  puts "InorganicBuilder) Processing $molMenuName"
   foreach mm [molinfo list] {
     if { [molinfo $mm get numatoms] > 0 } {
       # if we're building the PSF molecule menu, and the molecule doesn't
       # contain a PSF file, don't include it in the list
       if { [string equal $filetypes "-psf" ] } {
-#        puts "InorganicBuilder)Filling PSF menu"
+#        puts "InorganicBuilder) Filling PSF menu"
         set filetypes [lindex [ molinfo $mm get filetype ] 0]
-#        puts "InorganicBuilder)$mm has $filetypes"
+#        puts "InorganicBuilder) $mm has $filetypes"
         if { [ lsearch $filetypes "psf" ] == -1} {
           continue
         }
@@ -4316,16 +4316,16 @@ proc ::inorganicBuilder::guiFillMolMenuInt { molMenuName currentMol filetypes } 
       set usableMolLoaded  0
     }
   }
-#  puts "InorganicBuilder)$molMenuName:molList is $molList [llength $molList]"
+#  puts "InorganicBuilder) $molMenuName:molList is $molList [llength $molList]"
   if {[llength $molList] == 0} {
     $name add command -command "set [namespace current]::guiState($currentMol) none; [winfo parent $name] configure -text \"None loaded\"; puts \"Invoking none\";" -label "None loaded"
-#    puts "InorganicBuilder)Configuring [winfo parent $name]"
+#    puts "InorganicBuilder) Configuring [winfo parent $name]"
     [winfo parent $name] configure -text "None loaded"
   }
   
   $name invoke 0
   
-#  puts "InorganicBuilder)Done processing $molMenuName"
+#  puts "InorganicBuilder) Done processing $molMenuName"
 }
 
 
@@ -4355,7 +4355,7 @@ proc ::inorganicBuilder::guiFindShell {} {
   set shellatoms [::inorganicBuilder::findShell $mybox $molid $guiState(gridSz) $guiState(gridRad) $guiState(thickness)]
                   
   set num_shell [llength $shellatoms]
-#  puts "InorganicBuilder)Found $num_shell atoms in shell" 
+#  puts "InorganicBuilder) Found $num_shell atoms in shell" 
   if { $num_shell > 0 } {
     set shell_sel [atomselect $molid [concat "index" $shellatoms]]
     $shell_sel writepsf $guiState(shellFile).psf
@@ -4366,7 +4366,7 @@ proc ::inorganicBuilder::guiFindShell {} {
   set num_tot [lindex [ molinfo $molid get numatoms] 0]
   set num_int [expr $num_tot - $num_shell]
   
-#  puts "InorganicBuilder)Found $num_int atoms in interior" 
+#  puts "InorganicBuilder) Found $num_int atoms in interior" 
   if { $num_int > 0 } {
     if { $num_shell == 0 } {
       set sel_string "all"
@@ -4802,14 +4802,14 @@ proc ::inorganicBuilder::defineMaterialHexagonalBox { center basis cutoff } {
 
   # Build the box
   defineBoxInternal box $center $basis $cutoff
-#  puts "InorganicBuilder)box(basisa)=$box(basisa)"
-#  puts "InorganicBuilder)box(basisb)=$box(basisb)"
+#  puts "InorganicBuilder) box(basisa)=$box(basisa)"
+#  puts "InorganicBuilder) box(basisb)=$box(basisb)"
   # Determine whether the basis vectors are separarted by 60 or 120 degrees
   # so we can find the vertices
   set ba $box(basisa)
   set bb $box(basisb)
   set costheta [expr [vecdot $ba $bb ] / ( [veclength $ba] * [veclength $bb] ) ]
-#  puts "InorganicBuilder)costheta=$costheta"
+#  puts "InorganicBuilder) costheta=$costheta"
   if { $costheta > 0 } {
     set ba $box(basisb)
     set bb [vecinvert $box(basisa)]
@@ -4817,7 +4817,7 @@ proc ::inorganicBuilder::defineMaterialHexagonalBox { center basis cutoff } {
   set onethirddiam [expr $diam/3.]
   set b0 [vecscale $onethirddiam [vecsub $ba $bb]]
   set b1 [vecscale $onethirddiam [vecadd [vecscale 2. $ba ] $bb]]
-#  puts "InorganicBuilder)b0=$b0 b1=$b1 dot=[vecdot $b0 $b1] l0=[veclength $b0] l1=[veclength $b1]"
+#  puts "InorganicBuilder) b0=$b0 b1=$b1 dot=[vecdot $b0 $b1] l0=[veclength $b0] l1=[veclength $b1]"
   if { [vecdot $b0 $b1] < 0 } {
     # We need to calculate p1
     set b2 $b1
@@ -4885,7 +4885,7 @@ proc ::inorganicBuilder::defineBoxInternal { boxname center basis cutoff } {
   set box(ox) [lindex $box(origin) 0]
   set box(oy) [lindex $box(origin) 1]
   set box(oz) [lindex $box(origin) 2]
-#  puts "InorganicBuilder)origin=$box(origin)"
+#  puts "InorganicBuilder) origin=$box(origin)"
   
   set box(da) $box(la)
   set box(db) $box(lb)
@@ -4938,14 +4938,14 @@ proc ::inorganicBuilder::newMaterialHexagonalBox { material center diam height {
 
   # Build the box
   newBoxInternal box $material $center $boxdim $adjcharges
-#  puts "InorganicBuilder)box(basisa)=$box(basisa)"
-#  puts "InorganicBuilder)box(basisb)=$box(basisb)"
+#  puts "InorganicBuilder) box(basisa)=$box(basisa)"
+#  puts "InorganicBuilder) box(basisb)=$box(basisb)"
   # Determine whether the basis vectors are separarted by 60 or 120 degrees
   # so we can find the vertices
   set ba $box(basisa)
   set bb $box(basisb)
   set costheta [expr [vecdot $ba $bb ] / ( [veclength $ba] * [veclength $bb] ) ]
-#  puts "InorganicBuilder)costheta=$costheta"
+#  puts "InorganicBuilder) costheta=$costheta"
   if { $costheta > 0 } {
     set ba $box(basisb)
     set bb [vecinvert $box(basisa)]
@@ -4953,7 +4953,7 @@ proc ::inorganicBuilder::newMaterialHexagonalBox { material center diam height {
   set onethirddiam [expr $boxdiam/3.]
   set b0 [vecscale $onethirddiam [vecsub $ba $bb]]
   set b1 [vecscale $onethirddiam [vecadd [vecscale 2. $ba ] $bb]]
-#  puts "InorganicBuilder)b0=$b0 b1=$b1 dot=[vecdot $b0 $b1] l0=[veclength $b0] l1=[veclength $b1]"
+#  puts "InorganicBuilder) b0=$b0 b1=$b1 dot=[vecdot $b0 $b1] l0=[veclength $b0] l1=[veclength $b1]"
   if { [vecdot $b0 $b1] < 0 } {
     # We need to calculate p1
     set b2 $b1
@@ -5022,7 +5022,7 @@ proc ::inorganicBuilder::newBoxInternal { boxname material center boxsize adjcha
   set box(nb) [lindex $boxsize 1]
   set box(nc) [lindex $boxsize 2]
 
-#  puts "InorganicBuilder)box(na)=$box(na) a=$a"
+#  puts "InorganicBuilder) box(na)=$box(na) a=$a"
   set boxcorner [vecadd [vecscale $box(na) $a] [vecscale $box(nb) $b] [vecscale $box(nc) $c]]
   set box(origin) [vecsub $center [vecscale 0.5 $boxcorner]]
   set box(ox) [lindex $box(origin) 0]
@@ -5068,17 +5068,17 @@ proc ::inorganicBuilder::getBoxMaterial { boxlist } {
 proc ::inorganicBuilder::printBox { boxlist } {
   array set box $boxlist
   
-  puts "InorganicBuilder)inorganicBuilder::boxsize ($box(na),$box(nb),$box(nc))"
-  puts "InorganicBuilder)inorganicBuilder::origin ($box(ox),$box(oy),$box(oz))"
+  puts "InorganicBuilder) inorganicBuilder::boxsize ($box(na),$box(nb),$box(nc))"
+  puts "InorganicBuilder) inorganicBuilder::origin ($box(ox),$box(oy),$box(oz))"
   for { set k 0 } { $k < $box(nc) } { incr k } {
     set zz [lindex $box(state) $k ]
     for { set j 0 } { $j < $box(nb) } { incr j } {
       set yy [lindex $zz $j ]
-      puts "InorganicBuilder)inorganicBuilder::excludelist($j,$k) $yy"
+      puts "InorganicBuilder) inorganicBuilder::excludelist($j,$k) $yy"
     }
-    puts "InorganicBuilder)-------------------------------------------"
+    puts "InorganicBuilder) -------------------------------------------"
   }
-  puts "InorganicBuilder)inorganicBuilder::excludelist $box(excludelist)"
+  puts "InorganicBuilder) inorganicBuilder::excludelist $box(excludelist)"
 }
 
 # *** MODIFIED, THEREFORE ***
@@ -5090,8 +5090,9 @@ proc ::inorganicBuilder::setVMDPeriodicBox { boxlist {molid top}} {
        set guiState(mmod) 1.5
   } else {
 	  	  
+  # TODO: MY EYES HURT! WHY NOT JUST USE BOXLIST ?
     array set box $boxlist
-    # TODO: MY EYES HURT! guiState(mmod) == 1 HERE (WHATEVER guiState(mmod) IS...)!
+    # TODO: MY EYES HURT2! guiState(mmod) == 1 HERE (WHATEVER guiState(mmod) IS...)!
     set a [ expr $box(na) * [veclength $box(basisa)] * $guiState(mmod)]
     set b [ expr $box(nb) * [veclength $box(basisb)] * $guiState(mmod)]
     set c [ expr $box(nc) * [veclength $box(basisc)] * $guiState(mmod)]
@@ -5184,7 +5185,6 @@ proc ::inorganicBuilder::setVMDPeriodPDB { molid pdbfilename } {
 proc ::inorganicBuilder::structBoxMolecule { } {
 
   variable guiState
-  global M_PI
 
 
   # Delete any existing boxes
@@ -5444,7 +5444,7 @@ proc ::inorganicBuilder::draw_simple_box { layer orig a b c } {
 	  set drstyle "style solid"
   }
   
-#  puts "InorganicBuilder)draw simple box $layer $orig $a $b $c"
+#  puts "InorganicBuilder) draw simple box $layer $orig $a $b $c"
   set oa [vecadd $orig $a]
   set ob [vecadd $orig $b]
   set ab [vecadd $oa $b]
@@ -5453,7 +5453,7 @@ proc ::inorganicBuilder::draw_simple_box { layer orig a b c } {
   set bc [vecadd $ob $c]
   set abc [vecadd $ab $c]
   set w 3
-#  puts "InorganicBuilder)$oa=$orig $oa $ob $oc"
+#  puts "InorganicBuilder) $oa=$orig $oa $ob $oc"
   
   set obj {}
 #  graphics $layer line $orig $oa
@@ -5538,7 +5538,7 @@ proc ::inorganicBuilder::drawBox { boxlist molid } {
   set b [ vecsub [getRealCoord box [list 0 $box(nb) 0]] $orig ]
   set c [ vecsub [getRealCoord box [list 0 0 $box(nc)]] $orig ]
   set ret [draw_simple_box $molid $orig $a $b $c]
-#  puts "InorganicBuilder)DrawBox $orig $a $b $c"
+#  puts "InorganicBuilder) DrawBox $orig $a $b $c"
 
   return $ret
 }
@@ -5583,7 +5583,7 @@ proc ::inorganicBuilder::drawHexBox { boxlist molid } {
 proc ::inorganicBuilder::newBlock { type name params } {
   switch $type {
     "pp" {
-#      puts "InorganicBuilder)New parallelopiped $params"
+#      puts "InorganicBuilder) New parallelopiped $params"
       foreach {a b c o} $params {}
       set inv_tmat {{? ? ?} {? ? ?} {? ? ?}}
       for {set i 0} {$i < 3} {incr i} {
@@ -5594,19 +5594,19 @@ proc ::inorganicBuilder::newBlock { type name params } {
       lappend params [Inverse3 $inv_tmat]
     }
     "sphere" {
-#      puts "InorganicBuilder)New sphere $params"
+#      puts "InorganicBuilder) New sphere $params"
       set r [lindex $params 1]
       lappend params [expr $r*$r]
     }
     "cylinder" {
-#      puts "InorganicBuilder)New cylinder $params"
+#      puts "InorganicBuilder) New cylinder $params"
       foreach {o a r} $params {}
       set l [veclength $a]
       set u [vecnorm $a]
       lappend params [expr $r * $r ] $l $u
     }
     "th" {
-#      puts "InorganicBuilder)New tetrahedron $params"
+#      puts "InorganicBuilder) New tetrahedron $params"
       foreach {a b c o} $params {}
       set inv_tmat {{? ? ?} {? ? ?} {? ? ?}}
       for {set i 0} {$i < 3} {incr i} {
@@ -5617,23 +5617,23 @@ proc ::inorganicBuilder::newBlock { type name params } {
       lappend params [Inverse3 $inv_tmat]
     }
     "cone" {
-#      puts "InorganicBuilder)New cone $params"
+#      puts "InorganicBuilder) New cone $params"
       foreach {o a r} $params {}
       set l [veclength $a]
       set u [vecnorm $a]
       lappend params [expr $r * $r] $l $u
     }
     "selection" {
-#      puts "InorganicBuilder)New VMD selection"
+#      puts "InorganicBuilder) New VMD selection"
     }
     "dxfile" {
-#      puts "InorganicBuilder)New DX File"
+#      puts "InorganicBuilder) New DX File"
     }
     default {
-      puts "InorganicBuilder)Unknown block type"
+      puts "InorganicBuilder) Unknown block type"
     }
   }
-#  puts "InorganicBuilder)params [list $type {} $params]"
+#  puts "InorganicBuilder) params [list $type {} $params]"
   return [list $type {} $params $name]
 }
 
@@ -5658,7 +5658,7 @@ proc ::inorganicBuilder::newStruct { type name params } {
       set placeAtomSel [lindex $params 2]
     }
     default {
-      puts "InorganicBuilder)Unknown block type"
+      puts "InorganicBuilder) Unknown block type"
     }
   }
   return [list $type {} $params $name]
@@ -5668,59 +5668,59 @@ proc ::inorganicBuilder::newStruct { type name params } {
 
 proc ::inorganicBuilder::printBlock { block } {
   foreach {type bb params name} $block {}
-  puts "InorganicBuilder)Printing block type <$type>"
+  puts "InorganicBuilder) Printing block type <$type>"
   switch $type {
     "pp" {
       foreach {a b c o t} $params {}
-      puts "InorganicBuilder)A=$a"
-      puts "InorganicBuilder)B=$b"
-      puts "InorganicBuilder)C=$c"
-      puts "InorganicBuilder)O=$o"
-      puts "InorganicBuilder)T=$t"
+      puts "InorganicBuilder) A=$a"
+      puts "InorganicBuilder) B=$b"
+      puts "InorganicBuilder) C=$c"
+      puts "InorganicBuilder) O=$o"
+      puts "InorganicBuilder) T=$t"
     }
     "sphere" {
       foreach {c r rsq} $params {}
-      puts "InorganicBuilder)C=$c"
-      puts "InorganicBuilder)R=$r"
-      puts "InorganicBuilder)R^2=$rsq"
+      puts "InorganicBuilder) C=$c"
+      puts "InorganicBuilder) R=$r"
+      puts "InorganicBuilder) R^2=$rsq"
     }
     "cylinder" {
       foreach {o a r rsq l u} $params {}
-      puts "InorganicBuilder)O=$o"
-      puts "InorganicBuilder)A=$a"
-      puts "InorganicBuilder)R=$r"
-      puts "InorganicBuilder)R^2=$rsq"
-      puts "InorganicBuilder)L=$l"
-      puts "InorganicBuilder)U=$u"
+      puts "InorganicBuilder) O=$o"
+      puts "InorganicBuilder) A=$a"
+      puts "InorganicBuilder) R=$r"
+      puts "InorganicBuilder) R^2=$rsq"
+      puts "InorganicBuilder) L=$l"
+      puts "InorganicBuilder) U=$u"
     }
     "th" {
       foreach {a b c o t} $params {}
-      puts "InorganicBuilder)A=$a"
-      puts "InorganicBuilder)B=$b"
-      puts "InorganicBuilder)C=$c"
-      puts "InorganicBuilder)O=$o"
-      puts "InorganicBuilder)T=$t"
+      puts "InorganicBuilder) A=$a"
+      puts "InorganicBuilder) B=$b"
+      puts "InorganicBuilder) C=$c"
+      puts "InorganicBuilder) O=$o"
+      puts "InorganicBuilder) T=$t"
     }
     "cone" {
       foreach {o a r l u} $params {}
-      puts "InorganicBuilder)O=$o"
-      puts "InorganicBuilder)A=$a"
-      puts "InorganicBuilder)R=$r"
-      puts "InorganicBuilder)L=$l"
-      puts "InorganicBuilder)U=$u"
+      puts "InorganicBuilder) O=$o"
+      puts "InorganicBuilder) A=$a"
+      puts "InorganicBuilder) R=$r"
+      puts "InorganicBuilder) L=$l"
+      puts "InorganicBuilder) U=$u"
     }
     "selection" {
       foreach { sel include } $params {}
-      puts "InorganicBuilder)Sel=$sel"
-      puts "InorganicBuilder)Included=$include"
+      puts "InorganicBuilder) Sel=$sel"
+      puts "InorganicBuilder) Included=$include"
     }
     "dxfile" {
       foreach { DX incDX } $params {}
-      puts "InorganicBuilder)DX=$DX"
-      puts "InorganicBuilder)IncludedDX=$incDX"
+      puts "InorganicBuilder) DX=$DX"
+      puts "InorganicBuilder) IncludedDX=$incDX"
     }
     default {
-      puts "InorganicBuilder)Unknown type"
+      puts "InorganicBuilder) Unknown type"
     }
   }
 }
@@ -5728,7 +5728,7 @@ proc ::inorganicBuilder::printBlock { block } {
 proc ::inorganicBuilder::drawBlock { block molid } {
   variable guiState
   foreach {type bb params name} $block {}
-#  puts "InorganicBuilder)Drawing block type <$type> <$params>"
+#  puts "InorganicBuilder) Drawing block type <$type> <$params>"
   switch $type {
     "pp" {
       set a [lindex $params 0]
@@ -5769,19 +5769,19 @@ proc ::inorganicBuilder::drawBlock { block molid } {
       set o [lindex $params 0]
       set a [lindex $params 1]
       set r [lindex $params 2]
-#      puts "InorganicBuilder)cone:   [list cone $o [vecadd $o $a] radius $r resolution 20]"
+#      puts "InorganicBuilder) cone:   [list cone $o [vecadd $o $a] radius $r resolution 20]"
       set ret [::drawenv::draw $molid [list [list cone $o [vecadd $o $a] radius $r resolution 20]] "red" "Opaque"]
     }
     "selection" {
-      puts "InorganicBuilder)Can't draw selections"
+      puts "InorganicBuilder) Can't draw selections"
       set ret -1
     }
     "dxfile" {
-      puts "InorganicBuilder)A DX File was used"
+      puts "InorganicBuilder) A DX File was used"
       set ret -1
     }
     default {
-      puts "InorganicBuilder)Can't draw that block"
+      puts "InorganicBuilder) Can't draw that block"
       set ret -1
     }
   }
@@ -5927,7 +5927,7 @@ proc ::inorganicBuilder::computeBlockBoundingBox { boxname block } {
       lappend cellcoords [getCellCoord box $x]
 
       set ret [findMinMaxCoords $cellcoords $xmax $ymax $zmax]
-#      puts "InorganicBuilder)ret is $ret xmax=$xmax,$ymax,$zmax"
+#      puts "InorganicBuilder) ret is $ret xmax=$xmax,$ymax,$zmax"
     }
     default {
       set ret [ list [list 0 0 0] [list $xmax $ymax $zmax] ]
@@ -5993,9 +5993,9 @@ proc ::inorganicBuilder::getRealCoord { boxname cellcoord } {
   upvar $boxname box
 
   foreach {ci cj ck} $cellcoord {}
-#  puts "InorganicBuilder)getRealCoord $ci/$cj/$ck $box(basisa) $box(basisb) $box(basisc)"
+#  puts "InorganicBuilder) getRealCoord $ci/$cj/$ck $box(basisa) $box(basisb) $box(basisc)"
   set loc [ vecadd [ vecscale $ci $box(basisa) ] [ vecscale $cj $box(basisb) ] [ vecscale $ck $box(basisc) ] $box(origin) ]
-#  puts "InorganicBuilder)Returning $loc"
+#  puts "InorganicBuilder) Returning $loc"
   return $loc
 }
 
@@ -6070,9 +6070,9 @@ proc ::inorganicBuilder::transformRealToHex { boxname realcoord } {
       set dotmax $dot
     }
   }
-#  puts "InorganicBuilder)hexfaces($imax)=$box(hexfaces)"
+#  puts "InorganicBuilder) hexfaces($imax)=$box(hexfaces)"
   set faceplane [lindex $box(hexfaces) $imax]
-#  puts "InorganicBuilder)faceplane $faceplane -- [lrange $faceplane 0 2] -- $coord"
+#  puts "InorganicBuilder) faceplane $faceplane -- [lrange $faceplane 0 2] -- $coord"
   set facedist [vecdot [lrange $faceplane 0 2] $coord]
   set facedist [expr $facedist + [lindex $faceplane 3]]
   if { $facedist < 0 } {
@@ -6088,7 +6088,7 @@ proc ::inorganicBuilder::checkPointInside { boxname exclusion pos } {
   if { [string equal $box(type) "hex"] } {
     set oldpos $pos
     set pos [transformRealToHex $boxname $pos]
-#    puts "InorganicBuilder)Testing $pos [vecsub $oldpos $pos]"
+#    puts "InorganicBuilder) Testing $pos [vecsub $oldpos $pos]"
   }
   foreach {type bb params name} $exclusion {}
   switch $type {
@@ -6156,7 +6156,7 @@ proc ::inorganicBuilder::checkPointInside { boxname exclusion pos } {
       return 0
     }
     "default" {
-      puts "InorganicBuilder)Unknown type:$type params:$params"
+      puts "InorganicBuilder) Unknown type:$type params:$params"
       return -1
     }
   }
@@ -6187,16 +6187,16 @@ proc ::inorganicBuilder::buildBox { boxlist outfile } {
   mol off $molid
   set uc [atomselect top all]
   set ucnames [$uc get {index name resname resid }]
-#  puts "InorganicBuilder)Unit Cell names: $ucnames"
+#  puts "InorganicBuilder) Unit Cell names: $ucnames"
   # Store data indexed by resname
   foreach element $ucnames {
     foreach {index name resname resid } $element {
-#      puts "InorganicBuilder)index=$index name=$name resname=$resname"
+#      puts "InorganicBuilder) index=$index name=$name resname=$resname"
       lappend atomsbyresid($resid) [list $index $name $resname]
     }
   }
   set ucresids [array names atomsbyresid]
-#  puts "InorganicBuilder)resids are $ucresids"
+#  puts "InorganicBuilder) resids are $ucresids"
   
   set psfcon [psfcontext create]
   psfcontext eval $psfcon {
@@ -6300,7 +6300,7 @@ proc ::inorganicBuilder::buildBox { boxlist outfile } {
               }
             }
             concat {*}$res_delete
-            puts "InorganicBuilder)Storing res CUR:$curresid NAME:$resname COOR:[llength $res_coords] DEL:[llength $res_delete]"
+            puts "InorganicBuilder) Storing res CUR:$curresid NAME:$resname COOR:[llength $res_coords] DEL:[llength $res_delete]"
             if { [ llength $res_coords ] > 0 } {
               lappend seg_coords [list $curresid $resname $res_coords $res_delete] 
               incr curresid
@@ -6421,7 +6421,7 @@ proc ::inorganicBuilder::buildBox { boxlist outfile } {
   }
 
   
-#  puts "InorganicBuilder)Selection is $selstring"
+#  puts "InorganicBuilder) Selection is $selstring"
   set select [atomselect $molid $selstring]
 
   # Scale charges to the nearest integer
@@ -6479,23 +6479,23 @@ proc inorganicBuilder::buildSegment { segid seg_coords } {
     auto none
     first NONE
     last NONE
-#    puts "InorganicBuilder)seg_count [llength $seg_coords]"
+#    puts "InorganicBuilder) seg_count [llength $seg_coords]"
     foreach seg_coord  $seg_coords {
       set curresid [lindex $seg_coord 0]
       set resname [lindex $seg_coord 1]
-      #puts "InorganicBuilder)segid $segid curresid $curresid resname $resname"
+      #puts "InorganicBuilder) segid $segid curresid $curresid resname $resname"
       residue $curresid $resname
     }
   }
   foreach seg_coord  $seg_coords {
     foreach { curresid resname coord_list delete_list } $seg_coord {} 
-#    puts "InorganicBuilder)seg $segid coords=[llength $coord_list] delete=[llength $delete_list]"
-#    puts "InorganicBuilder)Residues in $segid:$curresid [ llength $coord_list ]"
+#    puts "InorganicBuilder) seg $segid coords=[llength $coord_list] delete=[llength $delete_list]"
+#    puts "InorganicBuilder) Residues in $segid:$curresid [ llength $coord_list ]"
     foreach coor $coord_list {
-#      puts "InorganicBuilder)Writing coord $segid $curresid $coor"
+#      puts "InorganicBuilder) Writing coord $segid $curresid $coor"
       coord $segid $curresid [lindex $coor 0] [lindex $coor 1]
     }
-#    puts "InorganicBuilder)Deleting $segid:curresid [ llength $delete_list ]"
+#    puts "InorganicBuilder) Deleting $segid:curresid [ llength $delete_list ]"
     foreach atom_to_del $delete_list {
       delatom $segid $curresid $atom_to_del
     }
@@ -6506,7 +6506,7 @@ proc ::inorganicBuilder::buildBonds { boxlist setTypes periodicIn { molid top }}
   if { [string equal $molid "top"] } {
     set molid [molinfo top]
   }
-  # puts "InorganicBuilder)molid is $molid"
+  # puts "InorganicBuilder) molid is $molid"
   mol off $molid
   
   # Make sure everything is in the unit cell
@@ -6518,7 +6518,7 @@ proc ::inorganicBuilder::buildBonds { boxlist setTypes periodicIn { molid top }}
   #mol bondsrecalc $molid
   
   # Add edge bonds
-  # puts "InorganicBuilder)Adding periodic bonds cutoff $box(cutoff)"
+  # puts "InorganicBuilder) Adding periodic bonds cutoff $box(cutoff)"
   buildPeriodicBonds box $periodicIn $molid
 
   # Rename atom types
@@ -6672,7 +6672,7 @@ proc ::inorganicBuilder::buildPeriodicBonds { boxname periodicIn molid } {
   set neighborlist { {-1 -1 -1} {-1 -1  0} {-1 -1  1} {-1  0 -1} {-1  0  0} {-1  0  1} {-1  1 -1} {-1  1  0} {-1  1  1} { 0 -1 -1} { 0 -1  0} { 0 -1  1} { 0  0 -1} { 0  0  1} { 0  1 -1} { 0  1  0} { 0  1  1} { 1 -1 -1} { 1 -1  0} { 1 -1  1} { 1  0 -1} { 1  0  0} { 1  0  1} { 1  1 -1} { 1  1  0} { 1  1  1} }
   set rsq [ expr $cutoff * $cutoff ]
   if { $periodicX } {
-#    puts "InorganicBuilder)Checking ix $ni $nj $nk"
+#    puts "InorganicBuilder) Checking ix $ni $nj $nk"
     set ix 0
     for { set iy 0 } { $iy < $nj } { incr iy } {
       for { set iz 0 } { $iz < $nk } { incr iz } {
@@ -6744,7 +6744,7 @@ proc ::inorganicBuilder::buildPeriodicBonds { boxname periodicIn molid } {
     }
   }
   if { $periodicY } {
-#    puts "InorganicBuilder)Checking iy"
+#    puts "InorganicBuilder) Checking iy"
     set iy 0
     for { set ix 1 } { $ix < $ni } { incr ix } {
       for { set iz 0 } { $iz < $nk } { incr iz } {
@@ -6818,7 +6818,7 @@ proc ::inorganicBuilder::buildPeriodicBonds { boxname periodicIn molid } {
     }
   }
   if { $periodicZ } {
-#    puts "InorganicBuilder)Checking iz"
+#    puts "InorganicBuilder) Checking iz"
     set iz 0
     for { set ix 1 } { $ix < $ni } { incr ix } {
       for { set iy 1 } { $iy < $nj } { incr iy } {
@@ -6889,20 +6889,20 @@ proc ::inorganicBuilder::buildPeriodicBonds { boxname periodicIn molid } {
     }
   }
   
-#  puts "InorganicBuilder)Resetting bonds"
+#  puts "InorganicBuilder) Resetting bonds"
   set indexlist [array names bondlist]
   set imax [llength $indexlist]
-#  puts "InorganicBuilder)Getting $imax atoms"
+#  puts "InorganicBuilder) Getting $imax atoms"
   if { [llength $indexlist] > 0 } {
     set allatoms [ atomselect $molid "index $indexlist" ]
-#    puts "InorganicBuilder)Selected all atoms"
+#    puts "InorganicBuilder) Selected all atoms"
     set oldbonds [ $allatoms getbonds ]
     set indices [ $allatoms get index]
-#    puts "InorganicBuilder)Got bonds"
+#    puts "InorganicBuilder) Got bonds"
     for {set i 0} { $i < $imax } { incr i } {
       set index [lindex $indices $i]
       set oldbondlist [lindex $oldbonds $i]
-      #puts "InorganicBuilder)I=$i index=$index oldbondlist=$oldbondlist new=$bondlist($index)"
+      #puts "InorganicBuilder) I=$i index=$index oldbondlist=$oldbondlist new=$bondlist($index)"
       set fullbondlist [lsort -unique -integer [concat $oldbondlist [join $bondlist($index)] ]]
       set bondlist($index) {}
       lset oldbonds $i $fullbondlist
@@ -6922,7 +6922,7 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
     
   # Find out which atom pairs we need to keep, and also the max cutoff
   # for pairlist purposes
-#  puts "InorganicBuilder)Finding bond types $bondtypelist"
+#  puts "InorganicBuilder) Finding bond types $bondtypelist"
   set maxcutoff 0
   foreach bondtype $bondtypelist {
     lappend atomtypelist [lindex $bondtype 0]
@@ -6933,11 +6933,11 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
     }
   }
   set atomtypelist [ lsort -unique $atomtypelist ]
-#  puts "InorganicBuilder)Atoms: $atomtypelist"
+#  puts "InorganicBuilder) Atoms: $atomtypelist"
   # make it a little bigger, to protect against rounding errors
   set maxcutoff [expr 1.01 * $maxcutoff]
   
-#  puts "InorganicBuilder)Computing cell size $maxcutoff"
+#  puts "InorganicBuilder) Computing cell size $maxcutoff"
   # Need to find the slices of the box that are the cutoff distance
   # away from the AB face, the AC face, and the BC face.
   set a $box(basisa)
@@ -6958,19 +6958,19 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
   set p1 [vecadd $o $cross_bc]
   set p2 [vecadd $p1 $b]
   set p3 [vecadd $p1 $c]
-#  puts "InorganicBuilder)imin $p1:$p2:$p3"
+#  puts "InorganicBuilder) imin $p1:$p2:$p3"
   set imin_plane [ find_plane $p1 $p2 $p3 $o]
   
   set p1 [vecadd $o $cross_ac]
   set p2 [vecadd $p1 $a]
   set p3 [vecadd $p1 $c]
-#  puts "InorganicBuilder)jmin $p1:$p2:$p3"
+#  puts "InorganicBuilder) jmin $p1:$p2:$p3"
   set jmin_plane [ find_plane $p1 $p2 $p3 $o]
 
   set p1 [vecadd $o $cross_ab]
   set p2 [vecadd $p1 $a]
   set p3 [vecadd $p1 $b]
-#  puts "InorganicBuilder)kmin $p1:$p2:$p3"
+#  puts "InorganicBuilder) kmin $p1:$p2:$p3"
   set kmin_plane [ find_plane $p1 $p2 $p3 $o]
 
   # Determine the cutoff cell by finding the intersections of the three
@@ -6980,12 +6980,12 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
   set ca_inv [Inverse3 $ca_mat]
   set ca_d [list [ lindex $imin_plane 3] [ lindex $jmin_plane 3] [ lindex $kmin_plane 3] ]
   set cutoff_coord [vecinvert [list [vecdot [lindex $ca_inv 0] $ca_d] [vecdot [lindex $ca_inv 1] $ca_d] [vecdot [lindex $ca_inv 2] $ca_d] ]]
-#  puts "InorganicBuilder)Cutoff_coord is $cutoff_coord --- $o"
+#  puts "InorganicBuilder) Cutoff_coord is $cutoff_coord --- $o"
   # Now convert to "cell coordinates" to find the size of the box in basis
   # vec units
   set cutoff_cell [ getCellCoord box $cutoff_coord ]
   # Round cutoff cell components up to integer multiples of box size
-#  puts "InorganicBuilder)cutoff_cell is $cutoff_cell"
+#  puts "InorganicBuilder) cutoff_cell is $cutoff_cell"
   foreach { ci cj ck } $cutoff_cell {}
   set ni [expr int($box(na)/$ci)]
   set nj [expr int($box(nb)/$cj)]
@@ -6993,23 +6993,23 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
   set di [expr double($box(na))/$ni]
   set dj [expr double($box(nb))/$nj]
   set dk [expr double($box(nc))/$nk]
-#  puts "InorganicBuilder)Box is $ni,$nj,$nk, size $di,$dj,$dk"
+#  puts "InorganicBuilder) Box is $ni,$nj,$nk, size $di,$dj,$dk"
 
   # Init cell array with atom types
   for {set i 0} { $i < [llength $atomtypelist] } { incr i } {
     set atomtype [lindex $atomtypelist $i]
     set atomtypeidx($atomtype) $i
   }
-#  puts "InorganicBuilder)atomtypeidx is [array get atomtypeidx]"
+#  puts "InorganicBuilder) atomtypeidx is [array get atomtypeidx]"
   
   # build cell decomposition
   # For periodic, wrap the atoms into the correct box. For non-periodic,
   # it must be rounding error, just shift them back into the closest cell
   for {set typeidx 0} { $typeidx < [llength $atomtypelist] } { incr typeidx } {
     set atomtype [lindex $atomtypelist $typeidx]
-#    puts "InorganicBuilder)building cells for $atomtype"
+#    puts "InorganicBuilder) building cells for $atomtype"
     set atomsel [atomselect $molid "type $atomtype"]
-#    puts "InorganicBuilder)Found [$atomsel num]"
+#    puts "InorganicBuilder) Found [$atomsel num]"
     set atoms [$atomsel get { index x y z }]
     foreach atom $atoms {
       foreach { index x y z } $atom {}
@@ -7092,9 +7092,9 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
       }
       if {$wrapped_a || $wrapped_b || $wrapped_c} {
         set new_x [vecadd $new_x $move_vec]
-#        puts "InorganicBuilder)Wrapping index $index $cell_coord to $ci,$cj,$ck $x,$y,$z"
-#        puts "InorganicBuilder)new cell_coord $ci $cj $ck"
-#        puts "InorganicBuilder)Re-wrapped to [getCellCoord box $new_x]"
+#        puts "InorganicBuilder) Wrapping index $index $cell_coord to $ci,$cj,$ck $x,$y,$z"
+#        puts "InorganicBuilder) new cell_coord $ci $cj $ck"
+#        puts "InorganicBuilder) Re-wrapped to [getCellCoord box $new_x]"
       }
       set i [expr int(floor($ci/$di))]
       set j [expr int(floor($cj/$dj))]
@@ -7103,7 +7103,7 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
     }
     $atomsel delete
   }
-#  puts "InorganicBuilder)Found [llength [array names cellfortype]] cells"
+#  puts "InorganicBuilder) Found [llength [array names cellfortype]] cells"
   
   # filter out duplicates in the neighbor lists
   #set celllist [array names cell]
@@ -7129,7 +7129,7 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
 
   foreach bondtype $bondtypelist {
     foreach { bondtype1 bondtype2 cutoff } $bondtype {}
-#    puts "InorganicBuilder)Scanning bonds of type $bondtype1-$bondtype2 cutoff $cutoff"
+#    puts "InorganicBuilder) Scanning bonds of type $bondtype1-$bondtype2 cutoff $cutoff"
     set rsq [ expr $cutoff * $cutoff ]
     set bondidx1 $atomtypeidx($bondtype1)
     set bondidx2 $atomtypeidx($bondtype2)
@@ -7203,8 +7203,8 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
                 foreach { nindex ncoord } $neighbor_atom {}
 #               if { $index == 7357 && $nindex == 6774 \
 #                  || $index == 6774 && $nindex == 7357 } {
-#                    puts "InorganicBuilder)index $index $nindex"
-#                   puts "InorganicBuilder)coord $xc $yc $zc $nxc $nyc $nzc $xwrap $ywrap $zwrap"
+#                    puts "InorganicBuilder) index $index $nindex"
+#                   puts "InorganicBuilder) coord $xc $yc $zc $nxc $nyc $nzc $xwrap $ywrap $zwrap"
 #                    set printme 1
 #                } else {
 #                  set printme 0
@@ -7214,14 +7214,14 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
                 if { $sametype && $index >= $nindex } {
                   continue
                 }
-                #puts "InorganicBuilder)Considering bond $index $nindex"
+                #puts "InorganicBuilder) Considering bond $index $nindex"
                 foreach { nxc nyc nzc } $ncoord {}
                 set delx [ expr $xc - $nxc + $xwrap]
                 set dely [ expr $yc - $nyc + $ywrap]
                 set delz [ expr $zc - $nzc + $zwrap]
                 if { [ expr $delx*$delx + $dely*$dely + $delz*$delz ] < $rsq } {
 #                 if {$printme} {
-#                    puts "InorganicBuilder)Adding bond $index $nindex"
+#                    puts "InorganicBuilder) Adding bond $index $nindex"
 #                  }
                   lappend newbondlist $nindex
                 }
@@ -7240,20 +7240,20 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
     }
   }
 
-#  puts "InorganicBuilder)Resetting bonds"
+#  puts "InorganicBuilder) Resetting bonds"
   set indexlist [array names bondlist]
   set imax [llength $indexlist]
-#  puts "InorganicBuilder)Getting $imax atoms"
+#  puts "InorganicBuilder) Getting $imax atoms"
   if { [llength $indexlist] > 0 } {
     set allatoms [ atomselect $molid "index $indexlist" ]
-#    puts "InorganicBuilder)Selected all atoms"
+#    puts "InorganicBuilder) Selected all atoms"
     set oldbonds [ $allatoms getbonds ]
     set indices [ $allatoms get index]
-#    puts "InorganicBuilder)Got bonds"
+#    puts "InorganicBuilder) Got bonds"
     for {set i 0} { $i < $imax } { incr i } {
       set index [lindex $indices $i]
       set oldbondlist [lindex $oldbonds $i]
-      #puts "InorganicBuilder)I=$i index=$index oldbondlist=$oldbondlist new=$bondlist($index)"
+      #puts "InorganicBuilder) I=$i index=$index oldbondlist=$oldbondlist new=$bondlist($index)"
       set fullbondlist [lsort -unique -integer [concat $oldbondlist [join $bondlist($index)] ]]
       set bondlist($index) {}
       lset oldbonds $i $fullbondlist
@@ -7307,14 +7307,14 @@ proc ::inorganicBuilder::processSelection { box_name cellmap_name cutoff_cell se
     set i [expr int(floor($ci/$di))]
     set j [expr int(floor($cj/$dj))]
     set k [expr int(floor($ck/$dk))]
-#    puts "InorganicBuilder)Storing [list $index [list $x $y $z]] in $i $j $k"
+#    puts "InorganicBuilder) Storing [list $index [list $x $y $z]] in $i $j $k"
     lappend cell($i,$j,$k) [list $index [list $x $y $z] $type]
   }
   $face delete
 }
 
 proc ::inorganicBuilder::setAtomTypes { molid } {
-#  puts "InorganicBuilder)Setting atom types"
+#  puts "InorganicBuilder) Setting atom types"
   set allatoms [atomselect $molid all]
   set atominfo [$allatoms get { element numbonds }]
   foreach atom $atominfo {
@@ -7374,7 +7374,7 @@ proc ::inorganicBuilder::transformCoordsToBox { boxlist {molid top} } {
   set allatoms [atomselect $molid all]
   
   set coords [$allatoms get { x y z }]
-#  puts "InorganicBuilder)Got [llength $coords] coords"
+#  puts "InorganicBuilder) Got [llength $coords] coords"
   set newcoords {}
   foreach elem $coords {
     set newelem [ getCellCoord box $elem ]
@@ -7400,7 +7400,7 @@ proc ::inorganicBuilder::transformCoordsToBox { boxlist {molid top} } {
     lset newelem 2 $tc
     lappend newcoords [getRealCoord box $newelem]
   }
-#  puts "InorganicBuilder)Resetting coords"
+#  puts "InorganicBuilder) Resetting coords"
   $allatoms set {x y z} $newcoords
   
   mol on $molid
@@ -7429,7 +7429,7 @@ proc ::inorganicBuilder::initMaterials {} {
   variable materialList
   variable materialPath
   
-#  puts "InorganicBuilder)Building materials lib"
+#  puts "InorganicBuilder) Building materials lib"
   set materialList [::inorganicBuilder::newMaterialList ]
   
   set a { 4.978 0 0}
@@ -7679,7 +7679,7 @@ proc ::inorganicBuilder::buildStructs { molid } {
 proc ::inorganicBuilder::printBondStats {} {
   for { set i 0 } { $i < 12 } {incr i } {
     set sel [atomselect top "numbonds $i"]
-    puts "InorganicBuilder)$i bonds: [$sel num]"
+    puts "InorganicBuilder) $i bonds: [$sel num]"
     $sel delete
   }
 }
@@ -7717,7 +7717,7 @@ proc ::inorganicBuilder::mergeMoleculesResegment { topfile mol1 mol2 outfile } {
     foreach atomtype $atomlist {
       set resatoms($resname,$atomtype) -1
     }
-#    puts "InorganicBuilder)Res($i) $resname: $atomlist"
+#    puts "InorganicBuilder) Res($i) $resname: $atomlist"
   }
   resetpsf
   # Now sort through each atom in each selection, and generate lists of 
@@ -7725,17 +7725,17 @@ proc ::inorganicBuilder::mergeMoleculesResegment { topfile mol1 mol2 outfile } {
   # the unit-cell building code above.
   foreach sel [list $m1sel $m2sel ] {
     set ucnames [$sel get {index name resname resid}]
-    #  puts "InorganicBuilder)Unit Cell names: $ucnames"
+    #  puts "InorganicBuilder) Unit Cell names: $ucnames"
     # Store data indexed by resname
     array unset atomsbyresid
     foreach element $ucnames {
       foreach {index name resname resid} $element {
-#       puts "InorganicBuilder)index=$index name=$name resname=$resname x=$x,%y,$z"
+#       puts "InorganicBuilder) index=$index name=$name resname=$resname x=$x,%y,$z"
         lappend atomsbyresid($resid) [list $index $name $resname]
       }
     }
     set ucresids [array names atomsbyresid]
-#    puts "InorganicBuilder)resids are $ucresids"
+#    puts "InorganicBuilder) resids are $ucresids"
 
     set seglist {}
     # Pre-calculate the segment list and coordinate lists, so we can
@@ -7763,19 +7763,19 @@ proc ::inorganicBuilder::mergeMoleculesResegment { topfile mol1 mol2 outfile } {
         foreach { id name resname} $atom {}
         set resatoms($resname,$name) $id
       } 
-#      puts "InorganicBuilder)seg $prefix $n resid $curresid"
+#      puts "InorganicBuilder) seg $prefix $n resid $curresid"
       foreach atomtype $resatoms($resname,allatomtypes) {
         set id $resatoms($resname,$atomtype)
         if { $id != -1 } {
           lappend res_coords [list $atomtype $pos($id) $resname ]
-#          puts "InorganicBuilder)Setting $resname $atomtype $name $pos($id) $resname"
+#          puts "InorganicBuilder) Setting $resname $atomtype $name $pos($id) $resname"
         } else {
           lappend res_delete $atomtype
-#          puts "InorganicBuilder)Deleting $resname $atomtype"
+#          puts "InorganicBuilder) Deleting $resname $atomtype"
         }
         set resatoms($resname,$atomtype) -1
       }
-#     puts "InorganicBuilder)Storing res CUR:$curresid NAME:$resname COOR:[llength $res_coords] DEL:[llength $res_delete]"
+#     puts "InorganicBuilder) Storing res CUR:$curresid NAME:$resname COOR:[llength $res_coords] DEL:[llength $res_delete]"
       if { [ llength $res_coords ] > 0 } {
         lappend seg_coords [list $curresid $resname $res_coords $res_delete] 
         incr curresid
@@ -7818,7 +7818,7 @@ proc ::inorganicBuilder::solvateBox { boxlist infiles outfile} {
   array set box $boxlist
   foreach {psffile pdbfile} $infiles {}
 
-#  puts "InorganicBuilder)Transforming coordinates"
+#  puts "InorganicBuilder) Transforming coordinates"
   set inpmol [mol new [file normalize $psffile] type psf autobonds off waitfor all]
   mol addfile [file normalize $pdbfile] type pdb autobonds off waitfor all
   transformCoordsToBox [array get box] $inpmol
@@ -7827,7 +7827,7 @@ proc ::inorganicBuilder::solvateBox { boxlist infiles outfile} {
   $allatoms delete
   mol delete $inpmol
 
-#  puts "InorganicBuilder)Finding box corners"
+#  puts "InorganicBuilder) Finding box corners"
   # Find the min/max corners of the real box
   set c [ getRealCoord box [list 0 0 0] ]
   set min $c
@@ -7840,21 +7840,21 @@ proc ::inorganicBuilder::solvateBox { boxlist infiles outfile} {
   findSolvateMinMax min max [ getRealCoord box [list $box(na) 0 $box(nc)]]
   findSolvateMinMax min max [ getRealCoord box [list 0 $box(nb) $box(nc)]]
   findSolvateMinMax min max [ getRealCoord box [list $box(na) $box(nb) $box(nc)]]
-#  puts "InorganicBuilder)Box corners $min --- $max"
+#  puts "InorganicBuilder) Box corners $min --- $max"
   
   # Solvate the box
-#  puts "InorganicBuilder)Calling solvate"
+#  puts "InorganicBuilder) Calling solvate"
   solvate $psffile $outfile.0.pdb -o $outfile.1 -minmax [list $min $max]
   set solv_mol [molinfo top]
   
   # Figure out which oxygens are outside of the box, and then trim them off
   # along with their attached hydrogens
-  # puts "InorganicBuilder)Loading result"
+  # puts "InorganicBuilder) Loading result"
   # set solv_mol [ mol new $outfile.1.psf type psf autobonds off waitfor all]
   # mol addfile $outfile.1.pdb type pdb autobonds off
   
   # Get all the water oxygen molecules
-#  puts "InorganicBuilder)Getting Oxygens"
+#  puts "InorganicBuilder) Getting Oxygens"
   set oxygens [atomselect $solv_mol "name OH2"]
   set oh2list [$oxygens get { index x y z } ]
   
@@ -7882,7 +7882,7 @@ proc ::inorganicBuilder::solvateBox { boxlist infiles outfile} {
     # WARNING: I think this is going to produce an incomplete PSF file.
     # Probably need to copy what the solvate code to get a proper box
     set keep_sel [atomselect $solv_mol "not index $del_list"]
-    #  puts "InorganicBuilder)Keeping [ $keep_sel num ] atoms"
+    #  puts "InorganicBuilder) Keeping [ $keep_sel num ] atoms"
   } else {
     set keep_sel [atomselect $solv_mol all]
   }
