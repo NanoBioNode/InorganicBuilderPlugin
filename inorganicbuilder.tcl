@@ -31,13 +31,13 @@ proc ::drawenv::draw { molid objs color { material none } } {
   if { ![molExists $molid] } {
     return -1
   }
-  
+
   set colorId [ graphics $molid color $color ]
   if { [string equal $material "none"] } {
     # Use two commands in here, so if later we want to turn the material
     # on, we can just use a graphics replace command
     set materialId [ list [graphics $molid materials on ] [graphics $molid materials off ] ]
-                          
+
   } else {
     set materialId [ list [graphics $molid materials on] [graphics $molid material $material] ]
   }
@@ -52,11 +52,11 @@ proc ::drawenv::draw { molid objs color { material none } } {
 proc ::drawenv::recolor { obj color } {
   set molid [lindex $obj 0]
   set colid [lindex $obj 1]
-  
+
   if { ![molExists $molid] } {
     return -1
   }
-  
+
   graphics $molid replace $colid
   graphics $molid color $color
 }
@@ -64,11 +64,11 @@ proc ::drawenv::recolor { obj color } {
 proc ::drawenv::changeMaterial { obj material } {
   set molid [lindex $obj 0]
   set matid [lindex $obj 2]
-  
+
   if { ![molExists $molid] } {
     return -1
   }
-  
+
   graphics $molid replace [lindex $matid 1]
   if { [string equal $material "none"] } {
     graphics $molid materials off
@@ -80,11 +80,11 @@ proc ::drawenv::changeMaterial { obj material } {
 proc ::drawenv::deleteObj { obj } {
   set molid [lindex $obj 0]
   set objid [lindex $obj 3]
-  
+
   if { ![molExists $molid] } {
     return -1
   }
-  
+
   foreach graphobj $objid {
     graphics $molid delete $graphobj
   }
@@ -312,22 +312,22 @@ proc ::inorganicBuilder::molmenuauxint {mol index op currentMol molMenuText } {
 
 proc ::inorganicBuilder::inorganicBuilder_mainwin {} {
   variable w
-  
+
   #De-minimize if the window is already running
   if { [winfo exists .inorganicBuilder] } {
     wm deiconify $w
     puts "Deiconifying!!!\007"
     return
   }
-  
+
   set ns [namespace current]
   initMaterials
-  
+
   set w [toplevel ".inorganicBuilder"]
 #  puts "InorganicBuilder) w is $w"
   wm title $w "InorganicBuilder"
   wm resizable $w yes yes
-  
+
   set row 0
 
   #Add a menubar
@@ -384,17 +384,17 @@ proc ::inorganicBuilder::inorganicBuilder_mainwin {} {
   # than the top window, because the top window generates Map events
   # for each child, and we don't want to be called multiple times
   bind $w.menubar <Map> "${ns}::guiStartWin"
-  
+
   #$w.menubar.task.menu invoke 0
 }
 
 proc ::inorganicBuilder::guiStartWin {} {
   variable guiState
   variable w
-  
+
   set ns [namespace current]
   set guiState(curWin) ${ns}::guiStartWin
-  
+
   foreach child [winfo children $w] {
     if { ![string equal "$child" "${w}.menubar"] } {
       destroy $child
@@ -406,7 +406,7 @@ proc ::inorganicBuilder::guiStartWin {} {
   grid [button $w.body1.click1 -text "Click here" -command "${ns}::guiBuildDeviceWin"] -row $row -column 0 -padx {4 0}
   grid [label $w.body1.label1 -text " or select \"Task:Build device\" to build a new device model" ] -row $row -column 1 -sticky w -padx {0 4} -pady 5
   incr row 2
-  
+
   grid [button $w.body1.click2 -text "Click here" -command "set fname \[tk_getOpenFile -defaultextension \".ibs\" \]; ${ns}::guiLoadState \$fname;"] -row $row -column 0 -padx {4 0}
   grid [label $w.body1.label2 -text " or select \"File:Open\" to load an existing model" ] -row $row -column 1 -sticky w -padx {0 4} -pady 5
   incr row 2
@@ -414,7 +414,7 @@ proc ::inorganicBuilder::guiStartWin {} {
   grid [button $w.body1.click3 -text "Click here" -command "${ns}::guiBuildBondsWin"] -row $row -column 0 -padx {4 0}
   grid [label $w.body1.label3 -text " or select \"Task:Add bonds\" to add bonds to a structure" ] -row $row -column 1 -sticky w -padx {0 4} -pady 5
   incr row 2
-  
+
   grid [button $w.body1.click4 -text "Click here" -command "${ns}::guiBuildSurfaceStructsWin"] -row $row -column 0 -padx {4 0}
   grid [label $w.body1.label4 -text " or select \"Task:Build Surface Structures\" to add new structures to a surface" ] -row $row -column 1 -sticky w -padx {0 4} -pady 5
   incr row 2
@@ -429,10 +429,10 @@ proc ::inorganicBuilder::guiStartWin {} {
 proc ::inorganicBuilder::guiBuildDeviceWin {} {
   variable guiState
   variable w
-  
+
   set ns [namespace current]
   set guiState(curWin) ${ns}::guiBuildDeviceWin
-  
+
   foreach child [winfo children $w] {
     if { ![string equal "$child" "${w}.menubar"] } {
       destroy $child
@@ -443,18 +443,18 @@ proc ::inorganicBuilder::guiBuildDeviceWin {} {
   set row 0
   grid columnconfigure $w.body1 { 0 2 3 } -weight 0
   grid columnconfigure $w.body1 1 -weight 1
-  
+
   grid [label $w.body1.materiallabel -text "Material" ] -row $row -column 0 -sticky w
   grid [menubutton $w.body1.materialmenub -menu $w.body1.materialmenub.menu -relief raised -pady 5] -row $row -column 1 -sticky ew
   menu $w.body1.materialmenub.menu -tearoff no
-    
+
 #  $w.body.materialmenub config -width 15
   set matlist [lsort -index 1 [ getMaterialNames ]]
 
   if { ![info exists guiState(material)] } {
     set guiState(material) [lindex $matlist 0 0 ]
   }
-  
+
   set i 0
   foreach mat $matlist {
     foreach { shortname longname } $mat {}
@@ -464,15 +464,19 @@ proc ::inorganicBuilder::guiBuildDeviceWin {} {
     }
     incr i
   }
-  
+
   grid [label $w.body1.hexlabel -text "Hex box:"] -row $row -column 2 -sticky w
   grid [checkbutton $w.body1.hex -variable ${ns}::guiState(hexBox) -command "${ns}::guiBuildDeviceWin" ] -row $row -column 3 -sticky w
-    
+
+  ## TODO: Rename this option to: "Save periodic box information to PDB"
+  ## TODO: Change behavior accordingly
   grid [label $w.body1.pbxlabel -text "Periodic box:"] -row $row -column 4 -sticky w
-  grid [checkbutton $w.body1.pbx -variable ${ns}::guiState(mmod) -command "${ns}::guiBuildDeviceWin" ] -row $row -column 5 -sticky w
+  #grid [checkbutton $w.body1.pbx -variable ${ns}::guiState(mmod) -command "${ns}::guiBuildDeviceWin" ] -row $row -column 5 -sticky w
+  grid [checkbutton $w.body1.pbx -variable ${ns}::guiState(mmod) -command "${ns}::setVMDPeriodicBox [list $guiState(currentBox)] $guiState(geomMol)" ] -row $row -column 5 -sticky w
                                                                 ## TODO: WHY ARE WE CALLING guiBuildDeviceWin ??? (-Max)
                                                                 ## IT CAUSES ENTIRE WINDOW TO BE REDRAWN!
-                                                                          
+                                                                ## FIXED! (-Max)
+
   if { ![ getMaterialHexSymmetry $guiState(material)] } {
     $w.body1.hex configure -state disabled
   } else {
@@ -480,16 +484,16 @@ proc ::inorganicBuilder::guiBuildDeviceWin {} {
   }
   bind $w.body1.hex <FocusOut> ${ns}::guiCreateBox
   incr row
-  
+
   frame $w.body2
   set row 0
-  
+
   grid columnconfigure $w.body2 { 0 2 4 } -weight 0
   grid columnconfigure $w.body2 { 1 3 5 } -weight 1
-  
+
   grid [label $w.body2.origlabel -text "Origin:"] -row $row -column 0 -columnspan 6 -sticky w
   incr row
-  
+
   grid [label $w.body2.xoriglabel -text "X:"] -row $row -column 0 -sticky e
   grid [entry $w.body2.xorig -width 5 -textvariable ${ns}::guiState(origX) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
   bind $w.body2.xorig <FocusOut> ${ns}::guiCreateBox
@@ -504,13 +508,13 @@ proc ::inorganicBuilder::guiBuildDeviceWin {} {
   if { $guiState(hexBox) } {
     grid [label $w.body2.hexlabel -text "Hex box dimensions:"] -row $row -column 0 -columnspan 6 -sticky w
     incr row
-  
+
     grid [label $w.body2.hexrlabel -text "D:" ] -row $row -column 0 -sticky e
     grid [entry $w.body2.hexr -width 5 -textvariable ${ns}::guiState(hexD) -validate all -vcmd "${ns}::guiRequirePInt %W %P %V" -invcmd "${ns}::guiUnitCellErr %W" ] -row $row -column 1 -sticky ew
     bind $w.body2.hexr <FocusOut> ${ns}::guiCreateBox
     grid [label $w.body2.hexrnotelabel -text "(inside diameter)" ] -row $row -column 2 -columnspan 4 -sticky w
     incr row
-    
+
     grid [label $w.body2.zboxlabel -text "Z:"] -row $row -column 0 -sticky e
     grid [entry $w.body2.zbox -width 5 -textvariable ${ns}::guiState(boxZ) -validate all -vcmd "${ns}::guiRequirePInt %W %P %V" -invcmd "${ns}::guiUnitCellErr %W" ] -row $row -column 1 -sticky ew
     bind $w.body2.zbox <FocusOut> ${ns}::guiCreateBox
@@ -519,11 +523,11 @@ proc ::inorganicBuilder::guiBuildDeviceWin {} {
   } else {
     grid [label $w.body2.boxdimlabel -text "Box dimension:"] -row $row -column 0 -columnspan 6 -sticky w
     incr row
-  
+
     grid [label $w.body2.xboxlabel -text "X:"] -row $row -column 0 -sticky e
     grid [entry $w.body2.xbox -width 5 -textvariable ${ns}::guiState(boxX) -validate all -vcmd "${ns}::guiRequirePInt %W %P %V" -invcmd "${ns}::guiUnitCellErr %W" ] -row $row -column 1 -sticky ew -padx 4
     bind $w.body2.xbox <FocusOut> ${ns}::guiCreateBox
-    
+
     grid [label $w.body2.yboxlabel -text "Y:"] -row $row -column 2 -sticky e
     grid [entry $w.body2.ybox -width 5 -textvariable ${ns}::guiState(boxY) -validate all -vcmd "${ns}::guiRequirePInt %W %P %V" -invcmd "${ns}::guiUnitCellErr %W" ] -row $row -column 3 -sticky ew -padx 4
     bind $w.body2.ybox <FocusOut> ${ns}::guiCreateBox
@@ -532,10 +536,10 @@ proc ::inorganicBuilder::guiBuildDeviceWin {} {
     bind $w.body2.zbox <FocusOut> ${ns}::guiCreateBox
     incr row
   }
-  
+
   grid [label $w.body2.basislabel -text "Basis vectors:"] -row $row -column 0 -columnspan 6 -sticky w
   incr row
-  
+
   grid [label $w.body2.axlabel -text "Vector A  X:"] -row $row -column 0 -sticky e
   grid [label $w.body2.ax -width 10 -anchor nw -textvariable ${ns}::guiState(boxAX)] -row $row -column 1 -sticky w
   grid [label $w.body2.aylabel -text "Y:"] -row $row -column 2 -sticky e
@@ -559,7 +563,7 @@ proc ::inorganicBuilder::guiBuildDeviceWin {} {
   grid [label $w.body2.czlabel -text "Z:"] -row $row -column 4 -sticky e
   grid [label $w.body2.cz -width 10 -anchor nw -textvariable ${ns}::guiState(boxCZ)] -row $row -column 5 -sticky ew
   incr row
-  
+
   frame $w.body2a
   grid columnconfigure $w.body2a { 0 } -weight 0
   grid columnconfigure $w.body2a { 1 } -weight 1
@@ -572,13 +576,13 @@ proc ::inorganicBuilder::guiBuildDeviceWin {} {
 
   frame $w.minmax
   set row 0
-  
+
   grid columnconfigure $w.minmax { 0 2 } -weight 0
   grid columnconfigure $w.minmax { 1 3 } -weight 1
 
   grid [label $w.minmax.minmaxlabel -text "Structure Min/Max:"] -row $row -column 0 -columnspan 4 -sticky w
   incr row
-  
+
   grid [label $w.minmax.xminlabel -text "X Min:"] -row $row -column 0 -sticky e
   grid [label $w.minmax.xmin -width 10 -anchor nw -textvariable ${ns}::guiState(boxXmin)] -row $row -column 1 -sticky ew
   grid [label $w.minmax.xmaxlabel -text "Max:"] -row $row -column 2 -sticky e
@@ -599,16 +603,16 @@ proc ::inorganicBuilder::guiBuildDeviceWin {} {
 
   frame $w.body3
   set row 0
-  
+
 #  grid [button $w.body3.drawbox -text "Draw Box" \
 #          -command "${ns}::guiDrawBoxButton"] \
 #    -row $row -column 0 -columnspan 3
 #  incr row
-    
+
   grid [label $w.body3.outputnamelabel -text "Output file (.pdb,.psf):" ] -row $row -column 0 -sticky w
   grid [entry $w.body3.outputname -textvariable ${ns}::guiState(fname) ] -row $row -column 1 -columnspan 2 -sticky ew -padx 4
   incr row
-  
+
   grid [label $w.body3.saveparlabel -text "Save par file (if available):"] -row $row -column 0 -sticky w
   grid [checkbutton $w.body3.savepar -variable ${ns}::guiState(saveParams)] -row $row -column 1 -columnspan 2 -sticky w
   incr row
@@ -656,7 +660,7 @@ proc ::inorganicBuilder::guiBuildDeviceWin {} {
   pack $w.blocks.btab.scroll -side right -fill y
   pack $w.blocks.btab.list -side left -fill both -expand 1
   pack $w.blocks.btab -fill both -expand 1
-    
+
   frame $w.buttons
   set row 0
 
@@ -688,7 +692,7 @@ proc ::inorganicBuilder::guiBuildDeviceWin {} {
 
 proc ::inorganicBuilder::guiViewMaterialWin { menuwin name } {
   variable guiState
-  
+
   set ns [namespace current]
   set guiState(curWin) "${ns}::guiViewMaterialWin $menuwin $name"
 
@@ -697,17 +701,17 @@ proc ::inorganicBuilder::guiViewMaterialWin { menuwin name } {
 
 proc ::inorganicBuilder::guiEditMaterialWin { menuwin } {
   variable guiState 
-  
+
   set ns [namespace current]
   set guiState(curWin) "${ns}::guiEditMaterialWin $menuwin"
-  
+
   return [guiViewEditMaterialWin $menuwin "" false]
 }
 
 proc ::inorganicBuilder::guiViewEditMaterialWin { menuwin shortname viewonly } {
   variable guiState
   variable w
-  
+
   if {$viewonly} {
     set guiState(newMatShortName) $shortname
     set guiState(newMatLongName) [getMaterialLongName $shortname]
@@ -759,7 +763,7 @@ proc ::inorganicBuilder::guiViewEditMaterialWin { menuwin shortname viewonly } {
       destroy $child
     }
   }
-  
+
   frame $w.name
   set row 0
   grid columnconfigure $w.name 1 -weight 1
@@ -771,7 +775,7 @@ proc ::inorganicBuilder::guiViewEditMaterialWin { menuwin shortname viewonly } {
   grid [label $w.name.shortlabel -text "Short name:"] -sticky e -row $row -column 0
   grid [entry $w.name.shortval -textvariable ${ns}::guiState(newMatShortName) ] -padx 4 -sticky ew -row $row -column 1 -columnspan 3
   incr row
-  
+
   grid [label $w.name.uclabel -text "Unit cell PDB:"] -sticky e -row $row -column 0
   grid [entry $w.name.ucname -textvariable ${ns}::guiState(newMatUCName) ] -padx 4 -sticky ew -row $row -column 1 -columnspan 2
   if { $viewonly } {
@@ -780,10 +784,10 @@ proc ::inorganicBuilder::guiViewEditMaterialWin { menuwin shortname viewonly } {
     grid [button $w.name.ucbutton -text "Browse" -command "set tempfile \[tk_getOpenFile -defaultextension .pdb\]; if \{!\[string equal \$tempfile \"\"\]\} \{ set ${ns}::guiState(newMatUCName) \$tempfile; \};" ] -row $row -column 3 -sticky e
   }
   incr row
-  
+
   grid [label $w.name.toplabel -text "Topology file:"] -sticky e -row $row -column 0
   grid [entry $w.name.topname -textvariable ${ns}::guiState(newMatTopName) ] -padx 4 -sticky ew -row $row -column 1
-    
+
   if { $viewonly } {
     grid [button $w.name.topbutton -text "Save" -command "set tempfile \[tk_getSaveFile -defaultextension .top\]; if \{!\[string equal \$tempfile \"\"\]\} \{ file copy -force -- $${ns}::guiState(newMatTopName) \$tempfile; \};" ] -row $row -column 3 -sticky e
   } else {
@@ -794,14 +798,14 @@ proc ::inorganicBuilder::guiViewEditMaterialWin { menuwin shortname viewonly } {
 
   grid [label $w.name.cutofflabel -text "Cutoff:"] -sticky e -row $row -column 0
   grid [entry $w.name.cutoffval -textvariable ${ns}::guiState(newMatCutoff) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -padx 4 -sticky ew -row $row -column 1
-    
+
   incr row
-  
+
   grid [label $w.name.hexlabel -text "Hex symmetry:"] -sticky e -row $row -column 0
   grid [checkbutton $w.name.hexval -variable ${ns}::guiState(newMatHex)] -padx 4 -sticky ew -row $row -column 1
-    
+
   incr row
-  
+
   frame $w.basis
   set row 0
   grid columnconfigure $w.basis { 0 2 4 } -weight 0
@@ -834,7 +838,7 @@ proc ::inorganicBuilder::guiViewEditMaterialWin { menuwin shortname viewonly } {
   grid [entry $w.basis.cz -width 5 -textvariable ${ns}::guiState(newMatCZ) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 5 -sticky ew -padx 4
   incr row
   pack $w.basis -anchor nw -fill x
- 
+
   frame $w.buttons
   set row 0
   if { $viewonly } {
@@ -845,7 +849,7 @@ proc ::inorganicBuilder::guiViewEditMaterialWin { menuwin shortname viewonly } {
     grid [button $w.buttons.doit -text "Add to library" -command "${ns}::guiAddMaterial $menuwin" ] -row $row -column 2
   }
   pack $w.buttons -anchor nw -fill x
-  
+
   if { $viewonly } {
     $w.name.longval configure -state readonly
     $w.name.shortval configure -state readonly
@@ -868,11 +872,11 @@ proc ::inorganicBuilder::guiViewEditMaterialWin { menuwin shortname viewonly } {
 proc ::inorganicBuilder::guiBuildBondsWin {} {
   variable guiState
   variable w
-  
+
 #  puts "InorganicBuilder) Finding specific bonds"
   set ns [namespace current]
   set guiState(curWin) ${ns}::guiBondsWin
-  
+
   foreach child [winfo children $w] {
     if { ![string equal "$child" "${w}.menubar"] } {
       destroy $child
@@ -881,7 +885,7 @@ proc ::inorganicBuilder::guiBuildBondsWin {} {
 
   frame $w.body31
   set row 0
-  
+
   grid [button $w.body31.explain -text "Explain bond options" -command "tk_messageBox -default ok -detail \"You can either add bonds that wrap around the sides of the periodic box using VMD's bond search heuristic, or specify bonds to add by atom type. In either case you may choose to keep the bonds already in the file. However, even if you choose to keep existing bonds, angle and dihedral bonds due to the way VMD handles PSF files will be lost. They may be regenerated by selecting the appropriate options below.\"  -parent $w -title \"Bond options\" -icon info  -type ok " ] -row $row -column 0 -sticky w
 
 #  grid [message $w.body31.explain -text "You can either add bonds that \
@@ -894,17 +898,17 @@ proc ::inorganicBuilder::guiBuildBondsWin {} {
 #    -aspect 650 ] \
 #    -row $row -column 0 -sticky w
   incr row
-  
+
   if { ![info exist guiState(addBondsHow)] } {
     set guiState(addBondsHow) addperiodictofile
   }
-  
+
   grid [radiobutton $w.body31.addbondsfile -variable ${ns}::guiState(addBondsHow) -value addperiodictofile -command ${ns}::guiSetBuildBondsControls -text "Keep existing bonds, add bonds that wrap around the periodic box" -anchor w] -row $row -column 0 -sticky w
   incr row
-  
+
   grid [radiobutton $w.body31.addbondsvmd -variable ${ns}::guiState(addBondsHow) -value addperiodictovmd -command ${ns}::guiSetBuildBondsControls -text "Let VMD generate internal bonds, add bonds that wrap aroundthe periodic box" -anchor w] -row $row -column 0 -sticky w
   incr row
-  
+
   grid [radiobutton $w.body31.addspecificbonds -variable ${ns}::guiState(addBondsHow) -value addspecifiedtofile -command ${ns}::guiSetBuildBondsControls -text "Keep existing bonds, specify bonds to add by atom type" -anchor w] -row $row -column 0 -sticky w
   incr row
 
@@ -920,7 +924,7 @@ proc ::inorganicBuilder::guiBuildBondsWin {} {
 #  grid columnconfigure $w.body3 1 -weight 1
 #  grid columnconfigure $w.body3 2 -weight 0
 #  grid columnconfigure $w.body3 3 -weight 1
-  
+
 #  grid [label $w.body3.cutofflabel -text "Bond cutoff (for periodic bonds):"] \
 #    -row $row -column 0 -sticky w
 #  grid [entry $w.body3.cutoff -width 5 \
@@ -931,24 +935,24 @@ proc ::inorganicBuilder::guiBuildBondsWin {} {
 #    -row $row -column 1 -sticky w
 #  incr row
 
-  grid [label $w.body3.periodicinabel -text "Periodic in" ] -row $row -column 0 -sticky w
+  grid [label $w.body3.periodicinabel -text "Periodic along" ] -row $row -column 0 -sticky w
 
   frame $w.body3.cb
-  label $w.body3.cb.perlabela -text "A:"
+  label $w.body3.cb.perlabela -text "Vector A:"
   checkbutton $w.body3.cb.periodica -variable ${ns}::guiState(periodicA)
-  label $w.body3.cb.perlabelb -text "B:"
+  label $w.body3.cb.perlabelb -text "Vector B:"
   checkbutton $w.body3.cb.periodicb -variable ${ns}::guiState(periodicB)
-  label $w.body3.cb.perlabelc -text "C:"
+  label $w.body3.cb.perlabelc -text "Vector C:"
   checkbutton $w.body3.cb.periodicc -variable ${ns}::guiState(periodicC)
   pack $w.body3.cb.perlabela $w.body3.cb.periodica $w.body3.cb.perlabelb $w.body3.cb.periodicb $w.body3.cb.perlabelc $w.body3.cb.periodicc -side left -anchor nw
-       
+
   grid $w.body3.cb -row $row -column 1 -columnspan 6 -sticky ew
   incr row
-  
+
   frame $w.body3.bbuttons
   label $w.body3.bbuttons.hexlabel -text "Transform to hex:"
   checkbutton $w.body3.bbuttons.hex -variable ${ns}::guiState(hexBox)
- 
+
   label $w.body3.bbuttons.angleslabel -text "Build angles:"
   checkbutton $w.body3.bbuttons.angles -variable ${ns}::guiState(buildAngles) -command "${ns}::guiProcessAngleCheckbox"
 
@@ -957,26 +961,26 @@ proc ::inorganicBuilder::guiBuildBondsWin {} {
 
   label $w.body3.bbuttons.relabelbondslabel -text "Includes bond count in type:"
   checkbutton $w.body3.bbuttons.relabelbonds -variable ${ns}::guiState(relabelBonds)
-    
+
   pack $w.body3.bbuttons.hexlabel $w.body3.bbuttons.hex -side left -anchor nw
   pack $w.body3.bbuttons.angleslabel $w.body3.bbuttons.angles -side left -anchor nw
   pack $w.body3.bbuttons.dihedralslabel $w.body3.bbuttons.dihedrals -side left -anchor nw
   pack $w.body3.bbuttons.relabelbondslabel $w.body3.bbuttons.relabelbonds -side left -anchor nw
   grid $w.body3.bbuttons -row $row -column 0 -columnspan 7 -sticky ew
   incr row
-  
+
   grid [label $w.body3.outputnamelabel -text "Output file (.pdb,.psf):" ] -row $row -column 0 -sticky w
   grid [entry $w.body3.outputname -textvariable ${ns}::guiState(fname) ] -row $row -column 1 -columnspan 5 -sticky ew -padx 4
-  
+
   grid [label $w.body3.loadresultlabel -text "Load result:"] -row $row -column 6 -sticky e
   grid [checkbutton $w.body3.loadresult -variable ${ns}::guiState(loadResult) ] -row $row -column 7 -sticky ew
   incr row
-  
+
   frame $w.body4
   grid columnconfigure $w.body4 {0 1 2} -weight 1
   grid [label $w.body4.blockslabel -text "Specified bonds:" ] -row $row -column 0 -sticky w
   grid [frame $w.body4.addbuttons] -row $row -column 1 -sticky w
-  
+
   grid [button $w.body4.addbuttons.addbonds -text "Add bond" -command "${ns}::guiAddBondWin"] -row 0 -column 0
   grid [button $w.body4.addbuttons.remove -text "Remove" -command "${ns}::guiRemoveBond $w.bonds.btab.list" ] -row 0 -column 1
   incr row
@@ -1000,7 +1004,7 @@ proc ::inorganicBuilder::guiBuildBondsWin {} {
     pack $w.bonds.btab.list -side left
     scrollbar $w.bonds.btab.scroll -command "$w.bonds.btab.list yview"
     pack $w.bonds.btab.scroll -side right -fill y
-    
+
     set i 0
     foreach bond $bondlist {
       $w.bonds.btab.list insert end [format "%3d %10s %10s %15.3f" $i [lindex $bond 0] [lindex $bond 1] [lindex $bond 2] ]
@@ -1012,7 +1016,7 @@ proc ::inorganicBuilder::guiBuildBondsWin {} {
   grid [button $w.buttons.doit -text "Find Bonds" -command "${ns}::guiBuildBonds" ] -row $row -column 0
   grid [button $w.buttons.cancel -text "Cancel" -command "wm withdraw $w" ] -row $row -column 5
 
-    
+
   pack $w.body31 -anchor nw -fill x
   pack $w.menubar -anchor nw -fill x
   pack $w.body -anchor nw -fill x
@@ -1028,7 +1032,7 @@ proc ::inorganicBuilder::guiBuildBondsWin {} {
 proc ::inorganicBuilder::guiSetBuildBondsControls {} {
   variable guiState
   variable w
-  
+
   if { [ string equal $guiState(addBondsHow) "addperiodictofile" ] || [ string equal $guiState(addBondsHow) "addperiodictovmd" ] } {
  #   $w.body3.cutoff configure -state normal
     $w.body4.addbuttons.addbonds configure -state disabled
@@ -1075,7 +1079,7 @@ proc ::inorganicBuilder::guiProcessAngleCheckbox {} {
 proc ::inorganicBuilder::guiFindSurfaceAtomsWin {} {
   variable guiState
   variable w
-  
+
 #  puts "InorganicBuilder) Finding surface"
   set ns [namespace current]
   set guiState(curWin) ${ns}::FindSurfaceAtomsWin
@@ -1092,15 +1096,15 @@ proc ::inorganicBuilder::guiFindSurfaceAtomsWin {} {
   set row 0
   grid columnconfigure $w.body3 0 -weight 0
   grid columnconfigure $w.body3 1 -weight 1
-  
+
   grid [label $w.body3.gridszlabel -text "Grid spacing:"] -row $row -column 0 -sticky w
   grid [entry $w.body3.gridsz -width 5 -textvariable ${ns}::guiState(gridSz) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky w
   incr row
-  
+
   grid [label $w.body3.gridradiuslabel -text "Radius:"] -row $row -column 0 -sticky w
   grid [entry $w.body3.gridradius -width 5 -textvariable ${ns}::guiState(gridRad) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky w
   incr row
-  
+
   grid [label $w.body3.thicknesslabel -text "Shell thickness:"] -row $row -column 0 -sticky w
   grid [entry $w.body3.thickness -width 5 -textvariable ${ns}::guiState(thickness) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky w
   incr row
@@ -1117,7 +1121,7 @@ proc ::inorganicBuilder::guiFindSurfaceAtomsWin {} {
   set row 0
   grid [button $w.buttons.doit -text "Find Shell" -command "${ns}::guiFindShell" ] -row $row -column 0
   grid [button $w.buttons.cancel -text "Cancel" -command "wm withdraw $w" ] -row $row -column 5
-    
+
   pack $w.menubar -anchor nw -fill x
   pack $w.body -anchor nw -fill x
   pack $w.body2 -anchor nw -fill x
@@ -1128,7 +1132,7 @@ proc ::inorganicBuilder::guiFindSurfaceAtomsWin {} {
 proc ::inorganicBuilder::guiMergeSurfInteriorWin {} {
   variable guiState
   variable w
-  
+
 #  puts "InorganicBuilder) Merging molecules"
   set ns [namespace current]
   set guiState(curWin) ${ns}::guiMergeSurfInteriorWin
@@ -1146,17 +1150,17 @@ proc ::inorganicBuilder::guiMergeSurfInteriorWin {} {
   set row 0
   grid columnconfigure $w.body3 0 -weight 0
   grid columnconfigure $w.body3 1 -weight 1
-  
+
   grid [label $w.body3.materiallabel -text "Material" ] -row $row -column 0 -sticky w
   grid [menubutton $w.body3.materialmenub -menu $w.body3.materialmenub.menu -relief raised -pady 5] -row $row -column 1 -sticky ew
   menu $w.body3.materialmenub.menu -tearoff no
-    
+
 #  $w.body.materialmenub config -width 15
   set matlist [lsort -index 1 [ getMaterialNames ]]
   if { ![info exists guiState(material)] } {
     set guiState(material) [lindex $matlist 0 0 ]
   }
-  
+
   set i 0
   foreach mat $matlist {
     foreach { shortname longname } $mat {}
@@ -1169,7 +1173,7 @@ proc ::inorganicBuilder::guiMergeSurfInteriorWin {} {
   incr row
 
 #  puts "InorganicBuilder) Built menu"
-  
+
   grid [label $w.body3.mergedfilelabel -text "Merged file (.pdb,.psf):"] -row $row -column 0 -sticky w
   grid [entry $w.body3.mergedfile -width 5 -textvariable ${ns}::guiState(mergedFile)] -row $row -column 1 -sticky ew
   incr row
@@ -1178,7 +1182,7 @@ proc ::inorganicBuilder::guiMergeSurfInteriorWin {} {
   set row 0
   grid [button $w.buttons.doit -text "Merge" -command "${ns}::guiMergeSurfInterior" ] -row $row -column 0
   grid [button $w.buttons.cancel -text "Cancel" -command "wm withdraw $w" ] -row $row -column 5
-    
+
   pack $w.menubar -anchor nw -fill x
   pack $w.body -anchor nw -fill x
   pack $w.body2 -anchor nw -fill x
@@ -1189,7 +1193,7 @@ proc ::inorganicBuilder::guiMergeSurfInteriorWin {} {
 proc ::inorganicBuilder::guiSolvateBoxWin {} {
   variable guiState
   variable w
-  
+
 #  puts "InorganicBuilder) Solvating structure"
   set ns [namespace current]
   set guiState(curWin) ${ns}::guiSolvateBoxWin
@@ -1206,11 +1210,11 @@ proc ::inorganicBuilder::guiSolvateBoxWin {} {
   frame $w.body3
   set row 0
   grid columnconfigure $w.body3 1 -weight 1
-  
+
   grid [label $w.body3.mergedfilelabel -text "Solvated file (.pdb,.psf):"] -row $row -column 0 -sticky w
   grid [entry $w.body3.mergedfile -width 5 -textvariable ${ns}::guiState(solvatedFile)] -row $row -column 1 -sticky ew -padx 4
   incr row
-  
+
   grid [label $w.body3.hexlabel -text "Transform to hex on completion:"] -row $row -column 0 -sticky w
   grid [checkbutton $w.body3.hex -variable ${ns}::guiState(hexBox) ] -row $row -column 1 -sticky ew
   incr row
@@ -1219,7 +1223,7 @@ proc ::inorganicBuilder::guiSolvateBoxWin {} {
   set row 0
   grid [button $w.buttons.doit -text "Solvate Box" -command "${ns}::guiSolvateBox" ] -row $row -column 0
   grid [button $w.buttons.cancel -text "Cancel" -command "wm withdraw $w" ] -row $row -column 5
-    
+
   pack $w.menubar -anchor nw -fill x
   pack $w.body -anchor nw -fill x
   pack $w.body2 -anchor nw -fill x
@@ -1258,8 +1262,8 @@ proc ::inorganicBuilder::guiBuildSurfaceStructsWin {} {
 	  }
 	  ${ns}::structBoxMolecule 
   }
-  
-  
+
+
   foreach child [winfo children $w] {
     if { ![string equal "$child" "${w}.menubar"] } {
       destroy $child
@@ -1285,7 +1289,7 @@ proc ::inorganicBuilder::guiBuildSurfaceStructsWin {} {
   grid [button $w.body3.getsa1 -text "Draw Surface Atoms" -command "${ns}::getSurfaceAtoms" ] -row $row -column 2
 
   incr row
-  
+
 
   grid [label $w.body3.structslabel -text "Structures:" ] -row $row -column 0 -sticky w
   grid [button $w.body3.addstructs -text "Add Structure" -command "${ns}::guiAddStructWin"] -row $row -column 1
@@ -1353,27 +1357,27 @@ proc ::inorganicBuilder::guiBuildSurfaceStructsWin {} {
   if { $guiState(StructHexBox) } {
     grid [label $w.periodic.hexdimlabel -text "Hex box dimensions (Angstrom):"] -row $row -column 0 -columnspan 6 -sticky w
     incr row
-  
+
     grid [label $w.periodic.hexrlabel -text "D:" ] -row $row -column 0 -sticky e
     grid [entry $w.periodic.hexr -width 5 -textvariable ${ns}::guiState(hexD2) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew
     bind $w.periodic.hexr <FocusOut> ${ns}::structBoxMolecule
     grid [label $w.periodic.hexrnotelabel -text "(inside diameter)" ] -row $row -column 2 -columnspan 4 -sticky w
     incr row
-    
+
     grid [label $w.periodic.zboxlabel -text "Z:"] -row $row -column 0 -sticky e
     grid [entry $w.periodic.zbox -width 5 -textvariable ${ns}::guiState(boxZ3) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew
     bind $w.periodic.zbox <FocusOut> ${ns}::structBoxMolecule
     grid [label $w.periodic.hexhnotelabel -text "(height)" ] -row $row -column 2 -columnspan 4 -sticky w
     incr row
-    
+
 # ~rot menu
     grid [label $w.periodic.boxdimlabel2h -text "Hex Periodic Directions (Degrees):"] -row $row -column 0 -columnspan 6 -sticky w
     incr row
-    
+
     grid [label $w.periodic.xboxlabel2h -text "Alpha:"] -row $row -column 0 -sticky e
     grid [entry $w.periodic.xbox2h -width 5 -textvariable ${ns}::guiState(boxX2Rh) -validate all -vcmd "${ns}::guiRequireAngle %W %P %V" -invcmd "${ns}::guiUnitAngErr %W" ] -row $row -column 1 -sticky ew -padx 4
     bind $w.periodic.xbox2h <FocusOut> ${ns}::structBoxMolecule 
-      
+
     grid [label $w.periodic.yboxlabel2h -text "Beta:"] -row $row -column 2 -sticky e
     grid [entry $w.periodic.ybox2h -width 5 -textvariable ${ns}::guiState(boxY2Rh) -validate all -vcmd "${ns}::guiRequireAngle %W %P %V" -invcmd "${ns}::guiUnitAngErr %W" ] -row $row -column 3 -sticky ew -padx 4
     bind $w.periodic.ybox2h <FocusOut> ${ns}::structBoxMolecule 
@@ -1383,15 +1387,15 @@ proc ::inorganicBuilder::guiBuildSurfaceStructsWin {} {
     incr row
 # ~rot menu
 
-    
+
   } else {
     grid [label $w.periodic.boxdimlabel -text "Box dimensions (Angstrom):"] -row $row -column 0 -columnspan 6 -sticky w
     incr row
-    
+
     grid [label $w.periodic.xboxlabel -text "X:"] -row $row -column 0 -sticky e
     grid [entry $w.periodic.xbox -width 5 -textvariable ${ns}::guiState(boxX2) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
     bind $w.periodic.xbox <FocusOut> ${ns}::structBoxMolecule 
-      
+
     grid [label $w.periodic.yboxlabel -text "Y:"] -row $row -column 2 -sticky e
     grid [entry $w.periodic.ybox -width 5 -textvariable ${ns}::guiState(boxY2) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 3 -sticky ew -padx 4
     bind $w.periodic.ybox <FocusOut> ${ns}::structBoxMolecule 
@@ -1402,11 +1406,11 @@ proc ::inorganicBuilder::guiBuildSurfaceStructsWin {} {
 # ~rot menu
     grid [label $w.periodic.boxdimlabel2 -text "Periodic Directions (Degrees):"] -row $row -column 0 -columnspan 6 -sticky w
     incr row
-    
+
     grid [label $w.periodic.xboxlabel2 -text "Alpha:"] -row $row -column 0 -sticky e
     grid [entry $w.periodic.xbox2 -width 5 -textvariable ${ns}::guiState(boxX2R) -validate all -vcmd "${ns}::guiRequireAngle %W %P %V" -invcmd "${ns}::guiUnitAngErr %W" ] -row $row -column 1 -sticky ew -padx 4
     bind $w.periodic.xbox2 <FocusOut> ${ns}::structBoxMolecule 
-      
+
     grid [label $w.periodic.yboxlabel2 -text "Beta:"] -row $row -column 2 -sticky e
     grid [entry $w.periodic.ybox2 -width 5 -textvariable ${ns}::guiState(boxY2R) -validate all -vcmd "${ns}::guiRequireAngle %W %P %V" -invcmd "${ns}::guiUnitAngErr %W" ] -row $row -column 3 -sticky ew -padx 4
     bind $w.periodic.ybox2 <FocusOut> ${ns}::structBoxMolecule 
@@ -1442,7 +1446,7 @@ proc ::inorganicBuilder::guiBuildSurfaceStructsWin {} {
   }
 
   set guiState(structListID) $w.structs.btab.list
-    
+
   pack $w.menubar -anchor nw -fill x
   pack $w.body -anchor nw -fill x
   pack $w.body3 -anchor nw -fill x
@@ -1467,13 +1471,13 @@ proc ::inorganicBuilder::guiDrawBox {} {
 
   mol rename $guiState(geomMol) "[getBoxMaterial $guiState(currentBox)]$guiState(geomMol)"
   set guiState(geomView) {}
-  
+
   if { $guiState(hexBox) } {
     lappend guiState(geomView) [drawHexBox $guiState(currentBox) $guiState(geomMol) ]
   } else {
     lappend guiState(geomView) [drawBox $guiState(currentBox) $guiState(geomMol) ]
   }
-  
+
   if { [info exists guiState(blocklist)] } {
     foreach block $guiState(blocklist) {
       lappend guiState(geomView) [drawBlock $block $guiState(geomMol) ]
@@ -1481,13 +1485,13 @@ proc ::inorganicBuilder::guiDrawBox {} {
   }
   ::inorganicBuilder::setVMDPeriodicBox $guiState(currentBox) $guiState(geomMol)
   #display resetview
-  
+
   return
 }
 
 proc ::inorganicBuilder::guiAddBlockWin {} {
   variable guiState
-  
+
   if { [winfo exists .ibaddblock] } {
     destroy .ibaddblock
   }
@@ -1502,7 +1506,7 @@ proc ::inorganicBuilder::guiAddBlockWin {} {
   grid [label $aw.type.label -text "Block type:" ] -row $row -column 0 -sticky w
   grid [menubutton $aw.type.menub -menu $aw.type.menub.menu -relief raised] -row $row -column 1 -columnspan 5 -sticky ew -ipady 2
   menu $aw.type.menub.menu -tearoff no
-    
+
   $aw.type.menub config -width 20
   set typelist { {pp Paralellepiped} {cylinder Cylinder} {sphere Sphere} {cone Cone} {th Tetrahedron} {selection "VMD Selection" } {dxfile "DX File" }}
   if { ![info exists guiState(addBlockType)] } {
@@ -1516,13 +1520,13 @@ proc ::inorganicBuilder::guiAddBlockWin {} {
     }
   }
   incr row
-  
+
   frame $aw.buttons
   set row 0
 
   grid [button $aw.buttons.add -text Add -command "${ns}::guiStoreBlock; destroy $aw"] -row $row -column 0
   grid [button $aw.buttons.cancel -text Cancel -command "destroy $aw"] -row $row -column 1
-  
+
   guiAddBlockParams $aw.params
   guiRepackAdd
 }
@@ -1530,7 +1534,7 @@ proc ::inorganicBuilder::guiAddBlockWin {} {
 # *** ADDED ***
 proc ::inorganicBuilder::guiAddStructWin {} {
   variable guiState
-  
+
   if { [winfo exists .ibaddstruct] } {
     destroy .ibaddstruct
   }
@@ -1545,10 +1549,10 @@ proc ::inorganicBuilder::guiAddStructWin {} {
   grid [label $aw.type.label -text "Structure type:" ] -row $row -column 0 -sticky w
   grid [menubutton $aw.type.menub -menu $aw.type.menub.menu -relief raised] -row $row -column 1 -columnspan 5 -sticky ew -ipady 2
   menu $aw.type.menub.menu -tearoff no
-    
+
   $aw.type.menub config -width 20
   set typelist { {custom "Custom Structure Selection"} {peg "Polyethylene Glycol"} {dna "DNA"}}
-  
+
   if { ![info exists guiState(addStructType)] } {
     set guiState(addStructType) [lindex $typelist 1 0]
   }
@@ -1560,7 +1564,7 @@ proc ::inorganicBuilder::guiAddStructWin {} {
     }
   }
   incr row
-  
+
   set row [guiDrawDensityFrame $ns $aw.body $row]
 
   if { [string equal "$guiState(setPreviewMode)" "-1"] } { 
@@ -1568,13 +1572,13 @@ proc ::inorganicBuilder::guiAddStructWin {} {
   } else {
 	  set mode 0
   }
-  
+
   frame $aw.buttons
-  
+
   set guiState(awframe) $aw
   grid [button $aw.buttons.add -text Add -command "${ns}::guiHighlightStruct $mode; ${ns}::guiStoreStruct;"] -row $row -column 0
   grid [button $aw.buttons.cancel -text Cancel -command "destroy $aw"] -row $row -column 1
- 
+
   guiAddStructParams $aw.params
   guiRepackStructAdd
 }
@@ -1593,7 +1597,7 @@ proc ::inorganicBuilder::guiSelectLoadedMolWin { psffile pdbfile { fileflag "-al
     set guiState(getSurfacePrevID) -1
   }
 
-  
+
   if { [winfo exists .ibseelctmol] } {
     destroy .ibselectmol
   }
@@ -1614,12 +1618,12 @@ proc ::inorganicBuilder::guiSelectLoadedMolWin { psffile pdbfile { fileflag "-al
   #puts "InorganicBuilder) Label is $def_label"
   #$aw.type.menub configure -text "$def_label"
   incr row 2
-  
+
   frame $aw.buttons
   set row 0
   grid [button $aw.buttons.add -text Select -command "${ns}::guiStoreMol $psffile $pdbfile; destroy $aw"] -row $row -column 0
   grid [button $aw.buttons.cancel -text Cancel -command "destroy $aw"] -row $row -column 1
-  
+
   guiRepackSelectMol
 
 }
@@ -1652,7 +1656,7 @@ proc ::inorganicBuilder::guiDrawNAMDFrame { ns win row } {
   labelframe $win -text "System Parameters" -padx 2 -pady 4
   incr row
 
-  
+
   grid [label ${win}temp -text "Temperature (K): "] -row $row -column 0 -sticky w
   grid [entry ${win}tempval -width 4 -textvariable ${ns}::guiState(setNAMDtemp)] -row $row -column 0 -columnspan 3 -sticky e -padx 4
   incr row
@@ -1679,13 +1683,13 @@ proc ::inorganicBuilder::guiDrawMolFileFrame { ns win label psfkey pdbkey } {
 
   grid [button $win.selloaded -text "Select loaded molecule" -command "${ns}::guiSelectLoadedMolWin $psfkey $pdbkey" ] -row $row -column 1 -columnspan 2 -sticky e
   incr row
-    
-  grid [label $win.psflabel -text "PSF: "] -row $row -column 0 -sticky w
+
+  grid [label $win.psflabel -text "PSF file: "] -row $row -column 0 -sticky w
   grid [entry $win.psfpath -width 30 -textvariable ${ns}::guiState($psfkey)] -row $row -column 1 -sticky ew
   grid [button $win.psfbutton -text "Browse" -command "set tempfile \[tk_getOpenFile -defaultextension .psf \]; if \{!\[string equal \$tempfile \"\"\]\} \{ set ${ns}::guiState($psfkey) \$tempfile; \};" ] -row $row -column 2 -sticky e
   incr row
-  
-  grid [label $win.pdblabel -text "PDB: "] -row $row -column 0 -sticky w
+
+  grid [label $win.pdblabel -text "PDB file: "] -row $row -column 0 -sticky w
   grid [entry $win.pdbpath -width 30 -textvariable ${ns}::guiState($pdbkey)] -row $row -column 1 -sticky ew
   grid [button $win.pdbbutton -text "Browse" -command "set tempfile \[tk_getOpenFile -defaultextension .pdb \]; if \{!\[string equal \$tempfile \"\"\]\} \{ set ${ns}::guiState($pdbkey) \$tempfile \};" ] -row $row -column 2 -sticky e
   incr row
@@ -1699,7 +1703,7 @@ proc ::inorganicBuilder::guiDrawBasisFrame { ns win } {
 
   grid [label $win.origlabel -text "Origin:"] -row $row -column 0 -columnspan 6 -sticky w
   incr row
-  
+
   grid [label $win.xoriglabel -text "X:"] -row $row -column 0 -sticky e
   grid [entry $win.xorig -width 5 -textvariable ${ns}::guiState(origX) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
   grid [label $win.yoriglabel -text "Y:"] -row $row -column 2 -sticky e
@@ -1712,7 +1716,7 @@ proc ::inorganicBuilder::guiDrawBasisFrame { ns win } {
   grid [button $win.getbasis -text "Get Basis from PDB" -command "${ns}::guiFindBasisFromPDB" ] -row $row -column 4 -columnspan 2 -sticky e
   incr row
 
-  grid [label $win.axlabel -text "A X:"] -row $row -column 0 -sticky e
+  grid [label $win.axlabel -text "Vector A  X:"] -row $row -column 0 -sticky e
   grid [entry $win.ax -width 5 -textvariable ${ns}::guiState(boxAX) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
   grid [label $win.aylabel -text "Y:"] -row $row -column 2 -sticky e
   grid [entry $win.ay -width 5 -textvariable ${ns}::guiState(boxAY) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 3 -sticky ew -padx 4
@@ -1720,7 +1724,7 @@ proc ::inorganicBuilder::guiDrawBasisFrame { ns win } {
   grid [entry $win.az -width 5 -textvariable ${ns}::guiState(boxAZ) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 5 -sticky ew -padx 4
   incr row
 
-  grid [label $win.bxlabel -text "B X:"] -row $row -column 0 -sticky e
+  grid [label $win.bxlabel -text "Vector B  X:"] -row $row -column 0 -sticky e
   grid [entry $win.bx -width 5 -textvariable ${ns}::guiState(boxBX) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
   grid [label $win.bylabel -text "Y:"] -row $row -column 2 -sticky e
   grid [entry $win.by -width 5 -textvariable ${ns}::guiState(boxBY) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 3 -sticky ew -padx 4
@@ -1728,7 +1732,7 @@ proc ::inorganicBuilder::guiDrawBasisFrame { ns win } {
   grid [entry $win.bz -width 5 -textvariable ${ns}::guiState(boxBZ) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 5 -sticky ew -padx 4
   incr row
 
-  grid [label $win.cxlabel -text "C X:"] -row $row -column 0 -sticky e
+  grid [label $win.cxlabel -text "Vector C  X:"] -row $row -column 0 -sticky e
   grid [entry $win.cx -width 5 -textvariable ${ns}::guiState(boxCX) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
   grid [label $win.cylabel -text "Y:"] -row $row -column 2 -sticky e
   grid [entry $win.cy -width 5 -textvariable ${ns}::guiState(boxCY) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 3 -sticky ew -padx 4
@@ -1751,12 +1755,12 @@ proc ::inorganicBuilder::guiFindBasisFromPDB { } {
     tk_messageBox -icon error -message "Error reading PDB file. Check path and try again." -type ok
     return
   }
-  
+
   if {[catch {set basis [findBasisVectors $molid]} ] } {
     tk_messageBox -icon error -message "Could not obtain basis vectors from that file." -type ok
     return
   }
-  
+
   foreach { o a b c } $basis {}
   foreach { guiState(origX) guiState(origY) guiState(origZ) } $o {}
   foreach { guiState(boxAX) guiState(boxAY) guiState(boxAZ) } $a {}
@@ -1776,11 +1780,11 @@ proc ::inorganicBuilder::guiRepackSelectMol { } {
 proc ::inorganicBuilder::guiAddBlockParams { f } {
   variable guiState
   set ns [namespace current]
-  
+
   if { [winfo exists $f] } {
     destroy $f
   }
-  
+
   set elemlist { addOrigX addOrigY addOrigZ addSideAX addSideAY addSideAZ addSideBX addSideBY addSideBZ addSideCX addSideCY addSideCZ addRadius }
 
   foreach elemname $elemlist {
@@ -1789,14 +1793,14 @@ proc ::inorganicBuilder::guiAddBlockParams { f } {
       set guiState($elemname) 0
     }
   }
-  
+
   frame $f
   set row 0
   set guiState(addBlockName) "Block [expr [llength $guiState(blocklist)] + [llength $guiState(selectionlist)]]"
   grid [label $f.namelabel -text "Block name:" ] -row $row -column 0 -sticky w
   grid [entry $f.name -width 5 -textvariable ${ns}::guiState(addBlockName)] -row $row -column 1 -columnspan 5 -sticky ew -padx 4
   incr row
-  
+
   set type $guiState(addBlockType)
   if { [string equal $type "pp"] } {
     grid [label $f.xoriglabel -text "Origin X:"] -row $row -column 0 -sticky w
@@ -1806,7 +1810,7 @@ proc ::inorganicBuilder::guiAddBlockParams { f } {
     grid [label $f.zoriglabel -text " Z:"] -row $row -column 4 -sticky w
     grid [entry $f.zorig -width 5 -textvariable ${ns}::guiState(addOrigZ) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 5 -sticky ew -padx 4
     incr row
-    
+
     grid [label $f.sideaxlabel -text "Side A X:"] -row $row -column 0 -sticky w
     grid [entry $f.sideax -width 5 -textvariable ${ns}::guiState(addSideAX) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
     grid [label $f.sideaylabel -text " Y:"] -row $row -column 2 -sticky w
@@ -1814,7 +1818,7 @@ proc ::inorganicBuilder::guiAddBlockParams { f } {
     grid [label $f.sideazlabel -text " Z:"] -row $row -column 4 -sticky w
     grid [entry $f.sideaz -width 5 -textvariable ${ns}::guiState(addSideAZ) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 5 -sticky ew -padx 4
     incr row
-    
+
     grid [label $f.sidebxlabel -text "Side B X:"] -row $row -column 0 -sticky w
     grid [entry $f.sidebx -width 5 -textvariable ${ns}::guiState(addSideBX) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
     grid [label $f.sidebylabel -text " Y:"] -row $row -column 2 -sticky w
@@ -1822,7 +1826,7 @@ proc ::inorganicBuilder::guiAddBlockParams { f } {
     grid [label $f.sidebzlabel -text " Z:"] -row $row -column 4 -sticky w
     grid [entry $f.sidebz -width 5 -textvariable ${ns}::guiState(addSideBZ) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 5 -sticky ew -padx 4
     incr row
-    
+
     grid [label $f.sidecxlabel -text "Side C X:"] -row $row -column 0 -sticky w
     grid [entry $f.sidecx -width 5 -textvariable ${ns}::guiState(addSideCX) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
     grid [label $f.sidecylabel -text " Y:"] -row $row -column 2 -sticky w
@@ -1830,7 +1834,7 @@ proc ::inorganicBuilder::guiAddBlockParams { f } {
     grid [label $f.sideczlabel -text " Z:"] -row $row -column 4 -sticky w
     grid [entry $f.sidecz -width 5 -textvariable ${ns}::guiState(addSideCZ) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 5 -sticky ew -padx 4
     incr row
-    
+
   } elseif { [string equal $type "cylinder"] } {
     grid [label $f.xoriglabel -text "Bottom center X:"] -row $row -column 0 -sticky w
     grid [entry $f.xorig -width 5 -textvariable ${ns}::guiState(addOrigX) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
@@ -1839,7 +1843,7 @@ proc ::inorganicBuilder::guiAddBlockParams { f } {
     grid [label $f.zoriglabel -text " Z:"] -row $row -column 4 -sticky w
     grid [entry $f.zorig -width 5 -textvariable ${ns}::guiState(addOrigZ) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 5 -sticky ew -padx 4
     incr row
-    
+
     grid [label $f.sideaxlabel -text "Top center X:"] -row $row -column 0 -sticky w
     grid [entry $f.sideax -width 5 -textvariable ${ns}::guiState(addSideAX) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
     grid [label $f.sideaylabel -text " Y:"] -row $row -column 2 -sticky w
@@ -1847,11 +1851,11 @@ proc ::inorganicBuilder::guiAddBlockParams { f } {
     grid [label $f.sideazlabel -text " Z:"] -row $row -column 4 -sticky w
     grid [entry $f.sideaz -width 5 -textvariable ${ns}::guiState(addSideAZ) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 5 -sticky ew -padx 4
     incr row
-    
+
     grid [label $f.radiuslabel -text "Radius:"] -row $row -column 0 -sticky w
     grid [entry $f.radius -width 5 -textvariable ${ns}::guiState(addRadius) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
     incr row
-    
+
   } elseif { [string equal $type "sphere"] } {
     grid [label $f.xoriglabel -text "Center X:"] -row $row -column 0 -sticky w
     grid [entry $f.xorig -width 5 -textvariable ${ns}::guiState(addOrigX) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
@@ -1860,11 +1864,11 @@ proc ::inorganicBuilder::guiAddBlockParams { f } {
     grid [label $f.zoriglabel -text " Z:"] -row $row -column 4 -sticky w
     grid [entry $f.zorig -width 5 -textvariable ${ns}::guiState(addOrigZ) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 5 -sticky ew -padx 4
     incr row
-    
+
     grid [label $f.radiuslabel -text "Radius:"] -row $row -column 0 -sticky w
     grid [entry $f.radius -width 5 -textvariable ${ns}::guiState(addRadius) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
     incr row
-    
+
   } elseif { [string equal $type "cone"] } {
     grid [label $f.xoriglabel -text "Base X:"] -row $row -column 0 -sticky w
     grid [entry $f.xorig -width 5 -textvariable ${ns}::guiState(addOrigX) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
@@ -1881,11 +1885,11 @@ proc ::inorganicBuilder::guiAddBlockParams { f } {
     grid [label $f.sideazlabel -text " Z:"] -row $row -column 4 -sticky w
     grid [entry $f.sideaz -width 5 -textvariable ${ns}::guiState(addSideAZ) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 5 -sticky ew -padx 4
     incr row
-    
+
     grid [label $f.radiuslabel -text "Radius:"] -row $row -column 0 -sticky w
     grid [entry $f.radius -width 5 -textvariable ${ns}::guiState(addRadius) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
     incr row
-    
+
   } elseif { [string equal $type "th"] } {
     grid [label $f.xoriglabel -text "Corner X:"] -row $row -column 0 -sticky w
     grid [entry $f.xorig -width 5 -textvariable ${ns}::guiState(addOrigX) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
@@ -1901,7 +1905,7 @@ proc ::inorganicBuilder::guiAddBlockParams { f } {
     grid [label $f.sideazlabel -text " Z:"] -row $row -column 4 -sticky w
     grid [entry $f.sideaz -width 5 -textvariable ${ns}::guiState(addSideAZ) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 5 -sticky ew -padx 4
     incr row
-    
+
     grid [label $f.sidebxlabel -text "Side B X:"] -row $row -column 0 -sticky w
     grid [entry $f.sidebx -width 5 -textvariable ${ns}::guiState(addSideBX) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
     grid [label $f.sidebylabel -text " Y:"] -row $row -column 2 -sticky w
@@ -1909,7 +1913,7 @@ proc ::inorganicBuilder::guiAddBlockParams { f } {
     grid [label $f.sidebzlabel -text " Z:"] -row $row -column 4 -sticky w
     grid [entry $f.sidebz -width 5 -textvariable ${ns}::guiState(addSideBZ) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 5 -sticky ew -padx 4
     incr row
-    
+
     grid [label $f.sidecxlabel -text "Side C X:"] -row $row -column 0 -sticky w
     grid [entry $f.sidecx -width 5 -textvariable ${ns}::guiState(addSideCX) -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
     grid [label $f.sidecylabel -text " Y:"] -row $row -column 2 -sticky w
@@ -1921,7 +1925,7 @@ proc ::inorganicBuilder::guiAddBlockParams { f } {
     grid [label $f.xoriglabel -text "VMD Selection:"] -row $row -column 0 -sticky w
     grid [entry $f.xorig -width 20 -textvariable ${ns}::guiState(addSelection)] -row $row -column 1 -columnspan 4 -sticky ew -padx 4
     incr row
-    
+
   } elseif { [string equal $type "dxfile"] } {
     grid [label $f.xoriglabel -text "DX File:"] -row $row -column 0 -sticky w
 
@@ -1929,16 +1933,16 @@ proc ::inorganicBuilder::guiAddBlockParams { f } {
     incr row    
     grid [entry $f.xorigg -width 20 -textvariable ${ns}::guiState(addDXFiletemp)] -row $row -column 1 -columnspan 4 -sticky ew -padx 4
     incr row    
-        
+
   }
 
 
   grid [label $f.menulabel -text "Include/Exclude:"] -row $row -column 0 -sticky w
   grid [menubutton $f.menub -menu $f.menub.menu -relief raised] -row $row -column 1 -columnspan 5 -sticky ew -padx 4
-    
+
   menu $f.menub.menu -tearoff no
   $f.menub config -width 20
-  
+
   $f.menub.menu add command -label Exclude -command "$f.menub configure -text Exclude; set ${ns}::guiState(addGenericInclude) 0;"
   $f.menub.menu add command -label "Include only" -command "$f.menub configure -text \"Include only\"; set ${ns}::guiState(addGenericInclude) 1;"
   if { $guiState(addGenericInclude) } {
@@ -1946,9 +1950,9 @@ proc ::inorganicBuilder::guiAddBlockParams { f } {
   } else {
     $f.menub configure -text "Exclude"
   }
-       
+
   incr row    
-  
+
   guiRepackAdd
 }
 
@@ -1963,11 +1967,11 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
   set guiState(addPEGTypes) $guiState(PEGTypes)
   set guiState(addDNATypes) $guiState(DNATypes)
   set guiState(addCUSTTypes) $guiState(CUSTTypes)
-  
+
   if { [winfo exists $f] } {
     destroy $f
   }
-  
+
   set elemlist { addPEGLength addDNALength addCustomSurfDetail addCustomStructDetail addMoleculeOrientXaddMoleculeOrientY addMoleculeOrientZ }
 
   foreach elemname $elemlist {
@@ -1982,8 +1986,8 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
   if { $guiState(addDNALength) == "" || $guiState(addDNALength) == "1" || $guiState(addDNALength) == "0" } {
     set guiState(addDNALength) 10
   }
-  
-  
+
+
   frame $f
   set row 0
   set guiState(addStructName) "Struct [expr [llength $guiState(structlist)] + [llength $guiState(selectionlist_structs)]]"
@@ -1999,7 +2003,7 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
   incr row
 
 
-  
+
   set type $guiState(addStructType)
   if { [string equal $type "peg"] } {
     grid [label $f.xoriglabel -text "PEG Chain Length:"] -row $row -column 0 -sticky w
@@ -2014,10 +2018,10 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
     grid [entry $f.selects -width 20 -textvariable ${ns}::guiState(addPEGTypes)] -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
     incr row
 
-    
+
   } elseif { [string equal $type "dna"] } {
-	  
-	  	  
+
+
     grid [label $f.xstrandlabela -text "Strand Type:"] -row $row -column 0 -sticky w
     grid [label $f.xstrandlabel -text ""] -row $row -column 2 -sticky w
     grid [radiobutton $f.xstrandlabel.strand1 -variable ${ns}::guiState(addDNAStrand) -value "1" -text "Single" -anchor e] -row $row -column 3 -sticky ew -padx 4
@@ -2039,16 +2043,16 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
     grid [entry $f.selects -width 20 -textvariable ${ns}::guiState(addDNATypes)] -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
     incr row
 
-    
+
   } elseif { [string equal $type "custom"] } {
 
     set guiState(addCUSTTypes) $guiState(addSurfTypes)
-	  
+
     grid [label $f.pdblabel -text "PDB: "] -row $row -column 0 -sticky w
     grid [entry $f.pdbpath -width 30 -textvariable ${ns}::guiState($pdbkey_struct)] -row $row -column 1 -sticky ew
     grid [button $f.pdbbutton -text "Browse" -command "set tempfile \[tk_getOpenFile -defaultextension .pdb \]; if \{!\[string equal \$tempfile \"\"\]\} \{ set ${ns}::guiState($pdbkey_struct) \$tempfile \};" ] -row $row -column 2 -sticky e
     incr row
-    
+
     grid [label $f.topolabel -text "Topology/Parameter CGenFF File: "] -row $row -column 0 -sticky w
     grid [entry $f.topopath -width 30 -textvariable ${ns}::guiState($topokey_struct)] -row $row -column 1 -sticky ew
     grid [button $f.topobutton -text "Browse" -command "set tempfile \[tk_getOpenFile -defaultextension .str \]; if \{!\[string equal \$tempfile \"\"\]\} \{ set ${ns}::guiState($topokey_struct) \$tempfile \};" ] -row $row -column 2 -sticky e
@@ -2067,22 +2071,22 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
     grid [label $f.selectsclabel -text "Available Atom Type Selections (i.e. AU H C):"] -row $row -column 0 -sticky w
     grid [entry $f.selectsc -width 20 -textvariable ${ns}::guiState(addCUSTTypes)] -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
     incr row
-    
+
     grid [label $f.cxoriglabel -text "Structure's Atom-to-Bond (Atom Number):"] -row $row -column 0 -sticky w
     grid [entry $f.cxorig -width 20 -textvariable ${ns}::guiState(addCustomStructDetail)] -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
     incr row
-    
+
     grid [label $f.cxoriglabel2 -text "Bond Spring Constant:"] -row $row -column 0 -sticky w
     grid [entry $f.cxorig2 -width 20 -textvariable ${ns}::guiState(addCustomK)] -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
     incr row
-    
+
     grid [label $f.cxoriglabel3 -text "Bond Equilibrium Distance:"] -row $row -column 0 -sticky w
     grid [entry $f.cxorig3 -width 20 -textvariable ${ns}::guiState(addCustomX)] -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
     incr row
-    
+
   }
-    
-  
+
+
   guiRepackStructAdd
 }
 
@@ -2115,7 +2119,7 @@ proc ::inorganicBuilder::guiRepackRunNAMD { } {
 
 proc ::inorganicBuilder::guiAddBondWin {} {
   variable guiState
-  
+
   if { [winfo exists .ibaddbond] } {
     destroy .ibaddbond
   }
@@ -2150,7 +2154,7 @@ proc ::inorganicBuilder::guiAddBondWin {} {
   set typelist [lsort -unique [$select get type] ]
   $select delete
   mol delete $molid
-  
+
   set row 0
   grid [label $aw.atom1label -text "Atom 1:" ] -row $row -column 0 -sticky w
   grid [menubutton $aw.menub1 -menu $aw.menub1.menu -relief raised] -row $row -column 1 -sticky ew -padx 4 -ipady 4
@@ -2159,11 +2163,11 @@ proc ::inorganicBuilder::guiAddBondWin {} {
   grid [label $aw.atom2label -text "Atom 2:" ] -row $row -column 0 -sticky w
   grid [menubutton $aw.menub2 -menu $aw.menub2.menu -relief raised] -row $row -column 1 -sticky ew -padx 4 -ipady 4
   incr row
-  
+
   grid [label $aw.cutofflabel -text "Bond length:" ] -row $row -column 0 -sticky w
   grid [entry $aw.cutoff -width 5 -textvariable ${ns}::guiState(bondcutoff)  -validate all -vcmd "${ns}::guiRequireDouble %W %P %V" ] -row $row -column 1 -sticky ew -padx 4
   incr row
-    
+
   grid [button $aw.add -text Add -command "${ns}::guiStoreBond; destroy $aw"] -row $row -column 0 -padx 4
   grid [button $aw.cancel -text Cancel -command "destroy $aw"] -row $row -column 1 -padx 4
   menu $aw.menub1.menu -tearoff no
@@ -2175,7 +2179,7 @@ proc ::inorganicBuilder::guiAddBondWin {} {
   set ntypes [llength $typelist]
   for {set i 0} { $i < $ntypes } { incr i } {
     set thistype [lindex $typelist $i]
-    
+
     $aw.menub1.menu add command -label $thistype -command "$aw.menub1 configure -text $thistype; set ${ns}::guiState(bondAtom1) $thistype"
     $aw.menub2.menu add command -label $thistype -command "$aw.menub2 configure -text $thistype; set ${ns}::guiState(bondAtom2) $thistype"
   }
@@ -2188,13 +2192,13 @@ proc ::inorganicBuilder::guiAddBondWin {} {
 
 proc ::inorganicBuilder::guiCreateBox { } {
   variable guiState
-  
+
   if { ![info exists guiState(material)] } {
     set matlist [lsort -index 1 [ getMaterialNames ]]
     set guiState(material) [lindex $matlist 0 0 ]
   }
   set material $guiState(material)
-  
+
   set ox 0
   if { [info exists guiState(origX) ]
        && [string is double -strict $guiState(origX)] } {
@@ -2210,7 +2214,7 @@ proc ::inorganicBuilder::guiCreateBox { } {
        && [string is double -strict $guiState(origZ)] } {
     set oz $guiState(origZ)
   }
-  
+
   set o [list $ox $oy $oz]
 
   if { $guiState(hexBox) } {
@@ -2264,7 +2268,7 @@ proc ::inorganicBuilder::guiCreateBox { } {
   set guiState(boxOY) [lindex $basis 3 1]
   set guiState(boxOZ) [lindex $basis 3 2]
   set guiState(bondCutoff) [::inorganicBuilder::getBondCutoff $guiState(currentBox)]
-                              
+
   set vertlist [getVertices $guiState(currentBox)]
   foreach { x y z } [lindex $vertlist 0] {}
   set guiState(boxXmin) $x
@@ -2373,7 +2377,7 @@ proc ::inorganicBuilder::guiStoreStruct { } {
   set btype $guiState(addStructType)
   set bname $guiState(addStructName)
   set useddense $guiState(dens_printer)
-  
+
   if {[string equal $btype "peg"] } {
     set params [list $guiState(addPEGLength) "placeholder" $useddense]
     set mystruct [ newStruct $btype $bname $params]
@@ -2391,7 +2395,7 @@ proc ::inorganicBuilder::guiStoreStruct { } {
 
   destroy $guiState(awframe)
   guiBuildSurfaceStructsWin
- 
+
   return
 }
 
@@ -2465,11 +2469,11 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
        if { ![string equal $guiState(setVMDSelSurf) ""] } {
 		   set vsurf_atomsel [atomselect $molid $guiState(setVMDSelSurf)]
            set usurf_atomsel [atomselect $molid [concat "index" $guiState(surfacearea)"and beta == 0"]]
-           
+
            set vsurface_area [ $vsurf_atomsel get index ]
            set usurface_area [ $usurf_atomsel get index ]
            set dsurface_area [ intersect_list $vsurface_area $usurface_area ]
-           
+
            $vsurf_atomsel delete
            $usurf_atomsel delete
 
@@ -2501,13 +2505,13 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
            incr dsa_index 1
 	   }
 	   $dsa_sel delete
-	  
+
 
   } elseif { $guiState(addStructType) == "peg" } {
-     
+
        source [file normalize [file join $homePath "mkPEG" "mkPEG.tcl"]]
        set pegname PEG$guiState(addPEGLength)
-       
+
        mkPEG $guiState(addPEGLength) $pegname $homePath
        set guiState(pdbfile_struct) $pegname.pdb
        set guiState(psffile_struct) $pegname.psf
@@ -2516,11 +2520,11 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
        if { ![string equal $guiState(setVMDSelSurf) ""] } {
 		   set vsurf_atomsel [atomselect $molid $guiState(setVMDSelSurf)]
            set usurf_atomsel [atomselect $molid [concat "index" $guiState(surfacearea)"and beta == 0"]]
-           
+
            set vsurface_area [ $vsurf_atomsel get index ]
            set usurface_area [ $usurf_atomsel get index ]
            set dsurface_area [ intersect_list $vsurface_area $usurface_area ]
-           
+
            $vsurf_atomsel delete
            $usurf_atomsel delete
 
@@ -2543,7 +2547,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
        set dsa_sel [atomselect $molid [concat "index" $dsurface_area]]
        foreach dsaname [$dsa_sel get name] {
            set dsa_name [lindex [split $dsaname {[1,2,3,4,5,6,7,8,9]}] 0]
- 
+
            if { [intersect_list $guiState(addPEGTypes) $dsa_name] == "" } {
              set dsurface_area [lreplace $dsurface_area $dsa_index $dsa_index]
              incr dsa_index -1
@@ -2559,7 +2563,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
        set guiState(pdbfile_struct) [file normalize $guiState(pdbfile_struct)]
        set pegname CUST$guiState(addCustomStructDetail)
        mod_pdb $guiState(pdbfile_struct) $guiState(topofile_struct) $pegname
-       
+
        set guiState(pdbfile_struct) $pegname.pdb
        set guiState(psffile_struct) $pegname.psf
 
@@ -2567,11 +2571,11 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
        if { ![string equal $guiState(setVMDSelSurf) ""] } {
 		   set vsurf_atomsel [atomselect $molid $guiState(setVMDSelSurf)]
            set usurf_atomsel [atomselect $molid [concat "index" $guiState(surfacearea)"and beta == 0"]]
-           
+
            set vsurface_area [ $vsurf_atomsel get index ]
            set usurface_area [ $usurf_atomsel get index ]
            set dsurface_area [ intersect_list $vsurface_area $usurface_area ]
-           
+
            $vsurf_atomsel delete
            $usurf_atomsel delete
 
@@ -2594,7 +2598,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
        set dsa_sel [atomselect $molid [concat "index" $dsurface_area]]
        foreach dsaname [$dsa_sel get name] {
            set dsa_name [lindex [split $dsaname {[1,2,3,4,5,6,7,8,9]}] 0]
- 
+
            if { [intersect_list $guiState(addCUSTTypes) $dsa_name] == "" } {
              set dsurface_area [lreplace $dsurface_area $dsa_index $dsa_index]
              incr dsa_index -1
@@ -2615,7 +2619,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
          set guiState(dens_printer) ""
          return;
        }
-       
+
 
        set ssurface_area [ShuffleList $dsurface_area]         
        set ssurface_area [lindex $ssurface_area 0]
@@ -2634,7 +2638,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
          set guiState(dens_printer) ""
          return;
        }
-       
+
 
        if { [string equal "$mode" "1"] } {
          if { $guiState(previous_densearea) != "" } {
@@ -2659,7 +2663,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
     }
 
 
-  
+
   if {![info exists guiState(pdbfile_struct)] 
       || [string equal $guiState(pdbfile_struct) ""] } {
     tk_messageBox -icon error -message "You must at least specify a PDB file to add." -type ok  
@@ -2679,7 +2683,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
 	    set guiState(setPreviewMode) $structmolid
 	  }
 
-  
+
   #align selected atoms
   set molid $guiState(currentMol)
 
@@ -2697,12 +2701,12 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
 # *** ADDED ***
 proc ::inorganicBuilder::DensityPDBGen { start_atom } {
   variable guiState
-  
+
   set molid $guiState(currentMol)
   set placement_index {}
   set usable_surface $guiState(temp_surfacearea)
 
- 
+
 
   # fairly quick shuffle, so do it a couple extra times for better randomization
   set usable_surface [ShuffleList $usable_surface]
@@ -2731,7 +2735,7 @@ proc ::inorganicBuilder::DensityPDBGen { start_atom } {
 		}
 
   }
-  
+
   set read_surface_area [atomselect $molid all]
   set surfacearea_nm2 [expr [measure sasa 1.44 $read_surface_area] * 0.01]
   $read_surface_area delete
@@ -2754,7 +2758,7 @@ proc ::inorganicBuilder::DensityPDBGen { start_atom } {
 				}
 			}
 		} 
-		
+
         $rad_sel delete
 
       # set next_usable_start $usable_surface
@@ -2771,11 +2775,11 @@ proc ::inorganicBuilder::DensityPDBGen { start_atom } {
 
           unset spacer_usable_surface($start_atom)			
           lappend placement_index $start_atom
-          
+
   		} else { set start_atom "" }
 
       } else {
-      
+
       # set next_usable_start $usable_surface
         if { $usable_surface != "" } {
           set start_atom [lindex $usable_surface 0]
@@ -2789,14 +2793,14 @@ proc ::inorganicBuilder::DensityPDBGen { start_atom } {
   set guiState(densearea) $placement_index  
   set catoms [llength $guiState(densearea)]
   set rdensity [expr $catoms / $guiState(snm2)]
-  
+
   if {$imcd != [llength $guiState(densearea)]} {
-		
+
 		set guiState(answer) [tk_messageBox -icon info -message "Due to the constraints set only $catoms/$imcd structures can be placed, giving a reduced density of $rdensity. Would you like to continue?" -type yesno]
   } else {
 		set guiState(answer) [tk_messageBox -icon info -message "$catoms/$imcd structures can be placed, giving a density of $rdensity. Would you like to continue?" -type yesno]
   }
-  
+
 
   array unset spacer_usable_surface
   return
@@ -2811,7 +2815,7 @@ proc ::inorganicBuilder::AlignDense { } {
   variable surfingPath
 
   mol delete $guiState(linemols)
-  
+
   set molid $guiState(currentMol)
   set densearea $guiState(densearea)
   set structnames {}
@@ -2831,7 +2835,7 @@ proc ::inorganicBuilder::AlignDense { } {
       mol on $moll
     }
   }
-  
+
   # turn off the representations of the atoms too
   for {set i 0} {$i < 2} {incr i} {
     mol showrep $surfacemol $i off
@@ -2890,7 +2894,7 @@ proc ::inorganicBuilder::AlignDense { } {
   set exty_n 0
   set extz_p 0
   set extz_n 0
-  
+
   array unset vertclouds
   array set vertclouds {}
   set vertcloud_keys {}
@@ -2907,14 +2911,14 @@ proc ::inorganicBuilder::AlignDense { } {
       gets $stl_in data_input3
       set check_unique 0
     }
-  
+
 
 
     if {$check_unique == 0} {
       set vtx1 "[lindex $data_input 1] [lindex $data_input 2] [lindex $data_input 3]"
       set vtx2 "[lindex $data_input2 1] [lindex $data_input2 2] [lindex $data_input2 3]"
       set vtx3 "[lindex $data_input3 1] [lindex $data_input3 2] [lindex $data_input3 3]"     
-      
+
 # compute normal and add to normals list
       set cvtx1 [expr ([lindex $vtx1 0] + [lindex $vtx2 0] + [lindex $vtx3 0])/double(3) ]
       set cvtx2 [expr ([lindex $vtx1 1] + [lindex $vtx2 1] + [lindex $vtx3 1])/double(3) ]
@@ -2922,9 +2926,9 @@ proc ::inorganicBuilder::AlignDense { } {
 
       set data_line "$cvtx1 $cvtx2 $cvtx3 {$vtx1} {$vtx2} {$vtx3}"
       lappend vertices_normals $data_line
-      
+
       if { $avg_verts == 50 } {
-		  
+
 	# save the vert normals + a key
         set sstring "${extx_p}_${extx_n}_${exty_p}_${exty_n}_${extz_p}_${extz_n}"
         set vertclouds($sstring) $vertices_normals
@@ -2937,8 +2941,8 @@ proc ::inorganicBuilder::AlignDense { } {
         set extz_p 0
         set extz_n 0
         set vertices_normals {}
-        
-        
+
+
       } 
 # Somewhat optimized choice of 50 vertice chunks, but this can be optimized further with a definitive test case!
       if { $avg_verts != 50 } {
@@ -2948,7 +2952,7 @@ proc ::inorganicBuilder::AlignDense { } {
         } elseif { $cvtx1 <= $extx_n } {       
           set extx_n $cvtx1
         }
-        
+
         if { $cvtx2 >= $exty_p } {
           set exty_p $cvtx2
         } elseif { $cvtx2 <= $exty_n } {       
@@ -2974,7 +2978,7 @@ proc ::inorganicBuilder::AlignDense { } {
 
 # iffy sort ahoy, not sure if this does anything
   set vertcloud_keys [lsort $vertcloud_keys]
-  
+
   close $stl_in
 
 
@@ -3012,7 +3016,7 @@ proc ::inorganicBuilder::AlignDense { } {
   set catoms [llength $densearea]
   array unset vecnormas
   array set vecnormas {}		 
-  
+
   foreach atom $densearea {
 
     puts "$countb / $catoms placements made. Last placement took: $tdiff microseconds"
@@ -3034,7 +3038,7 @@ proc ::inorganicBuilder::AlignDense { } {
     }
 
   # set first symbols
-      
+
     set j1z [format %c [lindex $string_c_list $guiState(structureZ)]]
 
   # set second symbols
@@ -3089,7 +3093,7 @@ proc ::inorganicBuilder::AlignDense { } {
 
   # Get the segment name.
       set segNaming $pegseg
-    
+
   # Generate the new pdb line.
       set temp0 [string range $line 0 71]
       set temp1 [string range $line 76 end]
@@ -3148,7 +3152,7 @@ proc ::inorganicBuilder::AlignDense { } {
       } else {
         incr n
 
-        
+
         set segNameNew $pegseg
         set temp0 [string range $line 0 8]
         set temp1 [string range $line 13 end]
@@ -3163,13 +3167,13 @@ proc ::inorganicBuilder::AlignDense { } {
     file rename -force ${pegnam}_mod.psf ${pegnam}.psf
 
 ###########
-	  
+
     set structmolid [mol new $current_pdbfile_struct]
     mol addfile ${pegnam}.psf $structmolid
 #  set guiState(structMol) $structmolid
-   
+
     set surf_indexed [atomselect $molid "index $atom"]
-  
+
 	# determine and save the anchors for each of the attachments
 	# DNA
     if { $guiState(addStructType) == "dna" } {
@@ -3210,12 +3214,12 @@ proc ::inorganicBuilder::AlignDense { } {
     set surf_num [$surf_full num]
 
     incr atoms_red
-    
+
     set M [measure fit $struct_indexed $surf_indexed]
 
     $struct_full move $M
 
-  
+
   #orientation around selected atom point
     set anchor_coord [lindex [$struct_indexed get {x y z}] 0]
 
@@ -3224,9 +3228,9 @@ proc ::inorganicBuilder::AlignDense { } {
     set atom_y [lindex $anchor_coord 1]
     set atom_z [lindex $anchor_coord 2]
     set last_diff 100000000000000000000000
-    
-    
-    
+
+
+
   # find the closest cloud and then set vertices_normals to that list
     set chosen_key {}
     foreach ckey $vertcloud_keys {
@@ -3236,7 +3240,7 @@ proc ::inorganicBuilder::AlignDense { } {
         if { ($atom_x <= $cvexp && $atom_x >= $cvexn) && ($atom_y <= $cveyp && $atom_y >= $cveyn) && ($atom_z <= $cvezp && $atom_z >= $cvezn) } {
           lappend chosen_key $ckey
         }
-		
+
     }
 
     set vertices_normals {}
@@ -3252,12 +3256,12 @@ proc ::inorganicBuilder::AlignDense { } {
       set vertex_x [lindex $vertex_normal 0]
       set vertex_y [lindex $vertex_normal 1]
       set vertex_z [lindex $vertex_normal 2]
-      
+
       set vtx1 [lindex $vertex_normal 3]
       set vtx2 [lindex $vertex_normal 4]
       set vtx3 [lindex $vertex_normal 5]
-      
-      
+
+
 
       set string_check [string is alpha $vertex_x]
       set skipcheck 0
@@ -3271,9 +3275,9 @@ proc ::inorganicBuilder::AlignDense { } {
       if { ($difx >= $vol_radius) || ($dify >= $vol_radius) || ($difz >= $vol_radius) } {
         set skipcheck 1
       } else {
-		  
+
         set vertex_string "${vertex_x}_${vertex_y}_${vertex_z}"
-       
+
         if { [info exists vecnormas($vertex_string)] } {
 			lassign $vecnormas($vertex_string) normal_x normal_y normal_z
         } else {
@@ -3291,7 +3295,7 @@ proc ::inorganicBuilder::AlignDense { } {
 					set vc [vecscale -1 $vc]
 				}
 			}
-			
+
             set vecnorma [vecnorm $vc]
             set normal_x [lindex $vecnorma 0]
             set normal_y [lindex $vecnorma 1]
@@ -3318,11 +3322,11 @@ proc ::inorganicBuilder::AlignDense { } {
         set anglez 0
       }
 
-      
+
       if { ($string_check != 1) && ($skipcheck != 1) } {
-      
+
         set curr_diff [expr sqrt($difx + $dify + $difz) ]
-      
+
 # NOTE: assuming for now PEG is aligned on a "clean" 1,0,0 direction
 
         if { $curr_diff < $last_diff } {
@@ -3361,7 +3365,7 @@ proc ::inorganicBuilder::AlignDense { } {
       }
     }
 
-    
+
   # rotate
     if { $guiState(addStructType) == "peg" } {
       $struct_full move [trans center $anchor_coord axis y 180]
@@ -3375,28 +3379,28 @@ proc ::inorganicBuilder::AlignDense { } {
     lappend structnames $fullglobname
     incr guiState(filename_index_glob) 1
     resetpsf
-    
+
     $struct_full writepdb $fullglobname.pdb
     $struct_full writepsf $fullglobname.psf
 
     mol delete $structmolid
     file delete -force ${pegnam}.pdb
     file delete -force ${pegnam}.psf
-    
+
     set t2 [clock microseconds]
-    
+
     $surf_indexed delete
     $surf_full delete
     $struct_indexed delete
     $struct_full delete
   }
-  
+
 
 
   # Part 2.5, merge files
 
   resetpsf
-  
+
 
   foreach structurename $structnames {
 
@@ -3415,7 +3419,7 @@ proc ::inorganicBuilder::AlignDense { } {
   set guiState(CustStructLength) [llength [$GL get index]]
   mol delete $getLength
   $GL delete
- 
+
   set guiState(pdbfile_struct) [lindex $structnames 0]_all.pdb
   set guiState(psffile_struct) [lindex $structnames 0]_all.psf
   lappend guiState(all_struct) [lindex $structnames 0]
@@ -3438,7 +3442,7 @@ proc ::inorganicBuilder::guiRemoveBlock { listid } {
   mol delete $popval
   set guiState(dxlist) [lreplace $guiState(dxlist) $deletelist $deletelist]
   set guiState(addDXFile) [lreplace $guiState(addDXFile) $deletelist $deletelist]
-  
+
   set blocklistlength [llength $guiState(blocklist)]
   foreach bnum $deletelist {
     if { $bnum >= $blocklistlength } {
@@ -3478,7 +3482,7 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
   set moldel_end 0
 
   foreach built_structure $guiState(structlist) {	
-	  
+
    set write1 [lindex $built_structure 0]
    set write2 [llength [lindex [lindex $built_structure 2] 2]]
    set pre_mol_count $molecules_counted
@@ -3492,7 +3496,7 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
    incr structs_counted
   }
 
-  
+
   if {[lindex [lindex $guiState(structlist) $deletelist] 0] == "dna"} {
 
     set guiState(oau_list) [lreplace $guiState(oau_list) $moldel_start $moldel_end]
@@ -3500,11 +3504,11 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
   } elseif {[lindex [lindex $guiState(structlist) $deletelist] 0] == "peg"} {
 
     set guiState(cau_list) [lreplace $guiState(cau_list) $moldel_start $moldel_end]
-    
+
   } elseif {[lindex [lindex $guiState(structlist) $deletelist] 0] == "custom"} {
 
     set guiState(ancau_list) [lreplace $guiState(ancau_list) $moldel_start $moldel_end]
-    
+
   }
 
 # remove the struct from the structlist  
@@ -3512,8 +3516,8 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
   set popval [lindex $guiState(buildPreviewMode) $deletelist]
   mol delete $popval
   set guiState(buildPreviewMode) [lreplace $guiState(buildPreviewMode) $deletelist $deletelist]
-  
-  
+
+
   set structlistlength [llength $guiState(structlist)]
   foreach bnum $deletelist {
     if { $bnum >= $structlistlength } {
@@ -3552,7 +3556,7 @@ proc ::inorganicBuilder::guiRemoveBond { listid } {
   variable guiState
 #  puts "InorganicBuilder) Removing bond"
   set deletelist [lsort -integer -decreasing [$listid curselection]]
-  
+
   foreach bnum $deletelist {
     set blist $guiState(bondlist)
     set myblock [lindex $blist $bnum]
@@ -3571,11 +3575,11 @@ proc ::inorganicBuilder::guiStoreMol { psffile pdbfile } {
       guiBuildSurfaceStructsWin
     }
   }
-  
+
   set mymol $guiState(currentMol)
   set filetypes [lindex [molinfo $mymol get filetype] 0]
   set filenames [lindex [molinfo $mymol get filename] 0]
-  
+
   set indx [lsearch $filetypes "psf"]
   if { $indx != -1 } {
     set guiState($psffile) [lindex $filenames $indx]
@@ -3593,9 +3597,9 @@ proc ::inorganicBuilder::guiStoreMol { psffile pdbfile } {
 proc ::inorganicBuilder::guiUpdateMaterial { shortname } {
   variable guiState
   variable w
-  
+
   set oldState $guiState(hexBox)
-  
+
   set guiState(material) $shortname
   set guiState(fname) $shortname
 
@@ -3608,7 +3612,7 @@ proc ::inorganicBuilder::guiUpdateMaterial { shortname } {
   if { [winfo exists $w.body3.savepar] } {
     $w.body3.savepar configure -state $parstate
   }
-  
+
   if { ![getMaterialHexSymmetry $shortname] } {
     set guiState(hexBox) 0
     set checkstate disabled
@@ -3628,7 +3632,7 @@ proc ::inorganicBuilder::guiUpdateMaterial { shortname } {
 proc ::inorganicBuilder::guiBuildStructure { } {
   variable guiState
 #  puts "InorganicBuilder) Building structure"
-  
+
   set blist [concat $guiState(blocklist) $guiState(selectionlist)]
   set fname $guiState(fname)
   foreach block $blist {
@@ -3644,7 +3648,7 @@ proc ::inorganicBuilder::guiBuildStructure { } {
     }
   }
   tk_messageBox -icon info -message "Model building complete." -type ok  
-  
+
   return
 }
 
@@ -3654,7 +3658,7 @@ proc ::inorganicBuilder::getSurfaceAtoms { } {
 
   variable guiState
   set ns [namespace current]
-  
+
   display update on  
 
   if { [string equal "$guiState(getSurfacePrevID)" "-1"] } {
@@ -3665,7 +3669,7 @@ proc ::inorganicBuilder::getSurfaceAtoms { } {
     set molid [mol new]
     set guiState(getSurfacePrevID) $molid
   }
-    
+
   if { ![string equal $guiState(psffileA) ""] } {
     mol addfile $guiState(psffileA) type psf autobonds off waitfor all $molid
     mol rename $molid "GetSurfaceAtoms"
@@ -3685,14 +3689,14 @@ proc ::inorganicBuilder::getSurfaceAtoms { } {
   }
   set allsel [atomselect $molid "name $STypeList"] 
 
-  
+
   set aminmax [measure minmax $allsel]
   set rs [measure surface $allsel 1.5 2.88 1.44 ] 
   $allsel delete
 
 # Graphically display a highlighted region where Surface Area atoms have been found.
   if {$rs == ""} { return }
-  
+
   set surface_area [atomselect $molid "(index $rs) and (name $STypeList)"]
   set guiState(surfacearea) {}
   set guiState(surfacearea) [concat $guiState(surfacearea) [$surface_area get index]]
@@ -3761,7 +3765,7 @@ proc ::inorganicBuilder::getSurfaceAtoms { } {
 	  ${ns}::structBoxMolecule 
   }
 
- 
+
   guiBuildSurfaceStructsWin
   return
 }
@@ -3771,7 +3775,7 @@ proc ::inorganicBuilder::getSurfaceAtomTypes { } {
 
   variable guiState
   set ns [namespace current]
-  
+
   if { [string equal "$guiState(getSurfacePrevID)" "-1"] } {
     set molid [mol new]
     set guiState(getSurfacePrevID) $molid
@@ -3780,7 +3784,7 @@ proc ::inorganicBuilder::getSurfaceAtomTypes { } {
     set molid [mol new]
     set guiState(getSurfacePrevID) $molid
   }
-    
+
   if { ![string equal $guiState(psffileA) ""] } {
     mol addfile $guiState(psffileA) type psf autobonds off filebonds off waitfor all $molid
     mol rename $molid "GetSurfaceAtomTypes"
@@ -3799,7 +3803,7 @@ proc ::inorganicBuilder::getSurfaceAtomTypes { } {
 
 # Graphically display a highlighted region where Surface Area atoms have been found.
   if {$rs == ""} { return }
-  
+
   set surface_area [atomselect $molid "index $rs"]
 
   set sa_names {}
@@ -3826,12 +3830,12 @@ proc ::inorganicBuilder::guiBuildStructs {} {
   set structmolid $guiState(structMol)
 
   ::inorganicBuilder::buildStructs $molid
-  
+
 
   tk_messageBox -icon info -message "System built." -type ok  
   set guiState(systemBuilt) 1
   file delete -force "tmp_reindex.pdb"
-  
+
   # Save the newly built file into the temporary variables for AutoIonize and Solvate
   # This feature might not do anything on Windows systems. (User will have to enter the name)
   file copy -force "$guiState(structedFile).psf" "tmpA.psf"
@@ -3841,9 +3845,9 @@ proc ::inorganicBuilder::guiBuildStructs {} {
   file delete -force $guiState(structedFile).pdb
   file rename -force "tmpA.psf" "$guiState(structedFile).psf"
   file rename -force "tmpA.pdb" "$guiState(structedFile).pdb"
-  
+
   mol delete top
-  
+
 }
 
 
@@ -3861,7 +3865,7 @@ proc ::inorganicBuilder::guiRunNAMD {} {
   set zmin [expr -1*abs($guiState(boxZ2) / 2)]
   set zmax [expr abs($guiState(boxZ2) / 2)]
 
-  
+
   if { [winfo exists .ibrunnamd] } {
     destroy .ibrunnamd
   }
@@ -3875,10 +3879,10 @@ proc ::inorganicBuilder::guiRunNAMD {} {
   set row 0
 
   incr row
- 
+
   set row [guiDrawNAMDFrame $ns $aw.body $row]
-  
-  
+
+
   labelframe $aw.buttons0 -text "Solvate Options" -padx 2 -pady 4
 
   label $aw.buttons0.neutlabela -text "Neutralize and set "
@@ -3886,14 +3890,14 @@ proc ::inorganicBuilder::guiRunNAMD {} {
   label $aw.buttons0.neutlabelb -text "concentration to "
   entry $aw.buttons0.neutentry -width 8 -textvariable ${ns}::guiState(saltConc)
   label $aw.buttons0.neutlabel2 -text "mol/L"
-  
+
   grid $aw.buttons0.neutlabela -row $row -column 0 -columnspan 3 -sticky ew
   grid $aw.buttons0.saltname -row $row -column 3 -columnspan 1 -sticky ew  
   grid $aw.buttons0.neutlabelb -row $row -column 4 -columnspan 6 -sticky w
   grid $aw.buttons0.neutentry -row $row -column 10 -columnspan 2 -sticky w
   grid $aw.buttons0.neutlabel2 -row $row -column 12 -columnspan 2 -sticky w
 
-  
+
 
   incr row
   if { $guiState(StructHexBox) } {
@@ -3930,18 +3934,18 @@ proc ::inorganicBuilder::guiRunNAMD {} {
   grid [entry $aw.buttons.msval -width 5 -textvariable ${ns}::guiState(setNAMDminimStep) -validate focusout -vcmd "${ns}::guiRequireStepSize %W %P %V" -invcmd "${ns}::guiStepSizeErr %W" ] -row $row -column 0 -sticky e -padx 4
 
 
-    
+
   grid [label $aw.buttons.ss -text "Simulate Steps: "] -row $row -column 1 -sticky w
   grid [entry $aw.buttons.ssval -width 6 -textvariable ${ns}::guiState(setNAMDsimStep) -validate focusout -vcmd "${ns}::guiRequireStepSize %W %P %V" -invcmd "${ns}::guiStepSizeErr %W" ] -row $row -column 1 -sticky e -padx 4
   incr row
 
-  
+
   grid [button $aw.buttons.add -text "Create Minimization" -command "${ns}::RunNAMD 0; destroy $aw"] -row $row -column 0
   grid [button $aw.buttons.con -text "Continue Simulation" -command "${ns}::RunNAMD 1; destroy $aw"] -row $row -column 1
   grid [button $aw.buttons.cancel -text Cancel -command "destroy $aw"] -row $row -column 2
 
   guiRepackRunNAMD  
-  
+
 }
 
 # *** ADDED ***
@@ -4008,7 +4012,7 @@ proc ::inorganicBuilder::RunNAMD { type } {
 
 # mkNAMD.tcl -args psf pdb outDir parDirpre dimFactor namdFile Temperature Dielectric Damping MinimizationSteps SimulationSteps
   source [file normalize [file join $homePath "mkNAMD" "mkNAMD.tcl"]]
-  
+
 #  mkNAMD $guiState(structedFile).psf $guiState(structedFile).pdb $outDir $parDirpre
 # 			$dimFactor $homePath $sim_file_name $temperature $dielectric $damping
 #			$stepstoMinimize $stepstoSimulate $OnOffIMD $PeriodicVecInfo
@@ -4025,7 +4029,7 @@ proc ::inorganicBuilder::RunNAMD { type } {
   set parDir [file normalize [file join $namdpackpath topology]]
   set pdbpath [file normalize [file join $namdpackpath $guiState(structedFile).pdb]]
   set psfpath [file normalize [file join $namdpackpath $guiState(structedFile).psf]]
-  
+
   if {[file exists $namdpackpath]} {
     if {[file exists [lindex [glob -directory $namdpackpath -nocomplain $guiState(simFile).*] 0] ] && ($type == 0) } {
       tk_messageBox -icon error -message "The simulation file $guiState(simFile) already exists, cannot create a new minimization file using this filename." -type ok
@@ -4058,7 +4062,7 @@ proc ::inorganicBuilder::RunNAMD { type } {
 	  }
   }
 
-  
+
 }
 
 
@@ -4074,7 +4078,7 @@ proc ::inorganicBuilder::clearStructs {} {
   if { ![string equal "$guiState(getSurfacePrevID)" "-1"] } {
     mol delete $guiState(getSurfacePrevID)
   }
-  
+
   resetpsf
   puts "Temporary data cleared from Inorganic Builder: Build Surface Structures"
   set guiState(surfacearea) {}
@@ -4150,7 +4154,7 @@ proc ::inorganicBuilder::clearStructs {} {
   set guiState(cation) "SOD"
   set guiState(anion) "CLA"
   set guiState(saltConc) "0.15"
-    
+
 }
 
 
@@ -4172,9 +4176,9 @@ proc ::inorganicBuilder::guiClearDevice { } {
 
 proc ::inorganicBuilder::guiBuildBonds { } {
   variable guiState
-  
+
   set periodicIn [list $guiState(periodicA) $guiState(periodicB) $guiState(periodicC)]
-  
+
   if { [string equal $guiState(addBondsHow) "addperiodictovmd"] } {
     guiBuildPeriodicBonds vmd $periodicIn
   } elseif { [string equal $guiState(addBondsHow) "addperiodictofile"] } {
@@ -4185,17 +4189,17 @@ proc ::inorganicBuilder::guiBuildBonds { } {
     guiBuildSpecifiedBonds none $periodicIn
   }
   tk_messageBox -icon info -message "Bond building complete." -type ok  
-  
+
 }
 
 proc ::inorganicBuilder::guiBuildPeriodicBonds { addhow periodicIn } {
   variable guiState
-  
+
   set orig [list $guiState(origX) $guiState(origY) $guiState(origZ)]
   set a [list $guiState(boxAX) $guiState(boxAY) $guiState(boxAZ)]
   set b [list $guiState(boxBX) $guiState(boxBY) $guiState(boxBZ)]
   set c [list $guiState(boxCX) $guiState(boxCY) $guiState(boxCZ)]
-  
+
   if { $guiState(hexBox) } {
     set mybox [ ::inorganicBuilder::defineMaterialHexagonalBox $orig [list $a $b $c] $guiState(bondCutoff) ]
   } else {
@@ -4229,12 +4233,12 @@ proc ::inorganicBuilder::guiBuildPeriodicBonds { addhow periodicIn } {
     mol bondsrecalc $molid
   }
   set guiState(currentMol) $molid
-  
+
   ::inorganicBuilder::buildBonds $guiState(currentBox) $guiState(relabelBonds) $periodicIn $guiState(currentMol)
-  
+
   set fname $guiState(fname)
   set mymol [atomselect $guiState(currentMol) all]
-  
+
   if { $guiState(buildAngles) } {
     set fname0 ${fname}-prebond
     $mymol writepsf $fname0.psf
@@ -4252,7 +4256,7 @@ proc ::inorganicBuilder::guiBuildPeriodicBonds { addhow periodicIn } {
   }
   $mymol delete
   mol delete $guiState(currentMol)
-  
+
   return
 }
 
@@ -4276,14 +4280,14 @@ proc ::inorganicBuilder::guiFillMolMenuInt { molMenuName currentMol filetypes } 
   #For now, shamelessly ripped off from the NAMDEnergy plugin
   #which in turn ripped it off from the PME plugin
   variable guiState
-  
+
 #  puts "InorganicBuilder) Processing $molMenuName $guiState($molMenuName)"
   set name $guiState($molMenuName)
   if { ![winfo exists $name] } {
     return
   }
 #  puts "InorganicBuilder) name parent is [winfo parent $name]"
-  
+
   if { [$name index end] != 0 } {
     $name delete 0 end
   }
@@ -4322,9 +4326,9 @@ proc ::inorganicBuilder::guiFillMolMenuInt { molMenuName currentMol filetypes } 
 #    puts "InorganicBuilder) Configuring [winfo parent $name]"
     [winfo parent $name] configure -text "None loaded"
   }
-  
+
   $name invoke 0
-  
+
 #  puts "InorganicBuilder) Done processing $molMenuName"
 }
 
@@ -4333,12 +4337,12 @@ proc ::inorganicBuilder::guiFillMolMenuInt { molMenuName currentMol filetypes } 
 
 proc ::inorganicBuilder::guiFindShell {} {
   variable guiState
-  
+
   set orig [list $guiState(origX) $guiState(origY) $guiState(origZ)]
   set a [list $guiState(boxAX) $guiState(boxAY) $guiState(boxAZ)]
   set b [list $guiState(boxBX) $guiState(boxBY) $guiState(boxBZ)]
   set c [list $guiState(boxCX) $guiState(boxCY) $guiState(boxCZ)]
-  
+
   set molid [mol new]
   if { ![string equal $guiState(psffile) ""] } {
     mol addfile $guiState(psffile) type psf autobonds off filebonds off waitfor all
@@ -4351,9 +4355,9 @@ proc ::inorganicBuilder::guiFindShell {} {
   set mybox [ ::inorganicBuilder::defineMaterialBox $orig [list $a $b $c] $guiState(bondCutoff) ]
   set guiState(currentBox) $mybox
   ::inorganicBuilder::setVMDPeriodicBox $mybox
-  
+
   set shellatoms [::inorganicBuilder::findShell $mybox $molid $guiState(gridSz) $guiState(gridRad) $guiState(thickness)]
-                  
+
   set num_shell [llength $shellatoms]
 #  puts "InorganicBuilder) Found $num_shell atoms in shell" 
   if { $num_shell > 0 } {
@@ -4362,10 +4366,10 @@ proc ::inorganicBuilder::guiFindShell {} {
     $shell_sel writepdb $guiState(shellFile).pdb
     $shell_sel delete
   }
-  
+
   set num_tot [lindex [ molinfo $molid get numatoms] 0]
   set num_int [expr $num_tot - $num_shell]
-  
+
 #  puts "InorganicBuilder) Found $num_int atoms in interior" 
   if { $num_int > 0 } {
     if { $num_shell == 0 } {
@@ -4380,12 +4384,12 @@ proc ::inorganicBuilder::guiFindShell {} {
   }
   mol delete $molid
   tk_messageBox -icon info -message "Interior and surface atoms separated and saved." -type ok  
-  
+
 }
 
 proc ::inorganicBuilder::guiSolvateBox {} {
   variable guiState
-  
+
   set orig [list $guiState(origX) $guiState(origY) $guiState(origZ)]
   set a [list $guiState(boxAX) $guiState(boxAY) $guiState(boxAZ)]
   set b [list $guiState(boxBX) $guiState(boxBY) $guiState(boxBZ)]
@@ -4398,16 +4402,16 @@ proc ::inorganicBuilder::guiSolvateBox {} {
   }
   set guiState(currentBox) $mybox
   ::inorganicBuilder::setVMDPeriodicBox $mybox
-  
+
   set molid $guiState(currentMol)
   ::inorganicBuilder::solvateBox $mybox [list $guiState(psffile) $guiState(pdbfile)] $guiState(solvatedFile)
   tk_messageBox -icon info -message "System solvated." -type ok  
-  
+
 }
 
 proc ::inorganicBuilder::guiMergeSurfInterior {} {
   variable guiState
-  
+
   set mol1id [mol new]
   if { ![string equal $guiState(psffile1) ""] } {
     mol addfile $guiState(psffile1) type psf autobonds off filebonds off waitfor all
@@ -4415,7 +4419,7 @@ proc ::inorganicBuilder::guiMergeSurfInterior {} {
   if { ![string equal $guiState(pdbfile1) ""] } {
     mol addfile $guiState(pdbfile1) type pdb autobonds off filebonds off waitfor all
   }
-  
+
   set mol2id [mol new]
   if { ![string equal $guiState(psffile2) ""] } {
     mol addfile $guiState(psffile2) type psf autobonds off filebonds off waitfor all
@@ -4423,23 +4427,23 @@ proc ::inorganicBuilder::guiMergeSurfInterior {} {
   if { ![string equal $guiState(pdbfile2) ""] } {
     mol addfile $guiState(pdbfile2) type pdb autobonds off filebonds off waitfor all
   }
-  
+
   set topfile [getMaterialTopologyFile $guiState(material)]
-  
+
   return [mergeMoleculesResegment $topfile $mol1id $mol2id $guiState(mergedFile)]
-          
+
   mol delete $mol1id
   mol delete $mol2id
 }
 
 proc ::inorganicBuilder::guiBuildSpecifiedBonds { addhow periodicIn} {
   variable guiState
-  
+
   set orig [list $guiState(origX) $guiState(origY) $guiState(origZ)]
   set a [list $guiState(boxAX) $guiState(boxAY) $guiState(boxAZ)]
   set b [list $guiState(boxBX) $guiState(boxBY) $guiState(boxBZ)]
   set c [list $guiState(boxCX) $guiState(boxCY) $guiState(boxCZ)]
-  
+
   if { $guiState(hexBox) } {
     set mybox [ ::inorganicBuilder::defineMaterialHexagonalBox $orig [list $a $b $c] $guiState(bondCutoff) ]
   } else {
@@ -4459,19 +4463,19 @@ proc ::inorganicBuilder::guiBuildSpecifiedBonds { addhow periodicIn} {
     mol addfile $guiState(pdbfile) type pdb autobonds off filebonds $fbonds waitfor all
   }
   set guiState(currentMol) $molid
-  
+
   set guiState(currentBox) $mybox
-  
+
   set molid $guiState(currentMol)
   ::inorganicBuilder::buildSpecificBonds $mybox $guiState(bondlist) $periodicIn $molid
   # Rename atom types
   if { $guiState(relabelBonds)  } {
     setAtomTypes $molid
   }
-  
+
   set fname $guiState(fname)
   set mymol [atomselect $guiState(currentMol) all]
-  
+
   if { $guiState(buildAngles) } {
     set fname0 ${fname}-prebond
     $mymol writepsf $fname0.psf
@@ -4553,7 +4557,7 @@ proc ::inorganicBuilder::guiRequireStepSize { w newval valtype } {
       $w delete 0 end
       $w insert 0 12
     }
-    
+
   } elseif { [string is true [expr [expr $newval/12.0] == [expr $newval/12]]] && [expr $newval > 0] } {
     set err 1
   }
@@ -4608,9 +4612,9 @@ proc ::inorganicBuilder::guiLoadMaterial { fname } {
   set chan [open $fname]
   set matdat [read $chan]
   close $chan
-  
+
   array set matState $matdat
-  
+
   set matvars $matState(newMatParams)
   foreach vname $matvars {
     set guiState($vname) $matState($vname)
@@ -4637,7 +4641,7 @@ proc ::inorganicBuilder::guiAddMaterial { menuwin } {
       return
     }
   }
-  
+
   set new_parfile $guiState(newMatTopName)
 
   set new_basis [list [list $guiState(newMatAX) $guiState(newMatAY) $guiState(newMatAZ)] [list $guiState(newMatBX) $guiState(newMatBY) $guiState(newMatBZ)] [list $guiState(newMatCX) $guiState(newMatCY) $guiState(newMatCZ)] ] 
@@ -4657,13 +4661,13 @@ proc ::inorganicBuilder::guiAddMaterial { menuwin } {
 proc ::inorganicBuilder::guiSaveState { fname } {
   variable guiState
   variable materialList
-  
+
   set guiState(materialList) $materialList
   set chan [open $fname "w"]
 #  puts $chan "INORGANICBUILDER"
   puts $chan [array get guiState]
   close $chan
-  
+
   return  
 }
 
@@ -4675,13 +4679,13 @@ proc ::inorganicBuilder::guiLoadState { fname } {
   if { $guiState(geomMol) != -1 } {
     mol delete $guiState(geomMol)
   }
-  
+
   set chan [open $fname]
   set state_dat [read $chan]
   close $chan
-  
+
   array set newState $state_dat
-  
+
   set stateVars [array names newState]
   foreach vname $stateVars {
     set guiState($vname) $newState($vname)
@@ -4702,7 +4706,7 @@ proc ::inorganicBuilder::newMaterialList { } {
 proc ::inorganicBuilder::addMaterial { listName materialName longName basis pdb top parfile cutoff {hex 0} } {
   upvar $listName materialList
   array set materials $materialList
-  
+
   set newMaterial [ list $materialName $longName $basis $pdb $top $cutoff $hex $parfile]
   set materials($materialName) $newMaterial
   set materialList [array get materials]
@@ -4711,7 +4715,7 @@ proc ::inorganicBuilder::addMaterial { listName materialName longName basis pdb 
 
 proc ::inorganicBuilder::getMaterialNames {} {
   variable materialList
-  
+
   set namelist {}
   foreach { shortName material } $materialList {
     lappend namelist [ list $shortName [lindex $material 1]]
@@ -4721,7 +4725,7 @@ proc ::inorganicBuilder::getMaterialNames {} {
 
 proc ::inorganicBuilder::getMaterialLongName { materialName } {
   variable materialList
-  
+
   array set materials $materialList
   set material $materials($materialName)
   return [lindex $material 1]
@@ -4729,7 +4733,7 @@ proc ::inorganicBuilder::getMaterialLongName { materialName } {
 
 proc ::inorganicBuilder::getMaterialLongName { materialName } {
   variable materialList
-  
+
   array set materials $materialList
   set material $materials($materialName)
   return [lindex $material 1]
@@ -4737,7 +4741,7 @@ proc ::inorganicBuilder::getMaterialLongName { materialName } {
 
 proc ::inorganicBuilder::getMaterialUnitCell { materialName } {
   variable materialList
-  
+
   array set materials $materialList
   set material $materials($materialName)
   return [lindex $material 2]
@@ -4766,7 +4770,7 @@ proc ::inorganicBuilder::getMaterialCutoff { materialName } {
 
 proc ::inorganicBuilder::getMaterialHexSymmetry { materialName } {
   variable materialList
-  
+
   array set materials $materialList
   set material $materials($materialName)
   return [lindex $material 6]
@@ -4774,7 +4778,7 @@ proc ::inorganicBuilder::getMaterialHexSymmetry { materialName } {
 
 proc ::inorganicBuilder::getMaterialParFile { materialName } {
   variable materialList
-  
+
   array set materials $materialList
   set material $materials($materialName)
   return [lindex $material 7]
@@ -4835,7 +4839,7 @@ proc ::inorganicBuilder::defineMaterialHexagonalBox { center basis cutoff } {
     set ni [expr ($i + 1) % 6]
     lappend box(hexneighbors) [vecadd [lindex $box(hexverts) $i] [lindex $box(hexverts) $ni]]
   }          
-  
+
   #Compute face planes, so we can transform to hex coordinates efficiently
   set topvert [findHexVertices box]
   set dz [vecscale $box(hexheight) $box(basisc)]
@@ -4849,7 +4853,7 @@ proc ::inorganicBuilder::defineMaterialHexagonalBox { center basis cutoff } {
     set p00 [lindex $topvert $i]
     set p01 [lindex $topvert $nxt]
     set p10 [lindex $botvert $i]
-    
+
     lappend box(hexradial) [ find_plane $topcenter $p00 $p10 $p01]
     lappend box(hextranslate) [vecsub [vecscale 2 $topcenter] [ vecadd $p00 $p01] ]
     lappend box(hexfaces) [ find_plane $p00 $p10 $p01 $topcenter]
@@ -4860,10 +4864,10 @@ proc ::inorganicBuilder::defineMaterialHexagonalBox { center basis cutoff } {
 
 proc ::inorganicBuilder::defineBoxInternal { boxname center basis cutoff } {
   upvar $boxname box
-  
+
   set box(material) "none"
   set box(cutoff) $cutoff
-  
+
   set a [lindex $basis 0]
   set b [lindex $basis 1]
   set c [lindex $basis 2]
@@ -4871,11 +4875,11 @@ proc ::inorganicBuilder::defineBoxInternal { boxname center basis cutoff } {
   set box(basisa) $a
   set box(basisb) $b
   set box(basisc) $c
-  
+
   set box(la) [ veclength $box(basisa) ]
   set box(lb) [ veclength $box(basisb) ]
   set box(lc) [ veclength $box(basisc) ]
-  
+
   set box(na) 1
   set box(nb) 1
   set box(nc) 1
@@ -4886,11 +4890,11 @@ proc ::inorganicBuilder::defineBoxInternal { boxname center basis cutoff } {
   set box(oy) [lindex $box(origin) 1]
   set box(oz) [lindex $box(origin) 2]
 #  puts "InorganicBuilder) origin=$box(origin)"
-  
+
   set box(da) $box(la)
   set box(db) $box(lb)
   set box(dc) $box(lc)
-  
+
   set box(cross_ab) [veccross $a $b]
   set box(cross_ac) [veccross $a $c]
   set box(cross_bc) [veccross $b $c]
@@ -4971,7 +4975,7 @@ proc ::inorganicBuilder::newMaterialHexagonalBox { material center diam height {
     set ni [expr ($i + 1) % 6]
     lappend box(hexneighbors) [vecadd [lindex $box(hexverts) $i] [lindex $box(hexverts) $ni]]
   }          
-  
+
   #Compute face planes, so we can transform to hex coordinates efficiently
   set topvert [findHexVertices box]
   set dz [vecscale $box(hexheight) $box(basisc)]
@@ -4985,7 +4989,7 @@ proc ::inorganicBuilder::newMaterialHexagonalBox { material center diam height {
     set p00 [lindex $topvert $i]
     set p01 [lindex $topvert $nxt]
     set p10 [lindex $botvert $i]
-    
+
     lappend box(hexradial) [ find_plane $topcenter $p00 $p10 $p01]
     lappend box(hextranslate) [vecsub [vecscale 2 $topcenter] [ vecadd $p00 $p01] ]
     lappend box(hexfaces) [ find_plane $p00 $p10 $p01 $topcenter]
@@ -4997,7 +5001,7 @@ proc ::inorganicBuilder::newMaterialHexagonalBox { material center diam height {
 proc ::inorganicBuilder::newBoxInternal { boxname material center boxsize adjcharges } {
   variable materialList
   upvar $boxname box
-  
+
   array set materials $materialList 
   set box(material) $materials($material)
   foreach { materialName longName basis pdb top cutoff hex parfname } $box(material) {}
@@ -5005,7 +5009,7 @@ proc ::inorganicBuilder::newBoxInternal { boxname material center boxsize adjcha
   set box(top) $top
   set box(cutoff) $cutoff
   set box(adjcharges) $adjcharges
-  
+
   set a [lindex $basis 0]
   set b [lindex $basis 1]
   set c [lindex $basis 2]
@@ -5013,11 +5017,11 @@ proc ::inorganicBuilder::newBoxInternal { boxname material center boxsize adjcha
   set box(basisa) $a
   set box(basisb) $b
   set box(basisc) $c
-  
+
   set box(la) [ veclength $box(basisa) ]
   set box(lb) [ veclength $box(basisb) ]
   set box(lc) [ veclength $box(basisc) ]
-  
+
   set box(na) [lindex $boxsize 0]
   set box(nb) [lindex $boxsize 1]
   set box(nc) [lindex $boxsize 2]
@@ -5028,11 +5032,11 @@ proc ::inorganicBuilder::newBoxInternal { boxname material center boxsize adjcha
   set box(ox) [lindex $box(origin) 0]
   set box(oy) [lindex $box(origin) 1]
   set box(oz) [lindex $box(origin) 2]
-  
+
   set box(da) [expr $box(la) * $box(na)]
   set box(db) [expr $box(lb) * $box(nb)]
   set box(dc) [expr $box(lc) * $box(nc)]
-  
+
   set box(cross_ab) [veccross $a $b]
   set box(cross_ac) [veccross $a $c]
   set box(cross_bc) [veccross $b $c]
@@ -5067,7 +5071,7 @@ proc ::inorganicBuilder::getBoxMaterial { boxlist } {
 
 proc ::inorganicBuilder::printBox { boxlist } {
   array set box $boxlist
-  
+
   puts "InorganicBuilder) inorganicBuilder::boxsize ($box(na),$box(nb),$box(nc))"
   puts "InorganicBuilder) inorganicBuilder::origin ($box(ox),$box(oy),$box(oz))"
   for { set k 0 } { $k < $box(nc) } { incr k } {
@@ -5085,36 +5089,37 @@ proc ::inorganicBuilder::printBox { boxlist } {
 # *** ADDED ***
 proc ::inorganicBuilder::setVMDPeriodicBox { boxlist {molid top}} {
   variable guiState
-  
+
   if { $guiState(mmod) != 1 } {
        set guiState(mmod) 1.5
   } else {
-	  	  
+
   # TODO: MY EYES HURT! WHY NOT JUST USE BOXLIST ?
     array set box $boxlist
     # TODO: MY EYES HURT2! guiState(mmod) == 1 HERE (WHATEVER guiState(mmod) IS...)!
     set a [ expr $box(na) * [veclength $box(basisa)] * $guiState(mmod)]
     set b [ expr $box(nb) * [veclength $box(basisb)] * $guiState(mmod)]
     set c [ expr $box(nc) * [veclength $box(basisc)] * $guiState(mmod)]
-  
+
     set anorm [vecnorm $box(basisa)]
     set bnorm [vecnorm $box(basisb)]
     set cnorm [vecnorm $box(basisc)]
-  
+
     set rad2deg 57.2957795131
     set alpha [expr acos([vecdot $bnorm $cnorm]) * $rad2deg]
     set beta  [expr acos([vecdot $cnorm $anorm]) * $rad2deg]
     set gamma [expr acos([vecdot $anorm $bnorm]) * $rad2deg]
-    
+
+    # WHAT IS THIS?
     set guiState(boxX2R) $alpha
     set guiState(boxY2R) $beta
     set guiState(boxZ2R) $gamma
     set guiState(boxX2Rh) $alpha
     set guiState(boxY2Rh) $beta
     set guiState(boxZ2Rh) $gamma
-  
+
     molinfo $molid set {a b c alpha beta gamma} [list $a $b $c $alpha $beta $gamma]
-   
+
   }
   return
 }
@@ -5204,7 +5209,7 @@ proc ::inorganicBuilder::structBoxMolecule { } {
 	  set angleY $guiState(boxY2R)
 	  set angleZ $guiState(boxZ2R)
   }
-  
+
   # Watch out for 0 values becoming blanks apparently
   if { $angleX == "" } {
 	  set angleX 90
@@ -5220,7 +5225,7 @@ proc ::inorganicBuilder::structBoxMolecule { } {
   set guiState(drawstyle) "style solid"
 
   set o [list $guiState(origX) $guiState(origY) $guiState(origZ)]
-  
+
   if {$guiState(StructHexBox)} {
 	set unitD [expr ( $guiState(hexD2) / 7.595)]
 	set unitZ3 [expr ( $guiState(boxZ3) / 2.902)]
@@ -5231,8 +5236,8 @@ proc ::inorganicBuilder::structBoxMolecule { } {
     drawHexBox $thisHexBox $guiState(sboxmol)        
     set vertlist [getVertices $thisHexBox]
 
-    
-	
+
+
   } else {
 	set unitX [expr ( $guiState(boxX2) / 4.0782)]
 	set unitY [expr ( $guiState(boxY2) / 4.0782)]
@@ -5244,7 +5249,7 @@ proc ::inorganicBuilder::structBoxMolecule { } {
     set vertlist [getVertices $thisSquareBox]
 
   }
-    
+
     foreach { x y z } [lindex $vertlist 0] {}
     set boxXmin $x
     set boxXmax $x
@@ -5285,7 +5290,7 @@ proc ::inorganicBuilder::structBoxMolecule { } {
 	} else {
 		set guiState(lenboxY) [expr sqrt(($boxYmax-$boxYmin)**2)]
 	}
-	
+
     set guiState(lenboxZ) [expr sqrt(($boxZmax-$boxZmin)**2)]
 
   #Convert to Rotations to Radians
@@ -5309,7 +5314,7 @@ proc ::inorganicBuilder::structBoxMolecule { } {
 		set z2 0
 		set zvec "0 0 0"
 	}
-	
+
     set z31 [expr (1.0 - $z1*$z1 - $z2*$z2)]
     if { ($z31 >= 0)  && ($zvec != "0 0 0") } {
 		set z3 [expr sqrt($z31)]
@@ -5326,7 +5331,7 @@ proc ::inorganicBuilder::structBoxMolecule { } {
     set zvec [lreplace $zvec 0 0 [format "%.2f" [lindex $zvec 0]]]
     set zvec [lreplace $zvec 1 1 [format "%.2f" [lindex $zvec 1]]]
     set zvec [lreplace $zvec 2 2 [format "%.2f" [lindex $zvec 2]]]
-  
+
     set guiState(sspVecs) "{$xvec} {$yvec} {$zvec} {$o}" 
 
 	# drawing for hex
@@ -5342,7 +5347,7 @@ proc ::inorganicBuilder::structBoxMolecule { } {
       if {$guiState(StructSurfPeriody) != 0} {
         set guiState(drawcolor) "green"
         set guiState(drawstyle) "style dashed"
-  	
+
         set o [ list [expr $guiState(origX) + [lindex $yvec 0]] [expr $guiState(origY) + [lindex $yvec 1]] [expr $guiState(origZ) + [lindex $yvec 2]] ]
         set thisDashHexBox [ newMaterialHexagonalBox "Si3N4" $o $unitD $unitZ3 0]
         drawHexBox $thisDashHexBox $guiState(sboxmol)
@@ -5350,7 +5355,7 @@ proc ::inorganicBuilder::structBoxMolecule { } {
       if {$guiState(StructSurfPeriodz) != 0} {
         set guiState(drawcolor) "blue"
         set guiState(drawstyle) "style dashed"
-  	
+
         set o [ list [expr $guiState(origX) + [lindex $zvec 0]] [expr $guiState(origY) + [lindex $zvec 1]] [expr $guiState(origZ) + [lindex $zvec 2]] ]
         set thisDashHexBox [ newMaterialHexagonalBox "Si3N4" $o $unitD $unitZ3 0]
         drawHexBox $thisDashHexBox $guiState(sboxmol)
@@ -5360,7 +5365,7 @@ proc ::inorganicBuilder::structBoxMolecule { } {
       if {$guiState(StructSurfPeriodx) != 0} {
         set guiState(drawcolor) "red"
         set guiState(drawstyle) "style dashed"
-  
+
         set o [ list [expr $guiState(origX) + [lindex $xvec 0]] [expr $guiState(origY) + [lindex $xvec 1]] [expr $guiState(origZ) + [lindex $xvec 2]] ]
         set thisDashBox [ newMaterialBox "Au" $o $boxsize 0]
         drawBox $thisDashBox $guiState(sboxmol)
@@ -5368,7 +5373,7 @@ proc ::inorganicBuilder::structBoxMolecule { } {
       if {$guiState(StructSurfPeriody) != 0} {
         set guiState(drawcolor) "green"
         set guiState(drawstyle) "style dashed"
-  	
+
         set o [ list [expr $guiState(origX) + [lindex $yvec 0]] [expr $guiState(origY) + [lindex $yvec 1]] [expr $guiState(origZ) + [lindex $yvec 2]] ]
         set thisDashBox [ newMaterialBox "Au" $o $boxsize 0]
         drawBox $thisDashBox $guiState(sboxmol)
@@ -5376,13 +5381,13 @@ proc ::inorganicBuilder::structBoxMolecule { } {
       if {$guiState(StructSurfPeriodz) != 0} {
         set guiState(drawcolor) "blue"
         set guiState(drawstyle) "style dashed"
-  	
+
         set o [ list [expr $guiState(origX) + [lindex $zvec 0]] [expr $guiState(origY) + [lindex $zvec 1]] [expr $guiState(origZ) + [lindex $zvec 2]] ]
         set thisDashBox [ newMaterialBox "Au" $o $boxsize 0]
         drawBox $thisDashBox $guiState(sboxmol)
       }  
     }
-    
+
   display resetview
 
   return
@@ -5401,13 +5406,13 @@ proc ::inorganicBuilder::getCellBasisVectors { boxlist } {
 
 proc ::inorganicBuilder::getBondCutoff { boxlist } {
   array set box $boxlist
-  
+
   return $box(cutoff)
 }
 
 proc ::inorganicBuilder::getVertices { boxlist } {
   array set box $boxlist
-  
+
   if {[string equal $box(type) "hex"]} {
     # findHexVertices returns corners of top face
     set vertlist [findHexVertices box]
@@ -5435,7 +5440,7 @@ proc ::inorganicBuilder::getVertices { boxlist } {
 # *** ADDED ***
 proc ::inorganicBuilder::draw_simple_box { layer orig a b c } {
   variable guiState
-  
+
   if {$layer == $guiState(sboxmol) } {
 	  set drcolor $guiState(drawcolor)
 	  set drstyle $guiState(drawstyle)
@@ -5443,7 +5448,7 @@ proc ::inorganicBuilder::draw_simple_box { layer orig a b c } {
 	  set drcolor "blue"
 	  set drstyle "style solid"
   }
-  
+
 #  puts "InorganicBuilder) draw simple box $layer $orig $a $b $c"
   set oa [vecadd $orig $a]
   set ob [vecadd $orig $b]
@@ -5454,7 +5459,7 @@ proc ::inorganicBuilder::draw_simple_box { layer orig a b c } {
   set abc [vecadd $ab $c]
   set w 3
 #  puts "InorganicBuilder) $oa=$orig $oa $ob $oc"
-  
+
   set obj {}
 #  graphics $layer line $orig $oa
 #  graphics $layer line $oa $ab
@@ -5464,7 +5469,7 @@ proc ::inorganicBuilder::draw_simple_box { layer orig a b c } {
   lappend obj [list line $oa $ab width $w [lindex $drstyle 0] [lindex $drstyle 1]]
   lappend obj [list line $ab $ob width $w [lindex $drstyle 0] [lindex $drstyle 1]]
   lappend obj [list line $ob $orig width $w [lindex $drstyle 0] [lindex $drstyle 1]]
-  
+
 #  graphics $layer line $orig $oc
 #  graphics $layer line $oa $ac
 #  graphics $layer line $ab $abc
@@ -5494,7 +5499,7 @@ proc ::inorganicBuilder::draw_simple_solid_box { layer orig a b c } {
   set ac [vecadd $oa $c]
   set bc [vecadd $ob $c]
   set abc [vecadd $ab $c]
-  
+
   set obj {}
 #  graphics $layer triangle $orig $oa $ob
 #  graphics $layer triangle $oa $ab $ob
@@ -5510,7 +5515,7 @@ proc ::inorganicBuilder::draw_simple_solid_box { layer orig a b c } {
 #  graphics $layer triangle $oc $bc $ob
   lappend obj [list triangle $orig $oc $ob]
   lappend obj [list triangle $oc $bc $ob]
-  
+
 #  graphics $layer triangle $oc $ac $bc
 #  graphics $layer triangle $bc $abc $ac
   lappend obj [list triangle $oc $ac $bc]
@@ -5520,7 +5525,7 @@ proc ::inorganicBuilder::draw_simple_solid_box { layer orig a b c } {
 #  graphics $layer triangle $ab $abc $bc
   lappend obj [list triangle $ob $ab $bc]
   lappend obj [list triangle $ab $abc $bc]
-  
+
 #  graphics $layer triangle $oa $ab $ac
 #  graphics $layer triangle $ac $abc $ab
   lappend obj [list triangle $oa $ab $ac]
@@ -5532,7 +5537,7 @@ proc ::inorganicBuilder::draw_simple_solid_box { layer orig a b c } {
 
 proc ::inorganicBuilder::drawBox { boxlist molid } {
   array set box $boxlist
-  
+
   set orig [ getRealCoord box { 0 0 0 } ]
   set a [ vecsub [getRealCoord box [list $box(na) 0 0]] $orig ]
   set b [ vecsub [getRealCoord box [list 0 $box(nb) 0]] $orig ]
@@ -5756,14 +5761,14 @@ proc ::inorganicBuilder::drawBlock { block molid } {
       set oa [vecadd $o $a]
       set ob [vecadd $o $b]
       set oc [vecadd $o $c]
-      
+
       set obj {}
       lappend obj [list triangle $o $oa $ob]
       lappend obj [triangle $o $oa $oc]
       lappend obj [triangle $o $ob $oc]
       lappend obj [triangle $oa $ob $oc]
       set ret [::drawenv::draw $molid $obj "red" "Opaque"]
-      
+
     }
     "cone" {
       set o [lindex $params 0]
@@ -5822,10 +5827,10 @@ proc ::inorganicBuilder::getStructParams { struct } {
 proc ::inorganicBuilder::storeBlock { boxname block } {
   upvar $boxname boxlist
   array set box $boxlist
-  
+
   # Add the bounding box to the block
   lset block 1 [computeBlockBoundingBox box $block]
-  
+
   # Store the block
   set blockindex [expr [llength [lappend box(excludelist) $block ]] - 1 ]
 
@@ -5842,19 +5847,19 @@ proc ::inorganicBuilder::getBlockBoundingBox { block } {
 
 proc ::inorganicBuilder::computeBlockBoundingBox { boxname block } {
   upvar $boxname box
- 
+
   foreach {type bb params name} $block {}
   set xmax $box(na)
   set ymax $box(nb)
   set zmax $box(nc)
-  
+
   # No bounding-box code for hext transformations yet, so we have to scan
   # the entire space
   if { [string equal $box(type) "hex"] } {
     set ret [ list [list 0 0 0] [list $xmax $ymax $zmax] ]
     return $ret
   }
- 
+
   switch $type {
     "pp" {
       foreach {a b c o tmat } $params {}
@@ -5944,7 +5949,7 @@ proc ::inorganicBuilder::findMinMaxCoords { cellcoords xmax ymax zmax } {
   set x1 0
   set y1 0
   set z1 0
-     
+
   foreach xx $cellcoords {
     foreach { x y z } $xx {}
     if {$x < $x0} {set x0 $x}
@@ -5954,7 +5959,7 @@ proc ::inorganicBuilder::findMinMaxCoords { cellcoords xmax ymax zmax } {
     if {$z < $z0} {set z0 $z}
     if {$z > $z1} {set z1 $z}
   }
-     
+
   set x0 [expr int(floor($x0))]
   set x1 [expr int(ceil($x1))]
   set y0 [expr int(floor($y0))]
@@ -5976,7 +5981,7 @@ proc ::inorganicBuilder::findMinMaxCoords { cellcoords xmax ymax zmax } {
 
 proc ::inorganicBuilder::getCellCoord { boxname realcoord } {
   upvar $boxname box
-  
+
   return [ transformCoords $box(origin) $box(transform_mat) $realcoord]
 }
 
@@ -5985,7 +5990,7 @@ proc ::inorganicBuilder::transformCoords { origin tmat realcoord } {
   set a [ vecdot $d [lindex $tmat 0] ]
   set b [ vecdot $d [lindex $tmat 1] ]
   set c [ vecdot $d [lindex $tmat 2] ]
-  
+
   return [ list $a $b $c ]
 }
 
@@ -6029,7 +6034,7 @@ proc ::inorganicBuilder::Inverse3 {matrix} {
     }
     return $inv
 }
- 
+
 proc ::inorganicBuilder::_Cofactor3 {matrix i j} {
     array set COLS {0 {1 2} 1 {0 2} 2 {0 1}}
     foreach {row1 row2} $COLS($j) break
@@ -6047,12 +6052,12 @@ proc ::inorganicBuilder::_Cofactor3 {matrix i j} {
 
 proc ::inorganicBuilder::transformRealToHex { boxname realcoord } {
   upvar $boxname box
-  
+
   set coord [concat $realcoord 1]
   set result $realcoord
   for { set i 0 } { $i < 6 } { incr i } {
     set nxt [ expr ($i + 1) % 6 ]
-    
+
     if { [vecdot [lindex $box(hexradial) $i] $coord] >= 0 && [vecdot [lindex $box(hexradial) $nxt] $coord] < 0 && [vecdot [lindex $box(hexfaces) $i] $coord ] < 0 } {
        set result [ vecadd $realcoord [lindex $box(hextranslate) $i]]
        break
@@ -6167,21 +6172,21 @@ proc ::inorganicBuilder::checkPointInside { boxname exclusion pos } {
 # *** ADDED ***
 proc ::inorganicBuilder::buildBox { boxlist outfile } {
   variable guiState
-  
+
   array set box $boxlist
-  
+
   set unitcellfile $box(pdb)
   set unitcelltopfile $box(top)
   set cutoff $box(cutoff)
-  
+
   set xmin $box(ox)
   set ymin $box(oy)
   set zmin $box(oz)
-  
+
   set nx $box(na)
   set ny $box(nb)
   set nz $box(nc)
-  
+
   mol new [file normalize $unitcellfile] type pdb autobonds off filebonds off waitfor all
   set molid [molinfo top]
   mol off $molid
@@ -6197,7 +6202,7 @@ proc ::inorganicBuilder::buildBox { boxlist outfile } {
   }
   set ucresids [array names atomsbyresid]
 #  puts "InorganicBuilder) resids are $ucresids"
-  
+
   set psfcon [psfcontext create]
   psfcontext eval $psfcon {
     topology $unitcelltopfile
@@ -6234,7 +6239,7 @@ proc ::inorganicBuilder::buildBox { boxlist outfile } {
             array unset track_resd
             array set track_resd {}
             set track_count 0
-            
+
             foreach atom $atomsbyresid($resid) {
               foreach { id name resname} $atom {}
               set addme 1
@@ -6338,18 +6343,18 @@ proc ::inorganicBuilder::buildBox { boxlist outfile } {
   psfcontext delete $psfcon
   # Delete unit cell
   mol delete top
-  
+
   # Read in the generated box to transform to hex and apply selections
   set molid [mol new [file normalize $outfile.psf] type psf autobonds off filebonds off waitfor all]
   mol addfile [file normalize $outfile.pdb] type pdb autobonds off filebonds off waitfor all
- 
+
   if { $isHex } {
     transformCoordsToHex $boxlist $molid
   }
 
   # Update periodic box, so it gets stored in the PDB file
   ::inorganicBuilder::setVMDPeriodicBox $boxlist $molid
-  
+
   # Apply DXFile exclusions
   set dxstring ""
   set countdx 0
@@ -6371,20 +6376,20 @@ proc ::inorganicBuilder::buildBox { boxlist outfile } {
       set dxstring "$dxstring not($volDX)"
     }
   }
-  
+
   # Apply selection and output
   if { [string equal $dxstring ""] } {
     set dxstring "all"
   }
 
-  
+
   # Apply selection exclusions
   if { [string equal $dxstring "all"] } {
     set selstring ""
   } else {
     set selstring $dxstring
   }
-  
+
   foreach exclusion $box(excludelist) {
     if { [getBlockType $exclusion] != "selection" } {
       continue
@@ -6417,10 +6422,10 @@ proc ::inorganicBuilder::buildBox { boxlist outfile } {
       set selstring [concat $selstring " and index $rsH $rsH2"]
       $secondLayer delete
     }
-    
+
   }
 
-  
+
 #  puts "InorganicBuilder) Selection is $selstring"
   set select [atomselect $molid $selstring]
 
@@ -6464,7 +6469,7 @@ proc ::inorganicBuilder::buildBox { boxlist outfile } {
   }
 #  set totq [measure sumweights $select weight charge]
 #  puts "New Charge is $totq"
-  
+
   $select writepsf $outfile.psf
   $select writepdb $outfile.pdb
   $select delete     
@@ -6501,22 +6506,22 @@ proc inorganicBuilder::buildSegment { segid seg_coords } {
     }
   }
 }
-  
+
 proc ::inorganicBuilder::buildBonds { boxlist setTypes periodicIn { molid top }} {
   if { [string equal $molid "top"] } {
     set molid [molinfo top]
   }
   # puts "InorganicBuilder) molid is $molid"
   mol off $molid
-  
+
   # Make sure everything is in the unit cell
   transformCoordsToBox $boxlist $molid
-  
+
   array set box $boxlist
   # Tell VMD to calculate internal bonds
   #
   #mol bondsrecalc $molid
-  
+
   # Add edge bonds
   # puts "InorganicBuilder) Adding periodic bonds cutoff $box(cutoff)"
   buildPeriodicBonds box $periodicIn $molid
@@ -6525,19 +6530,19 @@ proc ::inorganicBuilder::buildBonds { boxlist setTypes periodicIn { molid top }}
   if { $setTypes } {
     setAtomTypes $molid
   }
-  
+
   # If this is a hex box, transform to hex
   if { [string equal $box(type) "hex"] } {
     transformCoordsToHex $boxlist $molid
   }
- 
+
   mol on $molid
 }
 
 proc ::inorganicBuilder::buildAnglesDihedrals { ifprefix ofprefix dihedrals } {
   # Start psfgen again using the new PSF file, to generate
   # the angles and bonds
-  
+
   set psfcon [psfcontext create]
   psfcontext eval $psfcon {
     readpsf $ifprefix.psf
@@ -6555,14 +6560,14 @@ proc ::inorganicBuilder::buildAnglesDihedrals { ifprefix ofprefix dihedrals } {
 
 proc ::inorganicBuilder::buildPeriodicBonds { boxname periodicIn molid } {
   upvar $boxname box
-  
+
   foreach { periodicX periodicY periodicZ } $periodicIn {}
   if { !$periodicX && !$periodicY & !$periodicZ } {
     puts "InorganicBuilder) No periodic boundaries specified"
     return
   }
   # Make sure everything is properly wrapped into the unit cell
-  
+
   # Find the cutoff table to emulate VMDs heuristic: 0.6*R1*R2
   set allatoms [atomselect $molid all]
   set types [$allatoms get {type radius}]
@@ -6581,29 +6586,29 @@ proc ::inorganicBuilder::buildPeriodicBonds { boxname periodicIn molid } {
     }
   }
   $allatoms delete
-  
+
   # Need to find the slices of the box that are the cutoff distance
   # away from the AB face, the AC face, and the BC face.
   set a $box(basisa)
   set b $box(basisb)
   set c $box(basisc)
   set o $box(origin)
-  
+
   set cross_ab $box(cross_ab)
   set cross_ac $box(cross_ac)
   set cross_bc $box(cross_bc)
-  
+
   # Normalize cross products so they have length=cutoff
   set cross_ab [vecscale $cutoff [vecnorm $cross_ab]]
   set cross_ac [vecscale $cutoff [vecnorm $cross_ac]]
   set cross_bc [vecscale $cutoff [vecnorm $cross_bc]]
-  
+
   # Find 6 slice planes
   set p1 [vecadd $o $cross_bc]
   set p2 [vecadd $p1 $b]
   set p3 [vecadd $p1 $c]
   set imin_plane [ find_plane $p1 $p2 $p3 $o]
-  
+
   set corner [vecadd $o [vecscale $box(na) $a]]
   set p1 [vecsub  $corner $cross_bc]
   set p2 [vecadd $p1 $b]
@@ -6620,7 +6625,7 @@ proc ::inorganicBuilder::buildPeriodicBonds { boxname periodicIn molid } {
   set p2 [vecadd $p1 $a]
   set p3 [vecadd $p1 $c]
   set jmax_plane [ find_plane $p1 $p2 $p3 $corner]
-  
+
   set p1 [vecadd $o $cross_ab]
   set p2 [vecadd $p1 $a]
   set p3 [vecadd $p1 $b]
@@ -6631,7 +6636,7 @@ proc ::inorganicBuilder::buildPeriodicBonds { boxname periodicIn molid } {
   set p2 [vecadd $p1 $a]
   set p3 [vecadd $p1 $b]
   set kmax_plane [ find_plane $p1 $p2 $p3 $corner]
-  
+
   # Determine the cutoff cell by finding the intersections of the three
   # planes
   set ca_mat [list [lrange $imin_plane 0 2 ] [lrange $jmin_plane 0 2 ] [lrange $kmin_plane 0 2 ] ]
@@ -6648,7 +6653,7 @@ proc ::inorganicBuilder::buildPeriodicBonds { boxname periodicIn molid } {
   set nj [expr int($box(nb)/$cj)]
   set nk [expr int($box(nc)/$ck)]
   set cutoff_cell [list [expr double($box(na))/$ni] [expr double($box(nb))/$nj] [expr double($box(nc))/$nk] ]
-                        
+
   # Select each face of the block and put into cells
   processSelection box cell $cutoff_cell $imin_plane $molid
   processSelection box cell $cutoff_cell $imax_plane $molid
@@ -6656,13 +6661,13 @@ proc ::inorganicBuilder::buildPeriodicBonds { boxname periodicIn molid } {
   processSelection box cell $cutoff_cell $jmax_plane $molid
   processSelection box cell $cutoff_cell $kmin_plane $molid
   processSelection box cell $cutoff_cell $kmax_plane $molid
-  
+
   # filter out duplicates in the neighbor lists
   set celllist [array names cell]
   foreach cellidx $celllist {
     set cell($cellidx) [lsort -integer -unique -index 0 $cell($cellidx)]
   }
-  
+
   #puts [array get cell]
   # Scan cells on the zero edges
   # Need to determine whether its more efficient to use this lookup
@@ -6693,7 +6698,7 @@ proc ::inorganicBuilder::buildPeriodicBonds { boxname periodicIn molid } {
           } else {
             set wrap { 0 0 0 }
           }
-  
+
           if { $niy < 0 } {
             if { $periodicY } {
               incr niy $nj 
@@ -6888,7 +6893,7 @@ proc ::inorganicBuilder::buildPeriodicBonds { boxname periodicIn molid } {
       }
     }
   }
-  
+
 #  puts "InorganicBuilder) Resetting bonds"
   set indexlist [array names bondlist]
   set imax [llength $indexlist]
@@ -6919,7 +6924,7 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
   if { [string equal $molid "top"] } {
     set molid [molinfo top]
   }
-    
+
   # Find out which atom pairs we need to keep, and also the max cutoff
   # for pairlist purposes
 #  puts "InorganicBuilder) Finding bond types $bondtypelist"
@@ -6936,7 +6941,7 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
 #  puts "InorganicBuilder) Atoms: $atomtypelist"
   # make it a little bigger, to protect against rounding errors
   set maxcutoff [expr 1.01 * $maxcutoff]
-  
+
 #  puts "InorganicBuilder) Computing cell size $maxcutoff"
   # Need to find the slices of the box that are the cutoff distance
   # away from the AB face, the AC face, and the BC face.
@@ -6944,23 +6949,23 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
   set b $box(basisb)
   set c $box(basisc)
   set o $box(origin)
-  
+
   set cross_ab $box(cross_ab)
   set cross_ac $box(cross_ac)
   set cross_bc $box(cross_bc)
-  
+
   # Normalize cross products so they have length=cutoff
   set cross_ab [vecscale $maxcutoff [vecnorm $cross_ab]]
   set cross_ac [vecscale $maxcutoff [vecnorm $cross_ac]]
   set cross_bc [vecscale $maxcutoff [vecnorm $cross_bc]]
-  
+
   # Find 6 slice planes
   set p1 [vecadd $o $cross_bc]
   set p2 [vecadd $p1 $b]
   set p3 [vecadd $p1 $c]
 #  puts "InorganicBuilder) imin $p1:$p2:$p3"
   set imin_plane [ find_plane $p1 $p2 $p3 $o]
-  
+
   set p1 [vecadd $o $cross_ac]
   set p2 [vecadd $p1 $a]
   set p3 [vecadd $p1 $c]
@@ -7001,7 +7006,7 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
     set atomtypeidx($atomtype) $i
   }
 #  puts "InorganicBuilder) atomtypeidx is [array get atomtypeidx]"
-  
+
   # build cell decomposition
   # For periodic, wrap the atoms into the correct box. For non-periodic,
   # it must be rounding error, just shift them back into the closest cell
@@ -7075,7 +7080,7 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
       } else {
         set wrapped_c 0
       }
-      
+
       set new_x [list $x $y $z]
       set move_vec { 0 0 0 }
       if {$wrapped_a} {
@@ -7104,13 +7109,13 @@ proc ::inorganicBuilder::buildSpecificBonds { boxlist bondtypelist periodicIn {m
     $atomsel delete
   }
 #  puts "InorganicBuilder) Found [llength [array names cellfortype]] cells"
-  
+
   # filter out duplicates in the neighbor lists
   #set celllist [array names cell]
   #foreach cellidx $celllist {
   #  set cell($cellidx) [lsort -integer -unique -index 0 $cell($cellidx)]
   #}
-  
+
   # Scan cells on the zero edges
   # Need to determine whether its more efficient to use this lookup
   # table or to loop through the indicies at eval time. Initially only
@@ -7267,14 +7272,14 @@ proc ::inorganicBuilder::find_plane { p1 p2 p3 corner } {
   foreach { x1 y1 z1 } $p1 {}
   foreach { x2 y2 z2 } $p2 {}
   foreach { x3 y3 z3 } $p3 {}
-  
+
   set a [expr $y1*($z2-$z3) + $y2*($z3-$z1) + $y3*($z1-$z2)]
   set b [expr $z1*($x2-$x3) + $z2*($x3-$x1) + $z3*($x1-$x2)]
   set c [expr $x1*($y2-$y3) + $x2*($y3-$y1) + $x3*($y1-$y2)]
   set d [expr -$x1*($y2*$z3-$y3*$z2) - $x2*($y3*$z1-$y1*$z3) - $x3*($y1*$z2-$y2*$z1)] 
-  
+
   foreach { x y z } $corner {}
-  
+
   if { [expr $a*$x + $b*$y + $c*$z + $d] < 0 } {
     set plane [list [expr -$a] [expr -$b] [expr -$c] [expr -$d]]
   } else {
@@ -7284,10 +7289,10 @@ proc ::inorganicBuilder::find_plane { p1 p2 p3 corner } {
 }
 
 proc ::inorganicBuilder::processSelection { box_name cellmap_name cutoff_cell selection_plane molid} {
-  
+
   upvar $box_name box
   upvar $cellmap_name cell
-  
+
   foreach { ap bp cp dp } $selection_plane {}
   foreach { di dj dk } $cutoff_cell {}
 
@@ -7303,7 +7308,7 @@ proc ::inorganicBuilder::processSelection { box_name cellmap_name cutoff_cell se
     if { $cj > $box(nb) } { set cj [expr $box(nb) - 0.01]}
     if { $ck < 0 } { set ck 0 }
     if { $ck > $box(nc) } { set ck [expr $box(nc) - 0.01]}
-    
+
     set i [expr int(floor($ci/$di))]
     set j [expr int(floor($cj/$dj))]
     set k [expr int(floor($ck/$dk))]
@@ -7330,7 +7335,7 @@ proc ::inorganicBuilder::setAtomTypes { molid } {
 
 proc ::inorganicBuilder::findHexVertices { boxname } {  
   upvar $boxname box
-  
+
   # calculate vertices
   set hexcenter $box(hexcenter)
   set b0 [lindex $box(hexverts) 0]
@@ -7343,7 +7348,7 @@ proc ::inorganicBuilder::findHexVertices { boxname } {
   set p3 [vecsub [vecsub $hexcenter $b0] $height2]
   set p4 [vecsub [vecsub $hexcenter $b1] $height2]
   set p5 [vecsub [vecsub $hexcenter $b2] $height2]
-  
+
   return [ list $p0 $p1 $p2 $p3 $p4 $p5 ]
 }
 
@@ -7352,7 +7357,7 @@ proc ::inorganicBuilder::transformCoordsToHex { boxlist {molid top} } {
     set molid [molinfo top]
   }
   mol off $molid
-  
+
   transformCoordsToBox $boxlist $molid
   array set box $boxlist
 
@@ -7370,9 +7375,9 @@ proc ::inorganicBuilder::transformCoordsToBox { boxlist {molid top} } {
     set molid [molinfo top]
   }
   mol off $molid
-  
+
   set allatoms [atomselect $molid all]
-  
+
   set coords [$allatoms get { x y z }]
 #  puts "InorganicBuilder) Got [llength $coords] coords"
   set newcoords {}
@@ -7384,14 +7389,14 @@ proc ::inorganicBuilder::transformCoordsToBox { boxlist {molid top} } {
       set tc [expr $tc + $box(na) ]
     }
     lset newelem 0 $tc
-    
+
     set c [ lindex $newelem 1]
     set tc [expr fmod($c,$box(nb)) ]
     if { $tc < 0 } {
       set tc [expr $tc + $box(nb) ]
     }
     lset newelem 1 $tc
-    
+
     set c [ lindex $newelem 2]
     set tc [expr fmod($c,$box(nc)) ]
     if { $tc < 0 } {
@@ -7402,18 +7407,18 @@ proc ::inorganicBuilder::transformCoordsToBox { boxlist {molid top} } {
   }
 #  puts "InorganicBuilder) Resetting coords"
   $allatoms set {x y z} $newcoords
-  
+
   mol on $molid
   return
 }
 
 proc ::inorganicBuilder::transformPiece { boxname p0 p1 p2 shift } {
   upvar $boxname box
-  
+
   foreach { a0 b0 c0 d0 } $p0 {}
   foreach { a1 b1 c1 d1 } $p1 {}
   foreach { a2 b2 c2 d2 } $p2 {}
-  
+
   # make a selection
   set atoms [atomselect top "$a0*x+$b0*y+$c0*z+$d0 >= 0 and $a1*x+$b1*y+$c1*z+$d1 < 0 and $a2*x+$b2*y+$c2*z+$d2 < 0"  ]
   set atomcount [$atoms num]
@@ -7428,10 +7433,10 @@ proc ::inorganicBuilder::transformPiece { boxname p0 p1 p2 shift } {
 proc ::inorganicBuilder::initMaterials {} {
   variable materialList
   variable materialPath
-  
+
 #  puts "InorganicBuilder) Building materials lib"
   set materialList [::inorganicBuilder::newMaterialList ]
-  
+
   set a { 4.978 0 0}
   set b { 0 4.978 0}
   set c { 0 0 6.948}
@@ -7442,7 +7447,7 @@ proc ::inorganicBuilder::initMaterials {} {
   set parfilename [ file join $materialPath sio2.inp]
 
   ::inorganicBuilder::addMaterial materialList "SiO2" "Silicon Dioxide" $basis $pdbname $topname $parfilename $cutoff
-    
+
   set a { 7.595 0.0 0.0}
   set b [vecscale 7.595 [list 0.5 [expr sqrt(3)/2] 0.0 ]]
   set c { 0.0 0.0 2.902 }
@@ -7451,9 +7456,9 @@ proc ::inorganicBuilder::initMaterials {} {
   set pdbname [ file join $materialPath si3n4.pdb]
   set topname [ file join $materialPath si3n4.top]
   set parfilename [ file join $materialPath si3n4.inp]
- 
+
   ::inorganicBuilder::addMaterial materialList "Si3N4" "Silicon Nitride" $basis $pdbname $topname $parfilename $cutoff 1
-    
+
   set a { 4.2522 -2.455 0 }
   set b { 0 4.910 0 }
   set c { 0 0 5.402 }
@@ -7464,7 +7469,7 @@ proc ::inorganicBuilder::initMaterials {} {
   set parfilename ""
 
   ::inorganicBuilder::addMaterial materialList "Quartz-alpha" "Quartz-alpha" $basis $pdbname $topname $parfilename $cutoff
-    
+
   set a { 1.228 -2.127 0 }
   set b { 1.228  2.127 0 }
   set c { 0 0 6.696 }
@@ -7513,35 +7518,35 @@ proc ::inorganicBuilder::initMaterials {} {
 proc ::inorganicBuilder::dumpCoordinates { boxname molid outfname } {
   array set box $boxname
   #upvar $boxname box
-  
+
   set outf [open $outfname w]
-  
+
   puts $outf "$box(origin)"
   puts $outf "[vecscale $box(na) $box(basisa)]"
   puts $outf "[vecscale $box(nb) $box(basisb)]"
   puts $outf "[vecscale $box(nc) $box(basisc)]"
-  
+
   set allatoms [atomselect $molid all]
   puts $outf "[$allatoms num]"
-  
+
   foreach atom [$allatoms get {index x y z}] {
     puts $outf "$atom"
   }
   $allatoms delete
-  
+
   close $outf
 }
 
 proc ::inorganicBuilder::findShell { boxname molid gridsz radius dist } {
   set sel [atomselect $molid all]
   set results [measure surface $sel $gridsz $radius $dist] 
-  
+
   return $results
 }
 
 # *** ADDED ***
 proc ::inorganicBuilder::buildStructs { molid } {
-  
+
   variable guiState
   variable homePath
   display update off  
@@ -7549,7 +7554,7 @@ proc ::inorganicBuilder::buildStructs { molid } {
   set dens_printer [lsort -dictionary $guiState(densearea)]
   set surfdex "all"
   #  set surfdex "not index $dens_printer"
-  
+
   # combine PDB files for surface/structure into one piece
   resetpsf        
   set Surf [atomselect $molid "$surfdex"]
@@ -7562,7 +7567,7 @@ proc ::inorganicBuilder::buildStructs { molid } {
   source [file normalize [file join $homePath "mkPEG" "attach_PEG_Au.tcl"  ]]
   source [file normalize [file join $homePath "mkDNA" "attach_ssDNA_Au.tcl"]]
   source [file normalize [file join $homePath "mkCUST" "attach_exb.tcl"]]
-  
+
   resetpsf
   foreach entry $guiState(all_struct) {
     readpsf ${entry}_all.psf
@@ -7590,10 +7595,10 @@ proc ::inorganicBuilder::buildStructs { molid } {
       }
       $structO delete
       $finalO delete
-		
+
 	}
 
-   
+
     attach_ssDNA_Au All_DNA.pdb Surf.pdb $guiState(o_list)$guiState(oau_list) $guiState(structedFile) $homePath
     file delete -force "tmp.pdb"
     file delete -force "Surf.pdb"
@@ -7620,7 +7625,7 @@ proc ::inorganicBuilder::buildStructs { molid } {
       }
       $structC delete
       $finalC delete
-		
+
 	}
 
     attach_PEG_Au All_PEG.pdb Surf.pdb $guiState(c_list) $guiState(cau_list)$guiState(structedFile) $homePath
@@ -7629,7 +7634,7 @@ proc ::inorganicBuilder::buildStructs { molid } {
     file delete -force "Surf.psf"
     file delete -force "All_PEG.pdb"
     file delete -force "All_PEG.psf"
-    
+
   } elseif { $guiState(addStructType) == "custom" } {
 
     writepsf All_CUST.psf
@@ -7640,7 +7645,7 @@ proc ::inorganicBuilder::buildStructs { molid } {
     set anclist [atomselect $tempAll all]
     set tempAtomCount [llength [$anclist get index]]
     $anclist delete
-    
+
     for {set iC $guiState(addCustomStructDetail)} { $iC < $tempAtomCount } { set iC [expr $iC + $guiState(CustStructLength)] } {
 		lappend guiState(anc_list) $iC
     }
@@ -7687,7 +7692,7 @@ proc ::inorganicBuilder::printBondStats {} {
 proc ::inorganicBuilder::mergeMoleculesResegment { topfile mol1 mol2 outfile } {
   set m1sel [atomselect $mol1 "all"]
   set m2sel [atomselect $mol2 "all"]
-  
+
   # Get atom types for the residues by building a dummy segment with
   # one of each residue type and then reading back the atoms
   set resnamelist [concat [$m1sel get resname] [$m2sel get resname]]
@@ -7696,7 +7701,7 @@ proc ::inorganicBuilder::mergeMoleculesResegment { topfile mol1 mol2 outfile } {
 
   set psfcon [psfcontext create]
   psfcontext eval $psfcon {
-  
+
   foreach top $topfile {
     topology $top
   }
@@ -7802,7 +7807,7 @@ proc ::inorganicBuilder::mergeMoleculesResegment { topfile mol1 mol2 outfile } {
   writepdb $outfile.pdb
   writepsf $outfile.psf
   }
-  
+
   psfcontext delete $psfcon
   $m1sel delete
   $m2sel delete
@@ -7832,7 +7837,7 @@ proc ::inorganicBuilder::solvateBox { boxlist infiles outfile} {
   set c [ getRealCoord box [list 0 0 0] ]
   set min $c
   set max $c
-  
+
   findSolvateMinMax min max [ getRealCoord box [list $box(na) 0 0]]
   findSolvateMinMax min max [ getRealCoord box [list 0 $box(nb) 0]]
   findSolvateMinMax min max [ getRealCoord box [list 0 0 $box(nc)]]
@@ -7841,23 +7846,23 @@ proc ::inorganicBuilder::solvateBox { boxlist infiles outfile} {
   findSolvateMinMax min max [ getRealCoord box [list 0 $box(nb) $box(nc)]]
   findSolvateMinMax min max [ getRealCoord box [list $box(na) $box(nb) $box(nc)]]
 #  puts "InorganicBuilder) Box corners $min --- $max"
-  
+
   # Solvate the box
 #  puts "InorganicBuilder) Calling solvate"
   solvate $psffile $outfile.0.pdb -o $outfile.1 -minmax [list $min $max]
   set solv_mol [molinfo top]
-  
+
   # Figure out which oxygens are outside of the box, and then trim them off
   # along with their attached hydrogens
   # puts "InorganicBuilder) Loading result"
   # set solv_mol [ mol new $outfile.1.psf type psf autobonds off waitfor all]
   # mol addfile $outfile.1.pdb type pdb autobonds off
-  
+
   # Get all the water oxygen molecules
 #  puts "InorganicBuilder) Getting Oxygens"
   set oxygens [atomselect $solv_mol "name OH2"]
   set oh2list [$oxygens get { index x y z } ]
-  
+
   # Find which oxygens to delete
   set del_list {}
   foreach oh2 $oh2list {
@@ -7877,7 +7882,7 @@ proc ::inorganicBuilder::solvateBox { boxlist infiles outfile} {
         lappend del_list $indx
       }
     }
-  
+
     # Only keep the non-deleted atoms
     # WARNING: I think this is going to produce an incomplete PSF file.
     # Probably need to copy what the solvate code to get a proper box
@@ -7888,7 +7893,7 @@ proc ::inorganicBuilder::solvateBox { boxlist infiles outfile} {
   }
   $keep_sel writepsf $outfile.psf
   $keep_sel writepdb $outfile.pdb
-  
+
   # If this is a hex box, transform to hex
   if { [string equal $box(type) "hex"] } {
     set hexmol [mol new $outfile.psf autobonds off waitfor all]
@@ -7922,7 +7927,7 @@ proc ::inorganicBuilder::findSolvateMinMax { min max vec } {
   if { $y < $y0 } { set y0 $y }
   if { $z < $z0 } { set z0 $z }
   set m0 [list $x0 $y0 $z0]
-  
+
   foreach { x1 y1 z1 } $m1 {}
   if { $x > $x1 } { set x1 $x }
   if { $y > $y1 } { set y1 $y }
@@ -7938,14 +7943,14 @@ proc ::inorganicBuilder::findBasisVectors { { molid top} } {
   set center [measure center $allatoms]
   set ucparams [molinfo $molid get { a b c alpha beta gamma }]
   foreach { a b c alpha beta gamma } $ucparams {}
-  
+
   set deg2rad 1.74532925199e-02
-  
+
   set cosbc [expr cos($alpha * $deg2rad)]
   set cosac [expr cos($beta * $deg2rad)]
   set cosab [expr cos($gamma * $deg2rad)]
   set sinab [expr sin($gamma * $deg2rad)]
-  
+
   set avec [list $a 0 0]
   set bvec [list [expr $b * $cosab] [expr $b * $sinab] 0]
   if { [expr $sinab > 0] } {
@@ -7954,7 +7959,7 @@ proc ::inorganicBuilder::findBasisVectors { { molid top} } {
     set ucz [expr sqrt(1.0 - $ucx * $ucx - $ucy * $ucy)]
   }
   set cvec [list [expr $c * $ucx] [expr $c * $ucy] [expr $c * $ucz] ]
-  
+
   return [list $center $avec $bvec $cvec]
 }
 
