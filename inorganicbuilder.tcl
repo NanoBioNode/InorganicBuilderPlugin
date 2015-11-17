@@ -393,6 +393,7 @@ proc ::inorganicBuilder::guiBuildDeviceWin {} {
 
   ## TODO: Rename this option to: "Save periodic box information to PDB"
   ## TODO: Change behavior accordingly
+  ## TODO: Move this box right next to the "Build device" button
   grid [label $w.body1.pbxlabel -text "Periodic box:"] -row $row -column 4 -sticky w
   #grid [checkbutton $w.body1.pbx -variable ${ns}::guiState(mmod) -command "${ns}::guiBuildDeviceWin" ] -row $row -column 5 -sticky w
   grid [checkbutton $w.body1.pbx -variable ${ns}::guiState(mmod) -command "${ns}::setVMDPeriodicBox [list $guiState(currentBox)] $guiState(geomMol)" ] -row $row -column 5 -sticky w
@@ -587,6 +588,7 @@ proc ::inorganicBuilder::guiBuildDeviceWin {} {
   frame $w.buttons
   set row 0
 
+  ## TODO: Change name (Build Hollow) to something more understandable
   grid [button $w.buttons.doit -text "Build device" -command "set ${ns}::guiState(buildHollow) 0; ${ns}::guiCreateBox; ${ns}::guiBuildStructure" ] -row $row -column 0
   grid [button $w.buttons.doit2 -text "Build Hollow" -command "set ${ns}::guiState(buildHollow) 1; ${ns}::guiCreateBox; ${ns}::guiBuildStructure" ] -row $row -column 1
   grid [button $w.buttons.clear -text "Clear device" -command "${ns}::guiClearDevice" ] -row $row -column 2
