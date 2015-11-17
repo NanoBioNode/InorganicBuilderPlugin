@@ -184,6 +184,7 @@ namespace eval ::inorganicBuilder:: {
     currentMol "none"
     currentMol1 "none"
     currentMol2 "none"
+    currentCustPDB ""
     linemols {}
     bondCutoff 1.0
     gridSz 1
@@ -1194,7 +1195,7 @@ proc ::inorganicBuilder::guiBuildSurfaceStructsWin {} {
       destroy $child
     }
   }
-  guiDrawMolFileFrame $ns $w.body "Surface-Only Molecule" "psffileA" "pdbfileA"
+  guiDrawMolFileFrame $ns $w.body "Surface Molecule" "psffileA" "pdbfileA"
 
 
   frame $w.body3
@@ -1974,8 +1975,8 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
     set guiState(addCUSTTypes) $guiState(addSurfTypes)
 
     grid [label $f.pdblabel -text "PDB: "] -row $row -column 0 -sticky w
-    grid [entry $f.pdbpath -width 30 -textvariable ${ns}::guiState($pdbkey_struct)] -row $row -column 1 -sticky ew
-    grid [button $f.pdbbutton -text "Browse" -command "set tempfile \[tk_getOpenFile -defaultextension .pdb \]; if \{!\[string equal \$tempfile \"\"\]\} \{ set ${ns}::guiState($pdbkey_struct) \$tempfile \};" ] -row $row -column 2 -sticky e
+    grid [entry $f.pdbpath -width 30 -textvariable ${ns}::guiState(currentCustPDB)] -row $row -column 1 -sticky ew
+    grid [button $f.pdbbutton -text "Browse" -command "set tempfile \[tk_getOpenFile -defaultextension .pdb \]; if \{!\[string equal \$tempfile \"\"\]\} \{ set ${ns}::guiState(currentCustPDB) \$tempfile \};" ] -row $row -column 2 -sticky e
     incr row
 
     grid [label $f.topolabel -text "Topology/Parameter CGenFF File: "] -row $row -column 0 -sticky w
@@ -2005,7 +2006,7 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
     grid [entry $f.cxorig2 -width 20 -textvariable ${ns}::guiState(addCustomK)] -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
     incr row
 
-    grid [label $f.cxoriglabel3 -text "Bond Equilibrium Distance:"] -row $row -column 0 -sticky w
+    grid [label $f.cxoriglabel3 -text "Equilibrium Bond Distance (\u00C5):"] -row $row -column 0 -sticky w
     grid [entry $f.cxorig3 -width 20 -textvariable ${ns}::guiState(addCustomX)] -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
     incr row
 
@@ -2485,7 +2486,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
   } else {
        source [file normalize [file join $homePath "mkCUST" "mod_pdb.tcl"]]
        set guiState(topofile_struct) [file normalize $guiState(topofile_struct)]
-       set guiState(pdbfile_struct) [file normalize $guiState(pdbfile_struct)]
+       set guiState(pdbfile_struct) [file normalize $guiState(currentCustPDB)]
        set pegname CUST$guiState(addCustomStructDetail)
        mod_pdb $guiState(pdbfile_struct) $guiState(topofile_struct) $pegname
 
@@ -3298,6 +3299,11 @@ proc ::inorganicBuilder::AlignDense { } {
     $struct_full move [trans center $anchor_coord axis x $orientX]
     $struct_full move [trans center $anchor_coord axis y $orientY]
     $struct_full move [trans center $anchor_coord axis z $orientZ]
+
+  # for custom structures, now place the Equilibrium bond length b/w connection atoms
+    if { $guiState(addStructType) == "custom" } {
+		$struct_full moveby [vecscale $vecnorma $guiState(addCustomX)]
+    }
 
 
     set fullglobname [string replace $guiState(filename_index_glob)_$guiState(pdbfile_struct) end-3 end]
