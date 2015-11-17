@@ -8,4 +8,4 @@
 # script is sourced, the variable $dir must contain the
 # full path name of this file's directory.
 
-package ifneeded inorganicbuilder 0.1 "set env(INORGANICBUILDERDIR) [list $dir]; source [list [file join $dir inorganicbuilder.tcl]]"
+package ifneeded inorganicbuilder 0.2 "set env(INORGANICBUILDERDIR) [list $dir]; source [list [file join $dir inorganicbuilder.tcl]]"
