@@ -4445,21 +4445,36 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
   set guiState(all_struct) [lreplace $guiState(all_struct) $deletelist $deletelist]
 
 # set the o_list, oau_list, c_list, cau_lists accordingly to account for removed struct
+  array unset molecules_counted
+  array unset moldel_start
+  array unset moldel_end
+
+  array set molecules_counted {}
+  array set moldel_start {}
+  array set moldel_end {}
+
+  set molecules_counted(dna) 0
+  set molecules_counted(peg) 0
+  set molecules_counted(custom) 0
+  set moldel_start(dna) 0
+  set moldel_start(peg) 0
+  set moldel_start(custom) 0
+  set moldel_end(dna) 0
+  set moldel_end(peg) 0
+  set moldel_end(custom) 0
+
   set structs_counted 0
-  set molecules_counted 0
-  set moldel_start 0
-  set moldel_end 0
 
   foreach built_structure $guiState(structlist) {	
 	  
    set write1 [lindex $built_structure 0]
    set write2 [llength [lindex [lindex $built_structure 2] 2]]
-   set pre_mol_count $molecules_counted
-   incr molecules_counted $write2
+   set pre_mol_count $molecules_counted($write1)
+   incr molecules_counted($write1) $write2
 
    if { $structs_counted == $deletelist } {
-	   set moldel_start $pre_mol_count
-	   set moldel_end [expr $molecules_counted - 1]
+	   set moldel_start($write1) $pre_mol_count
+	   set moldel_end($write1) [expr $molecules_counted($write1) - 1]
 	   break
    }
    incr structs_counted
@@ -4467,16 +4482,13 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
 
   
   if {[lindex [lindex $guiState(structlist) $deletelist] 0] == "dna"} {
-
-    set guiState(oau_list) [lreplace $guiState(oau_list) $moldel_start $moldel_end]
+    set guiState(oau_list) [lreplace $guiState(oau_list) $moldel_start(dna) $moldel_end(dna)]
 
   } elseif {[lindex [lindex $guiState(structlist) $deletelist] 0] == "peg"} {
-
-    set guiState(cau_list) [lreplace $guiState(cau_list) $moldel_start $moldel_end]
+    set guiState(cau_list) [lreplace $guiState(cau_list) $moldel_start(peg) $moldel_end(peg)]
     
   } elseif {[lindex [lindex $guiState(structlist) $deletelist] 0] == "custom"} {
-
-    set guiState(ancau_list) [lreplace $guiState(ancau_list) $moldel_start $moldel_end]
+    set guiState(ancau_list) [lreplace $guiState(ancau_list) $moldel_start(custom) $moldel_end(custom)]
     
   }
 
