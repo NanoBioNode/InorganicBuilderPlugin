@@ -1618,7 +1618,6 @@ proc ::inorganicBuilder::guiBuildSurfaceStructsWin {} {
   }
   guiDrawMolFileFrame $ns $w.body "Surface Molecule" "psffileA" "pdbfileA"
 
-
   frame $w.body3
   set row 0
   grid columnconfigure $w.body3 0 -weight 0
@@ -2095,7 +2094,8 @@ proc ::inorganicBuilder::guiSelectLoadedMolWin { psffile pdbfile \
   frame $aw.buttons
   set row 0
   grid [button $aw.buttons.add -text Select \
-    -command "${ns}::guiStoreMol $psffile $pdbfile; \
+    -command "${ns}::guiStoreMol $psffile $pdbfile;\
+    if {\"$psffile\" == \"psffileA\"} {${ns}::getSurfaceAtomTypes};\
 			destroy $aw"] \
     -row $row -column 0
   grid [button $aw.buttons.cancel -text Cancel -command "destroy $aw"] \
