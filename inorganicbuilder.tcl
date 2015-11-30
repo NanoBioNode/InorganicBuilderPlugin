@@ -231,6 +231,7 @@ namespace eval ::inorganicBuilder:: {
     setNAMDIMD "yes"
     setVMDSelSurf ""
     structedFile "CombinedStructSurf"
+    topofile_struct "EmptyNoTopo"
     simFile "sim0"
     structureIndex 0
     structureX -1
