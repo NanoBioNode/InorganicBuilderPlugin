@@ -27,7 +27,7 @@ set ssDNAAtomNum [$allSet num]
 mol delete top
 $allSet delete
 set id2 [mol new [lindex $argv 1]]
-set allSet2 [atomselect top "not resname AU"]
+set allSet2 [atomselect top "not resname AU4"]
 set nonAUNum [$allSet2 num]
 mol delete $id2
 $allSet2 delete
@@ -77,11 +77,11 @@ set all [atomselect top all]
 set segnames [lsort -unique [$all get segname]]
 
 # Correct Au name and resid
-set AU [atomselect top "resname AU"]
-$AU set name AU
-set AU_n [$AU num]
-set AU_index [$AU get index]
-$AU delete
+set AU4 [atomselect top "resname AU4"]
+$AU4 set name AU4
+set AU_n [$AU4 num]
+set AU_index [$AU4 get index]
+$AU4 delete
 set count 1
 set counte 0
 foreach i $AU_index {
@@ -90,7 +90,7 @@ foreach i $AU_index {
 		set count 1
 		lappend segnames "U$counte"
 	}
-    set AU_m [atomselect top "resname AU and index $i"]
+    set AU_m [atomselect top "resname AU4 and index $i"]
     $AU_m set resid [expr $count]
     $AU_m set segname "U$counte"
     incr count
@@ -142,8 +142,18 @@ package require psfgen             ;# load psfgen
 resetpsf                           ;# Destroys any previous attempts
 psfcontext reset                   ;# Tosses out any previously declared topology files
 
-topology [file join $homePath mkDNA/top_all36_na_3S.rtf] ;# tells psfgen how atoms in a residue should be bound
-topology [file join $homePath mkDNA/toppar_fcc_metals_2010.str]
+#topology [file join $homePath mkDNA/top_all36_na_3S.rtf] ;# tells psfgen how atoms in a residue should be bound
+#topology [file join $homePath mkDNA/toppar_fcc_metals_2010.str]
+
+set parDir [file normalize [file join $homePath "topology"]]
+set topFiles [exec ls {*}[glob -nocomplain $parDir/*.top]]
+set topFiles [list {*}$topFiles {*}[exec ls {*}[glob -nocomplain $parDir/*.str]]]
+set topFiles [list {*}$topFiles {*}[exec ls {*}[glob -nocomplain $parDir/*.rtf]]]
+
+foreach top $topFiles {
+   topology $top
+}
+
 
 foreach seg $segnames {
 	
