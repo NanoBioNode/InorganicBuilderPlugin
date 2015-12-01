@@ -82,7 +82,7 @@ close $out
 
 foreach ancval $anclist ancauval $ancaulist {
     lappend fun_list $ancval
-    lappend sub_list [expr $ancauval + $funAtomNum + $nonAUNum]
+    lappend sub_list [expr $ancauval + $funAtomNum]
     lappend bau_list [expr $ancauval + $funAtomNum + $nonAUNum - [llength $ancaulist]]
 }
 
@@ -162,7 +162,7 @@ foreach seg $segnames {
 guesscoord ;# guess the coordinates of missing atoms
 regenerate angles dihedrals ;# fixes problems with patching
 
-writepdb setBetas.pdb
+writepdb [lindex $argv 3].pdb
 writepsf [lindex $argv 3].psf
 #set betas [mol new setBetas.pdb]
 #set betasel [atomselect $betas "index $bau_list"]
@@ -175,8 +175,8 @@ writepsf [lindex $argv 3].psf
 #$betasel delete
 #$betaful delete
 #file delete -force "setBetas.pdb"
-#file delete -force "tmp.pdb"
-#mol delete top
+file delete -force "tmp.pdb"
+mol delete top
 
 ####################### make extrabond file #########################################
 
@@ -189,6 +189,7 @@ set x [lindex $argv 7]
 set out [open [lindex $argv 5] w]
 
 foreach fun_seg $fun_segname_list fun_res $fun_resid_list fun_name $fun_name_list sub_seg $sub_segname_list sub_res $sub_resid_list sub_name $sub_name_list {
+
     set i0sel [atomselect top "segname $fun_seg and resid $fun_res and name $fun_name"]
     set i1sel [atomselect top "segname $sub_seg and resid $sub_res and name $sub_name"]
     set i0 [$i0sel get index]

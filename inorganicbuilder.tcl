@@ -231,6 +231,7 @@ namespace eval ::inorganicBuilder:: {
     setNAMDIMD "yes"
     setVMDSelSurf ""
     structedFile "CombinedStructSurf"
+    topofile_struct "EmptyNoTopo"
     simFile "sim0"
     structureIndex 0
     structureX -1
@@ -262,6 +263,7 @@ namespace eval ::inorganicBuilder:: {
     currentMol "none"
     currentMol1 "none"
     currentMol2 "none"
+    currentCustPDB ""
     linemols {}
     bondCutoff 1.0
     gridSz 1
@@ -1615,8 +1617,7 @@ proc ::inorganicBuilder::guiBuildSurfaceStructsWin {} {
       destroy $child
     }
   }
-  guiDrawMolFileFrame $ns $w.body "Surface-Only Molecule" "psffileA" "pdbfileA"
-
+  guiDrawMolFileFrame $ns $w.body "Surface Molecule" "psffileA" "pdbfileA"
 
   frame $w.body3
   set row 0
@@ -2094,7 +2095,8 @@ proc ::inorganicBuilder::guiSelectLoadedMolWin { psffile pdbfile \
   frame $aw.buttons
   set row 0
   grid [button $aw.buttons.add -text Select \
-    -command "${ns}::guiStoreMol $psffile $pdbfile; \
+    -command "${ns}::guiStoreMol $psffile $pdbfile;\
+    if {\"$psffile\" == \"psffileA\"} {${ns}::getSurfaceAtomTypes};\
 			destroy $aw"] \
     -row $row -column 0
   grid [button $aw.buttons.cancel -text Cancel -command "destroy $aw"] \
@@ -2923,12 +2925,12 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
     grid [label $f.pdblabel -text "PDB: "] \
       -row $row -column 0 -sticky w
     grid [entry $f.pdbpath -width 30 \
-            -textvariable ${ns}::guiState($pdbkey_struct)] \
+            -textvariable ${ns}::guiState(currentCustPDB)] \
       -row $row -column 1 -sticky ew
     grid [button $f.pdbbutton -text "Browse" \
            -command "set tempfile \[tk_getOpenFile -defaultextension .pdb \]; \
                      if \{!\[string equal \$tempfile \"\"\]\} \{ \
-                       set ${ns}::guiState($pdbkey_struct) \$tempfile \
+                       set ${ns}::guiState(currentCustPDB) \$tempfile \
 	                   \};" \
           ] -row $row -column 2 -sticky e
     incr row
@@ -2978,7 +2980,7 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
       -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
     incr row
     
-    grid [label $f.cxoriglabel3 -text "Bond Equilibrium Distance:"] \
+    grid [label $f.cxoriglabel3 -text "Bond Equilibrium Distance (Angstrom):"] \
       -row $row -column 0 -sticky w
     grid [entry $f.cxorig3 -width 20 \
       -textvariable ${ns}::guiState(addCustomX)] \
@@ -3503,7 +3505,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
   } else {
        source [file normalize [file join $homePath "mkCUST" "mod_pdb.tcl"]]
        set guiState(topofile_struct) [file normalize $guiState(topofile_struct)]
-       set guiState(pdbfile_struct) [file normalize $guiState(pdbfile_struct)]
+       set guiState(pdbfile_struct) [file normalize $guiState(currentCustPDB)]
        set pegname CUST$guiState(addCustomStructDetail)
        mod_pdb $guiState(pdbfile_struct) $guiState(topofile_struct) $pegname
        
@@ -4336,6 +4338,10 @@ proc ::inorganicBuilder::AlignDense { } {
     $struct_full move [trans center $anchor_coord axis y $orientY]
     $struct_full move [trans center $anchor_coord axis z $orientZ]
 
+  # for custom structures, now place the Equilibrium bond length b/w connection atoms
+    if { $guiState(addStructType) == "custom" } {
+		$struct_full moveby [vecscale $vecnorma $guiState(addCustomX)]
+    }
 
     set fullglobname [string replace $guiState(filename_index_glob)_$guiState(pdbfile_struct) end-3 end]
     lappend structnames $fullglobname
@@ -4440,21 +4446,36 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
   set guiState(all_struct) [lreplace $guiState(all_struct) $deletelist $deletelist]
 
 # set the o_list, oau_list, c_list, cau_lists accordingly to account for removed struct
+  array unset molecules_counted
+  array unset moldel_start
+  array unset moldel_end
+
+  array set molecules_counted {}
+  array set moldel_start {}
+  array set moldel_end {}
+
+  set molecules_counted(dna) 0
+  set molecules_counted(peg) 0
+  set molecules_counted(custom) 0
+  set moldel_start(dna) 0
+  set moldel_start(peg) 0
+  set moldel_start(custom) 0
+  set moldel_end(dna) 0
+  set moldel_end(peg) 0
+  set moldel_end(custom) 0
+
   set structs_counted 0
-  set molecules_counted 0
-  set moldel_start 0
-  set moldel_end 0
 
   foreach built_structure $guiState(structlist) {	
 	  
    set write1 [lindex $built_structure 0]
    set write2 [llength [lindex [lindex $built_structure 2] 2]]
-   set pre_mol_count $molecules_counted
-   incr molecules_counted $write2
+   set pre_mol_count $molecules_counted($write1)
+   incr molecules_counted($write1) $write2
 
    if { $structs_counted == $deletelist } {
-	   set moldel_start $pre_mol_count
-	   set moldel_end [expr $molecules_counted - 1]
+	   set moldel_start($write1) $pre_mol_count
+	   set moldel_end($write1) [expr $molecules_counted($write1) - 1]
 	   break
    }
    incr structs_counted
@@ -4462,16 +4483,13 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
 
   
   if {[lindex [lindex $guiState(structlist) $deletelist] 0] == "dna"} {
-
-    set guiState(oau_list) [lreplace $guiState(oau_list) $moldel_start $moldel_end]
+    set guiState(oau_list) [lreplace $guiState(oau_list) $moldel_start(dna) $moldel_end(dna)]
 
   } elseif {[lindex [lindex $guiState(structlist) $deletelist] 0] == "peg"} {
-
-    set guiState(cau_list) [lreplace $guiState(cau_list) $moldel_start $moldel_end]
+    set guiState(cau_list) [lreplace $guiState(cau_list) $moldel_start(peg) $moldel_end(peg)]
     
   } elseif {[lindex [lindex $guiState(structlist) $deletelist] 0] == "custom"} {
-
-    set guiState(ancau_list) [lreplace $guiState(ancau_list) $moldel_start $moldel_end]
+    set guiState(ancau_list) [lreplace $guiState(ancau_list) $moldel_start(custom) $moldel_end(custom)]
     
   }
 
