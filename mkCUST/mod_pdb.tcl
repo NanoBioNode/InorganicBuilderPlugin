@@ -4,14 +4,15 @@
 # 2015/11/1
 #
 
-proc mod_pdb { inPdb topFile outPdb } {
-set argc 4
+proc mod_pdb { inPdb topFile outPdb csD} {
+set argc 5
 set argv {}
 lappend argv $inPdb
 lappend argv $topFile
 lappend argv $outPdb
+lappend argv $csD
 
-if {$argc != 4} {
+if {$argc != 5} {
     puts "vmd -dispdev text -e mkNAMD.tcl -args inPdb topFile outPdb "
     puts "inPdb: The pdb file containing the functional group."
     puts "topFile: The topology/parameter file from CGenFF."
@@ -19,6 +20,44 @@ if {$argc != 4} {
 
     exit
 }
+
+# orient the incoming molecule along x-axis [1,0,0]
+set molsel [mol new ${inPdb}]
+
+# move anchor to 0 0 0
+set as [atomselect $molsel all]
+set b [atomselect $molsel "index $csD"]
+set bx [expr [$b get x]*-1]
+set by [expr [$b get y]*-1]
+set bz [expr [$b get z]*-1]
+set M "$bx $by $bz"
+$as moveby $M
+
+# find avg vector direction from 0 0 0
+proc lavg L {expr ([join $L +])/[llength $L].}
+set xa [lavg [ $as get x ]]
+set ya [lavg [ $as get y ]]
+set za [lavg [ $as get z ]]
+#graphics $molsel cylinder "0 0 0" "$xa $ya $za" radius 1
+
+set vec1 [vecnorm "$xa $ya $za"]
+set vec2 [vecnorm {1 0 0}]
+
+# compute the angle and axis of rotation
+set rotvec [veccross $vec1 $vec2]
+set sine   [veclength $rotvec]
+set cosine [vecdot $vec1 $vec2]
+set angle [expr atan2($sine,$cosine)]
+
+# return the rotation matrix and rotate the molecule
+set ts [trans center "0 0 0" axis $rotvec $angle rad]
+$as move $ts
+
+set all1 [atomselect top all]
+
+$all1 writepdb ${inPdb}_temp.pdb
+mol delete top
+$all1 delete
 
 
 
@@ -39,7 +78,7 @@ close $top
 
 
 # correct functional group pdb
-mol new ${inPdb}
+mol new ${inPdb}_temp.pdb
 
 set all [atomselect top all]
 
@@ -58,5 +97,5 @@ $all writepsf ${outPdb}.psf
 mol delete top
 
 $all delete
-
+file delete -force ${inPdb}_temp.pdb
 }
