@@ -3507,7 +3507,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
        set guiState(topofile_struct) [file normalize $guiState(topofile_struct)]
        set guiState(pdbfile_struct) [file normalize $guiState(currentCustPDB)]
        set pegname CUST$guiState(addCustomStructDetail)
-       mod_pdb $guiState(pdbfile_struct) $guiState(topofile_struct) $pegname
+       mod_pdb $guiState(pdbfile_struct) $guiState(topofile_struct) $pegname $guiState(addCustomStructDetail)
        
        set guiState(pdbfile_struct) $pegname.pdb
        set guiState(psffile_struct) $pegname.psf
