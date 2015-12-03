@@ -4,8 +4,8 @@
 # 2015/6/30
 #
 
-proc mkNAMD { builtPSF builtPDB outDir parDir dimFactor namdFile simFile Temperature Dielectric Damping minimStep simStep setIMD sspVecs exb exbFile con conFile topoFile} {
-set argc 19
+proc mkNAMD { builtPSF builtPDB outDir parDir dimFactor namdFile simFile Temperature Dielectric Damping minimStep simStep setIMD sspVecs exb exbFile con conFile topoFile constPressure gridforce gridforceFile gridforcePotFile gridforceCont1 gridforceCont2 gridforceCont3} {
+set argc 26
 set argv {}
 
 lappend argv $builtPSF
@@ -28,7 +28,7 @@ lappend argv $conFile
 lappend argv $topoFile
 lappend argv $simFile
 
-if {$argc != 19} {
+if {$argc != 26} {
     puts "vmd -dispdev text -e mkNAMD.tcl -args psf pdb outDir parDir dimFactor namdFile"
     puts "psf: psf file"
     puts "pdb: pdb file"
@@ -66,6 +66,23 @@ set namdFile [open [lindex $argv 5] w]
 set Temperature [lindex $argv 6]
 set Dielectric [lindex $argv 7]
 set Damping [lindex $argv 8]
+
+if {$gridforceCont1} {
+    set gridforceCont1 "on"
+} else {
+    set gridforceCont1 "off"
+}
+if {$gridforceCont2} {
+    set gridforceCont2 "on"
+} else {
+    set gridforceCont2 "off"
+}
+if {$gridforceCont3} {
+    set gridforceCont3 "on"
+} else {
+    set gridforceCont3 "off"
+}
+
 
 puts $namdFile "########################################################"
 puts $namdFile "#### NAMD config file for simulating a box of water ####"
@@ -140,11 +157,11 @@ puts $namdFile "#loweAndersen        on"
 puts $namdFile "#loweAndersenTemp    \$temperature"
 puts $namdFile ""
 puts $namdFile "## perform constant pressure simulation"
-puts $namdFile "if {1} { "
+puts $namdFile "if {$constPressure} { "
 puts $namdFile "langevinPiston        on      ;# turn this off for constant volume sim"
 puts $namdFile "langevinPistonTarget  1.01325 ;#  in bar -> 1 atm"
-puts $namdFile "langevinPistonPeriod  100.  "
-puts $namdFile "langevinPistonDecay   50."
+puts $namdFile "langevinPistonPeriod  1000.  "
+puts $namdFile "langevinPistonDecay   500."
 puts $namdFile "langevinPistonTemp    \$temperature"
 puts $namdFile "}"
 puts $namdFile ""
@@ -267,16 +284,16 @@ puts $namdFile "                                                      #1V/A = 23
 puts $namdFile "}"
 puts $namdFile "## TCLforces"
 puts $namdFile "## etc."
-puts $namdFile "if {0} {"
+puts $namdFile "if {$gridforce} {"
 puts $namdFile "gridforce                       on"
-puts $namdFile "gridforceFile                   constrain/square2plate_1MKCl_reduce_Mg3_DNAConstrain.pdb"
+puts $namdFile "gridforceFile                   $gridforceFile"
 puts $namdFile "gridforceCol                    B"
 puts $namdFile "gridforceChargeCol              O"
-puts $namdFile "gridforcePotFile                grid_180.dx"
+puts $namdFile "gridforcePotFile                $gridforcePotFile"
 puts $namdFile "gridforceScale                  2 2 2"
-puts $namdFile "gridforceCont1                  on"
-puts $namdFile "gridforceCont2                  on"
-puts $namdFile "gridforceCont3                  off"
+puts $namdFile "gridforceCont1                  $gridforceCont1"
+puts $namdFile "gridforceCont2                  $gridforceCont2"
+puts $namdFile "gridforceCont3                  $gridforceCont3"
 puts $namdFile "}"
 puts $namdFile ""
 puts $namdFile ""
