@@ -1,0 +1,13 @@
+read rtf card append                
+* Topologies from top_all36_prot.rtf
+*                                   
+*                                   
+36 1                                
+
+RESI THIO         0.00 ! from CYS
+ATOM SG   S      -0.23  !     |           
+ATOM HG1  HS      0.16
+
+BOND SG HG1
+
+END
