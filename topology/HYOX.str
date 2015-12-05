@@ -1,0 +1,12 @@
+read rtf card append                
+* Topologies from top_all36_prot.rtf
+*                                   
+36 1                                
+
+RESI HYOX         0.00 ! from SER
+ATOM OG   OH1    -0.66  !     |           
+ATOM HG1  H       0.43  !     | HG21 HG22 
+
+BOND OG HG1
+
+END

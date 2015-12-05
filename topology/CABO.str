@@ -1,0 +1,13 @@
+read rtf card append                
+* Topologies from top_all36_prot.rtf
+*                                   
+36 1                                
+
+RESI CABO        -1.00 ! from ASP
+ATOM CG   CC      0.62  !     |           
+ATOM OD1  OC     -0.76
+ATOM OD2  OC     -0.76
+
+BOND OD2 CG OD1 CG
+
+END

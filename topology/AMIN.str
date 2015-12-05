@@ -1,0 +1,14 @@
+read rtf card append                
+* Topologies from top_all36_prot.rtf
+*                                   
+36 1                                
+
+RESI AMIN         0.00 ! from LYS
+ATOM NZ   NH3    -0.30
+ATOM HZ1  HC      0.33
+ATOM HZ2  HC      0.33
+ATOM HZ3  HC      0.33
+
+BOND NZ HZ1  NZ HZ2  NZ HZ3   
+
+END
