@@ -21,12 +21,15 @@ proc build_nt {numOfStrand template out numberOfNucleotide} {
     if {$numOfStrand == 1} {
         set sel [atomselect top "segname DS1"]
         $sel writepdb tmp.pdb
+        $sel delete
     } else {
         $all writepdb tmp.pdb
     }
 
     $all delete
-    mol delete all
+    $sel1 delete
+    $sel2 delete
+    mol delete $id
     set inStream [open tmp.pdb r]
     foreach line [split [read $inStream] \n] {
 
@@ -115,10 +118,11 @@ proc mkDNA { numOfStrand numberOfNucleotide outputname homepath seqFileIn } {
     
     close $out
     
-    mol new build_re.pdb
+    set ie [mol new build_re.pdb]
     set all [atomselect top all]
     $all writepdb build_re_1.pdb
-    mol delete all
+    $all delete
+    mol delete $ie
     
     ####################### psfgen #########################################
     
