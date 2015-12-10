@@ -2013,7 +2013,9 @@ proc ::inorganicBuilder::guiAddStructWin {} {
   menu $aw.type.menub.menu -tearoff no
     
   $aw.type.menub config -width 20
-  set typelist { {custom "Custom Structure Selection"} {peg "Polyethylene Glycol"} {dna "DNA"}}
+  set typelist { {custom "Custom Structure Selection"} {peg "Polyethylene Glycol"}\
+				 {dna "DNA (single or double)"} {thiol "Sulfhydryl Group"} {amine "Protonated Amino Group"}\
+				 {hyox "Hydroxyl Group"} {cabo "Carboxylate Group"} }
   
   if { ![info exists guiState(addStructType)] } {
     set guiState(addStructType) [lindex $typelist 1 0]
@@ -2792,6 +2794,7 @@ proc ::inorganicBuilder::guiAddBlockParams { f } {
 
 proc ::inorganicBuilder::guiAddStructParams { f } {
   variable guiState
+  variable homePath
   set ns [namespace current]
   set psfkey_struct "psffile_struct"
   set pdbkey_struct "pdbfile_struct"
@@ -2918,9 +2921,45 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
     incr row
 
     
-  } elseif { [string equal $type "custom"] } {
+  } elseif { [string equal $type "custom"] || [string equal $type "amine"]\
+		  || [string equal $type "thiol"] || [string equal $type "cabo"]\
+		  || [string equal $type "hyox"]} {
 
     set guiState(addCUSTTypes) $guiState(addSurfTypes)
+    
+    # Prepare custom menu for Amine
+    if { [string equal $type "amine"] } {
+		set guiState(currentCustPDB) [file normalize [file join $homePath "functionalGroup" "AMIN.pdb"]]
+		set guiState($topokey_struct) [file normalize [file join $homePath "topology" "AMIN.str"]]
+		set guiState(addCustomStructDetail) 0
+		set guiState(addStructType) "custom"
+		set guiState(addCustomK) 200.00
+		set guiState(addCustomX) 1.4800
+	    
+	} elseif { [string equal $type "thiol"] } {
+		set guiState(currentCustPDB) [file normalize [file join $homePath "functionalGroup" "THIO.pdb"]]
+		set guiState($topokey_struct) [file normalize [file join $homePath "topology" "THIO.str"]]
+		set guiState(addCustomStructDetail) 0
+		set guiState(addStructType) "custom"
+		set guiState(addCustomK) 198.00
+		set guiState(addCustomX) 1.8180
+		
+	} elseif { [string equal $type "cabo"]  } {
+		set guiState(currentCustPDB) [file normalize [file join $homePath "functionalGroup" "CABO.pdb"]]
+		set guiState($topokey_struct) [file normalize [file join $homePath "topology" "CABO.str"]]
+		set guiState(addCustomStructDetail) 0
+		set guiState(addStructType) "custom"
+		set guiState(addCustomK) 200.00
+		set guiState(addCustomX) 1.5220
+
+	} elseif { [string equal $type "hyox"]  } { 
+		set guiState(currentCustPDB) [file normalize [file join $homePath "functionalGroup" "HYOX.pdb"]]
+		set guiState($topokey_struct) [file normalize [file join $homePath "topology" "HYOX.str"]]
+		set guiState(addCustomStructDetail) 0
+		set guiState(addStructType) "custom"
+		set guiState(addCustomK) 428.00
+		set guiState(addCustomX) 1.4200
+	}
 	  
     grid [label $f.pdblabel -text "PDB: "] \
       -row $row -column 0 -sticky w
@@ -2989,6 +3028,33 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
     
   }
     
+
+    if { [string equal $type "amine"]\
+		  || [string equal $type "thiol"] || [string equal $type "cabo"]\
+		  || [string equal $type "hyox"] } {
+	  if { [winfo exists $f.cxorig3] } {
+
+	    $f.pdbpath configure -state disabled
+	    $f.pdbbutton configure -state disabled
+	    $f.topopath configure -state disabled
+	    $f.topobutton configure -state disabled
+	    $f.cxorig configure -state disabled
+	    $f.cxorig2 configure -state disabled	    
+	    $f.cxorig3 configure -state disabled	    
+			
+	  }
+	} else {
+	  if { [winfo exists $f.cxorig3] } {
+	    $f.pdbpath configure -state normal
+	    $f.pdbbutton configure -state normal
+	    $f.topopath configure -state normal
+	    $f.topobutton configure -state normal
+	    $f.cxorig configure -state normal
+	    $f.cxorig2 configure -state normal
+	    $f.cxorig3 configure -state normal	    		
+	  }
+	}
+
   
   guiRepackStructAdd
 }
