@@ -77,11 +77,12 @@ set all [atomselect top all]
 set segnames [lsort -unique [$all get segname]]
 
 # Correct Au name and resid
-set AU4 [atomselect top "resname AU4"]
-$AU4 set name AU4
-set AU_n [$AU4 num]
-set AU_index [$AU4 get index]
-$AU4 delete
+set AU [atomselect top "resname AU4"]
+$AU set resname AU
+$AU set name AU
+set AU_n [$AU num]
+set AU_index [$AU get index]
+$AU delete
 set count 1
 set counte 0
 foreach i $AU_index {
@@ -90,7 +91,7 @@ foreach i $AU_index {
 		set count 1
 		lappend segnames "U$counte"
 	}
-    set AU_m [atomselect top "resname AU4 and index $i"]
+    set AU_m [atomselect top "resname AU and index $i"]
     $AU_m set resid [expr $count]
     $AU_m set segname "U$counte"
     incr count
