@@ -144,7 +144,8 @@ package require psfgen             ;# load psfgen
 resetpsf                           ;# Destroys any previous attempts
 psfcontext reset                   ;# Tosses out any previously declared topology files
 
-topology [file join $homepath mkPEG/top_all36_cgenff.rtf] ;# tells psfgen how atoms in a residue should be bound
+set parDir [file normalize [file join $homepath "topology"]]
+topology $parDir/top_all36_cgenff_PEGA.rtf ;# tells psfgen how atoms in a residue should be bound
 
 set ID [mol new ${outname}.pdb]
 set seg [lindex $Segname_n 0]
