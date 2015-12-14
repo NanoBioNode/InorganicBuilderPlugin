@@ -131,7 +131,8 @@ proc mkDNA { numOfStrand numberOfNucleotide outputname homepath seqFileIn } {
     resetpsf                           ;# Destroys any previous attempts
     psfcontext reset                   ;# Tosses out any previously declared topology files
     
-    topology [file join $homepath mkDNA/top_all36_na_3S.rtf] ;# tells psfgen how atoms in a residue should be bound
+    set parDir [file normalize [file join $homepath "topology"]]
+    topology $parDir/top_all36_na_3S.rtf ; # tells psfgen how atoms in a residue should be bound
     
     # Here's for nucleics
     foreach suff {"" 3 5} {
