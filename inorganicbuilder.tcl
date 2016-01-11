@@ -3463,7 +3463,6 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
        source [file normalize [file join $homePath "mkDNA" "mkDNA.tcl"]]
        set pegname DNA$guiState(addDNALength)
 
-
        mkDNA $guiState(addDNAStrand) $guiState(addDNALength) $pegname $homePath $guiState(addDNASEQ)
        set guiState(pdbfile_struct) $pegname.pdb
        set guiState(psffile_struct) $pegname.psf
@@ -3482,7 +3481,6 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
            $usurf_atomsel delete
 
            set dsurface_area [subtract_list $dsurface_area $guiState(global_useddense)]
-
 		   } else {
 			 set dsurf_atomsel [atomselect $molid [concat "index" $guiState(surfacearea)\
 			 "and beta == 0"]]
@@ -4934,7 +4932,7 @@ proc ::inorganicBuilder::guiRunNAMD {} {
   set aw [toplevel ".ibrunnamd"]
   wm title $aw "Run NAMD"
   wm resizable $aw yes yes
-#  grab set ".ibrunnamd"
+  grab set ".ibrunnamd"
   set ns [namespace current]
 
   frame $aw.type
@@ -5044,10 +5042,10 @@ proc ::inorganicBuilder::guiRunNAMD {} {
 
   
   grid [button $aw.buttons.add -text "Create Minimization" \
-    -command "${ns}::RunNAMD 0; destroy $aw"] \
+    -command "destroy $aw; ${ns}::RunNAMD 0"] \
     -row $row -column 0
   grid [button $aw.buttons.con -text "Continue Simulation" \
-    -command "${ns}::RunNAMD 1; destroy $aw"] \
+    -command "destroy $aw; ${ns}::RunNAMD 1"] \
     -row $row -column 1
   grid [button $aw.buttons.cancel -text Cancel -command "destroy $aw"] \
     -row $row -column 2
@@ -5159,6 +5157,16 @@ proc ::inorganicBuilder::RunNAMD { type } {
     file copy -force $psfpath_copy $namdpackpath
   }
 
+# fake the unused parameters to have valid values so that mkNAMD will run,
+# note that using the gridforce is not truly enabled.
+  set guiState(constPressure) 1
+  set guiState(gridforce) 0
+  set guiState(gridforceFile) "Constrain.pdb"
+  set guiState(gridforcePotFile) "grid_file.dx"
+  set guiState(gridforceCont1) 1
+  set guiState(gridforceCont2) 1
+  set guiState(gridforceCont3) 0
+
 #  file copy --force $readmepath $namdpackpath
   # build and copy the NAMD file with appropriate pathing
   mkNAMD $guiState(structedFile).psf $guiState(structedFile).pdb $namdpackpath\
@@ -5166,22 +5174,61 @@ proc ::inorganicBuilder::RunNAMD { type } {
     $guiState(setNAMDdiel) $guiState(setNAMDpress) $guiState(setNAMDminimStep)\
      $guiState(setNAMDsimStep) $guiState(setNAMDIMD) $guiState(sspVecs)\
       $guiState(exb) $guiState(exbFile) $guiState(con) $guiState(conFile)\
-       $guiState(topofile_struct)
+       $guiState(topofile_struct) $guiState(constPressure) $guiState(gridforce)\
+        $guiState(gridforceFile) $guiState(gridforcePotFile) $guiState(gridforceCont1)\
+         $guiState(gridforceCont2) $guiState(gridforceCont3)
 
   file copy -force $namdfilepath $namdpackpath
 
-  set alpha [catch {exec $guiState(namdhandle) $namdFile &}]
+  set alpha [catch {exec $guiState(namdhandle) $namdFile &} namdPID]
   if {$alpha != 0} {
     tk_messageBox -icon error -message \
       "The NAMD executable was not able to be run using the specified global handle '$guiState(namdhandle)'." \
       -type ok  
   } else {
 	  if {$guiState(setNAMDIMD) == "yes"} {
-	    imdmenu_tk
+		imdmenu_tk
+		update idletasks
+		set waitLimit 0
+		if { [info exists sockChan] } {
+			unset sockChan
+		}
+		while {![info exists sockChan] || $waitLimit > 65000} {
+			after 600
+			set waitLimit [expr $waitLimit + 600]
+			for {set i 1025} { $i < 4096 } { incr i } {
+				if {![catch {set sockChan [socket localhost $i]}]} {
+					set portIMD $i
+				}
+			}
+		}
+	  imd connect localhost $portIMD
+	  update idletasks
+	  update
 	  }
+	  
+
+  }
+  set checkPID [catch {exec kill -0 $namdPID}]
+  set waitTime 0
+  while {$checkPID != 1 && $waitTime < 65000 } {
+	  after 600
+	  set waitTime [expr $waitTime + 600]
+	  set checkPID [catch {exec kill -0 $namdPID}]
+  }
+  if {$checkPID == 1 && $alpha == 0} {
+	  mol delete top
+	  set movieid [mol new $guiState(structedFile).pdb]
+	  set addFiles [glob -nocomplain -- $namdpackpath/*.dcd]
+	  set addFLen [llength $addFiles]
+	  mol rename $movieid "$guiState(simFile)_$addFLen"
+	  mol addfile $guiState(structedFile).psf type psf autobonds off waitfor all
+	  foreach addF $addFiles {
+		  mol addfile $addF	
+	  }
+
   }
 
-  
 }
 
 
