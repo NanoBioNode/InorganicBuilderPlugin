@@ -5203,8 +5203,8 @@ proc ::inorganicBuilder::RunNAMD { type } {
 			}
 		}
 	  imd connect localhost $portIMD
-	  update idletasks
-	  update
+#	  update idletasks
+#	  update
 	  }
 	  
 
