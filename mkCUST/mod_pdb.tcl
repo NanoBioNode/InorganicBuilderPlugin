@@ -55,10 +55,21 @@ $as move $ts
 
 set all1 [atomselect top all]
 
-$all1 writepdb ${inPdb}_temp.pdb
+
+if {[lindex [split $topFile "."] end] == "str"} {
+	
+$all1 writepdb inPdb_temp.pdb
 mol delete top
 $all1 delete
+	
+} else {
+	
+$all1 writepdb ${outPdb}.pdb
+# this is a fake psf simply for processing using the same flow as built-in structs
+$all1 writepsf ${outPdb}.psf
+return
 
+}
 
 
 # get resname and atom name from topology file
@@ -78,7 +89,7 @@ close $top
 
 
 # correct functional group pdb
-mol new ${inPdb}_temp.pdb
+mol new inPdb_temp.pdb
 
 set all [atomselect top all]
 
@@ -97,5 +108,5 @@ $all writepsf ${outPdb}.psf
 mol delete top
 
 $all delete
-file delete -force ${inPdb}_temp.pdb
+file delete -force inPdb_temp.pdb
 }
