@@ -162,19 +162,20 @@ foreach seg $segnames {
 guesscoord ;# guess the coordinates of missing atoms
 regenerate angles dihedrals ;# fixes problems with patching
 
-writepdb [lindex $argv 3].pdb
+writepdb setBetas.pdb
 writepsf [lindex $argv 3].psf
-#set betas [mol new setBetas.pdb]
-#set betasel [atomselect $betas "index $bau_list"]
-#set betaful [atomselect $betas all]
-#$betasel set beta 1.1
-#$betaful writepdb [lindex $argv 3].pdb
+set betas [mol new setBetas.pdb]
+set betasel [atomselect $betas "index $bau_list"]
+set betaful [atomselect $betas all]
+$betasel set beta 1.1
+$betaful writepdb [lindex $argv 3].pdb
 
-#mol delete $id
-#mol delete $betas
-#$betasel delete
-#$betaful delete
-#file delete -force "setBetas.pdb"
+
+mol delete $id
+mol delete $betas
+$betasel delete
+$betaful delete
+file delete -force "setBetas.pdb"
 file delete -force "tmp.pdb"
 mol delete top
 
@@ -208,15 +209,16 @@ close $out
 set all [atomselect top all]
 
 $all set beta 0
-$all set occupancy 0
+#$all set occupancy 0
 
 set sub [atomselect top "segname S0"]
 
 $sub set beta 20
-$sub set occupancy 20
+#$sub set occupancy 20
 
 $all writepdb [lindex $argv 8]
 
 $all delete
+$sub delete
 
 }

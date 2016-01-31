@@ -54,7 +54,8 @@ set ts [trans center "0 0 0" axis $rotvec $angle rad]
 $as move $ts
 
 set all1 [atomselect top all]
-
+$as delete
+$b delete
 
 if {[lindex [split $topFile "."] end] == "str"} {
 	
@@ -63,10 +64,12 @@ mol delete top
 $all1 delete
 	
 } else {
-	
+
+# Using a CHARMM file instead of CGenFF so just quit from mod_pdb	
 $all1 writepdb ${outPdb}.pdb
 # this is a fake psf simply for processing using the same flow as built-in structs
 $all1 writepsf ${outPdb}.psf
+$all1 delete
 return
 
 }
@@ -99,6 +102,7 @@ $all set segname F0
 foreach ind [$all get index] {
     set sel [atomselect top "index $ind"]
     $sel set name [lindex $atomName $ind]
+    $sel delete
 }
 
 $all writepdb ${outPdb}.pdb
