@@ -4774,14 +4774,14 @@ proc ::inorganicBuilder::getSurfaceAtoms { } {
   mol addrep $molid
   mol modselect 1 $molid "index $rs"
 
-  mol modcolor 1 $molid resname
+  mol modcolor 1 $molid ColorID 6
   mol colupdate 1 $molid 1 
   mol scaleminmax $molid 1 auto 
   mol modstyle 1 $molid Licorice
 
   mol addrep $molid
   mol modselect 2 $molid "name $STypeList"
-  mol modcolor 2 $molid name
+  mol modcolor 2 $molid ColorID 6
   mol modmaterial 2 $molid Transparent
   mol colupdate 2 $molid 1 
   mol modstyle 2 $molid QuickSurf 2 2.6 1 high
@@ -5192,6 +5192,7 @@ proc ::inorganicBuilder::RunNAMD { type } {
 		set waitLimit 0
 		if { [info exists sockChan] } {
 			unset sockChan
+			unset portIMD
 		}
 		while {![info exists sockChan] || $waitLimit > 65000} {
 			after 600
