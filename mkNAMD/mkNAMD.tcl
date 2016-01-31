@@ -54,6 +54,7 @@ set dimFactor [lindex $argv 4]
 set id [mol load psf $psf pdb $pdb]
 set all [atomselect top all]
 set MinMax [measure minmax $all]
+$all delete
 #set x [expr [lindex $MinMax 1 0] - [lindex $MinMax 0 0]]
 #set y [expr [lindex $MinMax 1 1] - [lindex $MinMax 0 1]]
 #set z [expr [lindex $MinMax 1 2] - [lindex $MinMax 0 2]]
