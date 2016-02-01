@@ -43,7 +43,7 @@ set funAtomNum [$funA num]
 mol delete top
 $funA delete
 set id2 [mol new [lindex $argv 1]]
-set allSet2 [atomselect top "not segname \"S\[0-9\]\" "]
+set allSet2 [atomselect top all]
 set nonAUNum [$allSet2 num]
 mol delete $id2
 $allSet2 delete
