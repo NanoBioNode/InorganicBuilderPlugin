@@ -4190,7 +4190,7 @@ proc ::inorganicBuilder::AlignDense { } {
         set temp1 [string range $line 13 end]
 
           # Write the new line.
-        puts $out2 ${temp0}${segNameNew}${temp1}
+        puts $out2 "${temp0}${segNameNew} ${temp1}"
       }
     }
     close $in2
@@ -5051,8 +5051,11 @@ proc ::inorganicBuilder::guiRunNAMD {} {
   grid [button $aw.buttons.con -text "Continue Simulation" \
     -command "destroy $aw; ${ns}::RunNAMD 1"] \
     -row $row -column 1
-  grid [button $aw.buttons.cancel -text Cancel -command "destroy $aw"] \
+  grid [button $aw.buttons.con -text "Pack NAMD files as .tar" \
+    -command "destroy $aw; ${ns}::RunNAMD 2"] \
     -row $row -column 2
+  grid [button $aw.buttons.cancel -text Cancel -command "destroy $aw"] \
+    -row $row -column 3
 
   guiRepackRunNAMD  
   
@@ -5183,6 +5186,11 @@ proc ::inorganicBuilder::RunNAMD { type } {
          $guiState(gridforceCont2) $guiState(gridforceCont3)
 
   file copy -force $namdfilepath $namdpackpath
+
+  if { $type == 2 } {
+	  set alphabeta [catch {exec tar -c -f "${namdpackpath}.tar" $namdpackpath &}]
+	  return
+  }
 
   set alpha [catch {exec $guiState(namdhandle) $namdFile &} namdPID]
   if {$alpha != 0} {
