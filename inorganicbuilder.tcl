@@ -5051,7 +5051,7 @@ proc ::inorganicBuilder::guiRunNAMD {} {
   grid [button $aw.buttons.con -text "Continue Simulation" \
     -command "destroy $aw; ${ns}::RunNAMD 1"] \
     -row $row -column 1
-  grid [button $aw.buttons.con -text "Pack NAMD files as .tar" \
+  grid [button $aw.buttons.pack -text "Pack NAMD files as .tar" \
     -command "destroy $aw; ${ns}::RunNAMD 2"] \
     -row $row -column 2
   grid [button $aw.buttons.cancel -text Cancel -command "destroy $aw"] \
