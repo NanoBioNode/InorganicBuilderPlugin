@@ -43,7 +43,7 @@ set funAtomNum [$funA num]
 mol delete top
 $funA delete
 set id2 [mol new [lindex $argv 1]]
-set allSet2 [atomselect top all]
+set allSet2 [atomselect top "not resname AU"]
 set nonAUNum [$allSet2 num]
 mol delete $id2
 $allSet2 delete
@@ -52,7 +52,7 @@ $allSet2 delete
 # Unify segname in subPdb
 set id [mol new [lindex $argv 1]]
 set all [atomselect top all]
-$all set segname S0
+#$all set segname S0
 $all writepdb tmp.pdb
 mol delete top
 $all delete
@@ -211,7 +211,7 @@ set all [atomselect top all]
 $all set beta 0
 #$all set occupancy 0
 
-set sub [atomselect top "segname S0"]
+set sub [atomselect top "segname U0"]
 
 $sub set beta 20
 #$sub set occupancy 20
