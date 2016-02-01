@@ -371,10 +371,10 @@ proc ::inorganicBuilder::inorganicBuilder_mainwin {} {
   menu $w.menubar.task.menu -tearoff no
   set tasklist [list \
     [list "Build device" "${ns}::guiBuildDeviceWin"] \
+    [list "Build Surface Structures" "${ns}::guiBuildSurfaceStructsWin"] \
     [list "Add bonds" "${ns}::guiBuildBondsWin"] \
     [list "Find surface atoms" "${ns}::guiFindSurfaceAtomsWin"] \
-    [list "Solvate box" "${ns}::guiSolvateBoxWin"] \
-    [list "Build Surface Structures" "${ns}::guiBuildSurfaceStructsWin"]
+    [list "Solvate box" "${ns}::guiSolvateBoxWin"] 
   ]
   set ntasks [llength $tasklist]
   foreach task $tasklist {
@@ -434,6 +434,14 @@ proc ::inorganicBuilder::guiStartWin {} {
           -text " or select \"Task:Build device\" to build a new device model" ] \
     -row $row -column 1 -sticky w -padx {0 4} -pady 5
   incr row 2
+
+  grid [button $w.body1.click4 -text "Click here" \
+          -command "${ns}::guiBuildSurfaceStructsWin"] \
+    -row $row -column 0 -padx {4 0}
+  grid [label $w.body1.label4 \
+          -text " or select \"Task:Build Surface Structures\" to add new structures to a surface" ] \
+    -row $row -column 1 -sticky w -padx {0 4} -pady 5
+  incr row 2
   
   grid [button $w.body1.click2 -text "Click here" \
           -command "set fname \[tk_getOpenFile -defaultextension \".ibs\" \]; \
@@ -452,13 +460,7 @@ proc ::inorganicBuilder::guiStartWin {} {
     -row $row -column 1 -sticky w -padx {0 4} -pady 5
   incr row 2
   
-  grid [button $w.body1.click4 -text "Click here" \
-          -command "${ns}::guiBuildSurfaceStructsWin"] \
-    -row $row -column 0 -padx {4 0}
-  grid [label $w.body1.label4 \
-          -text " or select \"Task:Build Surface Structures\" to add new structures to a surface" ] \
-    -row $row -column 1 -sticky w -padx {0 4} -pady 5
-  incr row 2
+
 
 
   pack $w.menubar -anchor nw -fill x
@@ -1610,7 +1612,8 @@ proc ::inorganicBuilder::guiBuildSurfaceStructsWin {} {
 	  }
 	  ${ns}::structBoxMolecule 
   }
-  
+
+
   
   foreach child [winfo children $w] {
     if { ![string equal "$child" "${w}.menubar"] } {
@@ -1911,6 +1914,7 @@ proc ::inorganicBuilder::guiDrawBoxButton {} {
 proc ::inorganicBuilder::guiDrawBox {} {
   variable guiState
   if { $guiState(geomMol) != -1 } {
+    mol delete $guiState(sboxmol)
     mol delete $guiState(geomMol)
   }
   set guiState(geomMol) [mol new]
@@ -2160,7 +2164,7 @@ proc ::inorganicBuilder::guiDrawNAMDFrame { ns win row } {
     -row $row -column 0 -columnspan 3 -sticky e -padx 4
   incr row
 
-  grid [label ${win}press -text "Langevin Damping Constant (Pressure): "] \
+  grid [label ${win}press -text "Langevin Damping Constant: "] \
     -row $row -column 0 -sticky w
   grid [entry ${win}pressval -width 4 \
     -textvariable ${ns}::guiState(setNAMDpress)] \
@@ -4196,8 +4200,8 @@ proc ::inorganicBuilder::AlignDense { } {
 
 ###########
 	  
-    set structmolid [mol new $current_pdbfile_struct]
-    mol addfile ${pegnam}.psf $structmolid
+    set structmolid [mol new ${pegnam}.psf]
+    mol addfile $current_pdbfile_struct $structmolid   
 #  set guiState(structMol) $structmolid
    
     set surf_indexed [atomselect $molid "index $atom"]
@@ -4873,7 +4877,7 @@ proc ::inorganicBuilder::getSurfaceAtomTypes { } {
   set guiState(addSurfTypes) $unique_sa_names
 
   mol delete $molid
-
+  $surface_area delete
   guiBuildSurfaceStructsWin
   return
 }
@@ -5219,11 +5223,12 @@ proc ::inorganicBuilder::RunNAMD { type } {
   }
   if {$checkPID == 1 && $alpha == 0} {
 	  mol delete top
-	  set movieid [mol new $guiState(structedFile).pdb]
+	  set movieid [mol new]
+	  mol addfile $guiState(structedFile).pdb type psf autobonds off waitfor all
+	  mol addfile $guiState(structedFile).pdb type pdb autobonds off waitfor all
 	  set addFiles [glob -nocomplain -- $namdpackpath/*.dcd]
 	  set addFLen [llength $addFiles]
 	  mol rename $movieid "$guiState(simFile)_$addFLen"
-	  mol addfile $guiState(structedFile).psf type psf autobonds off waitfor all
 	  foreach addF $addFiles {
 		  mol addfile $addF	
 	  }
@@ -6447,6 +6452,7 @@ proc ::inorganicBuilder::structBoxMolecule { } {
 
   # Delete any existing boxes
   mol delete $guiState(sboxmol)
+  mol delete $guiState(geomMol)
 
   # Draw the new box
   set guiState(sboxmol) [mol new]
@@ -7629,6 +7635,7 @@ proc ::inorganicBuilder::buildBox { boxlist outfile } {
   psfcontext delete $psfcon
   # Delete unit cell
   mol delete top
+  $uc delete
   
   # Read in the generated box to transform to hex and apply selections
   set molid [mol new [file normalize $outfile.psf] \
@@ -7707,8 +7714,8 @@ proc ::inorganicBuilder::buildBox { boxlist outfile } {
     if { [$secondLayer get index] != "" } {
       set rsH2 [measure surface $secondLayer 1.5 2.88 1.44 ] 
       set selstring [concat $selstring " and index $rsH $rsH2"]
-      $secondLayer delete
     }
+    $secondLayer delete
     
   }
 
@@ -8729,7 +8736,7 @@ proc ::inorganicBuilder::transformCoordsToBox { boxlist {molid top} } {
   }
 #  puts "InorganicBuilder)Resetting coords"
   $allatoms set {x y z} $newcoords
-  
+  $allatoms delete
   mol on $molid
   return
 }
@@ -8871,7 +8878,7 @@ proc ::inorganicBuilder::dumpCoordinates { boxname molid outfname } {
 proc ::inorganicBuilder::findShell { boxname molid gridsz radius dist } {
   set sel [atomselect $molid all]
   set results [measure surface $sel $gridsz $radius $dist] 
-  
+  $sel delete
   return $results
 }
 
@@ -8998,9 +9005,9 @@ proc ::inorganicBuilder::buildStructs { molid } {
   }
 
 
-  set molid [mol new "$guiState(structedFile).pdb"]
+  set molid [mol new "$guiState(structedFile).psf"]
   set guiState(structed_molid) $molid
-  mol addfile "$guiState(structedFile).psf"
+  mol addfile "$guiState(structedFile).pdb"
   mol delete $tempAll
 
   ::inorganicBuilder::setVMDPeriodPDB $molid "$guiState(structedFile).pdb"
@@ -9215,6 +9222,7 @@ proc ::inorganicBuilder::solvateBox { boxlist infiles outfile} {
   if { [llength $del_list] > 0 } {
     set o_del_sel [ atomselect $solv_mol "index $del_list"]
     set h_indices [ $o_del_sel getbonds ]
+    $o_del_sel delete
     foreach bondlist $h_indices {
       foreach indx $bondlist {
         lappend del_list $indx
@@ -9297,7 +9305,7 @@ proc ::inorganicBuilder::findBasisVectors { { molid top} } {
     set ucz [expr sqrt(1.0 - $ucx * $ucx - $ucy * $ucy)]
   }
   set cvec [list [expr $c * $ucx] [expr $c * $ucy] [expr $c * $ucz] ]
-  
+  $allatoms delete
   return [list $center $avec $bvec $cvec]
 }
 
