@@ -371,10 +371,10 @@ proc ::inorganicBuilder::inorganicBuilder_mainwin {} {
   menu $w.menubar.task.menu -tearoff no
   set tasklist [list \
     [list "Build device" "${ns}::guiBuildDeviceWin"] \
-    [list "Build Surface Structures" "${ns}::guiBuildSurfaceStructsWin"]
+    [list "Build Surface Structures" "${ns}::guiBuildSurfaceStructsWin"] \
     [list "Add bonds" "${ns}::guiBuildBondsWin"] \
     [list "Find surface atoms" "${ns}::guiFindSurfaceAtomsWin"] \
-    [list "Solvate box" "${ns}::guiSolvateBoxWin"] \
+    [list "Solvate box" "${ns}::guiSolvateBoxWin"] 
   ]
   set ntasks [llength $tasklist]
   foreach task $tasklist {
