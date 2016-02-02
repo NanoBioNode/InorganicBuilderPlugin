@@ -2017,9 +2017,10 @@ proc ::inorganicBuilder::guiAddStructWin {} {
   menu $aw.type.menub.menu -tearoff no
     
   $aw.type.menub config -width 20
-  set typelist { {custom "Custom Structure Selection"} {peg "Polyethylene Glycol"}\
-				 {dna "DNA (single or double)"} {thiol "Sulfhydryl Group"} {amine "Protonated Amino Group"}\
-				 {hyox "Hydroxyl Group"} {cabo "Carboxylate Group"} }
+  set typelist { {peg "Polyethylene Glycol for Gold (Covalent)"}\
+				 {peg2 "Polyethylene Glycol (Non-Covalent)"} {dna "DNA (single or double) for Gold (Covalent)"} \
+				 {dna2 "DNA (single or double) (Non-Covalent)"} {thiol "Sulfhydryl Group"} {amine "Protonated Amino Group"}\
+				 {hyox "Hydroxyl Group"} {cabo "Carboxylate Group"} {custom "Custom Structure Selection"} }
   
   if { ![info exists guiState(addStructType)] } {
     set guiState(addStructType) [lindex $typelist 1 0]
@@ -2868,16 +2869,9 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
     incr row
 
 
-    grid [label $f.pegslabel -text "Available Atom Types for PEG to bond are: $guiState(PEGTypes)"] \
+    grid [label $f.pegslabel -text "Available Atom Types for PEG to bond are: AU"] \
       -row $row -column 0 -sticky w
     incr row 
-
-    grid [label $f.selectslabel -text "Available Atom Type Selections (i.e. AU H C):"] \
-      -row $row -column 0 -sticky w
-    grid [entry $f.selects -width 20 \
-      -textvariable ${ns}::guiState(addPEGTypes)] \
-      -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
-    incr row
 
     
   } elseif { [string equal $type "dna"] } {
@@ -2913,21 +2907,15 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
       -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
     incr row
 
-    grid [label $f.dnaslabel -text "Available Atom Types for DNA to bond are: $guiState(DNATypes)"] \
+    grid [label $f.dnaslabel -text "Available Atom Types for DNA to bond are: AU"] \
       -row $row -column 0 -sticky w
     incr row 
-
-    grid [label $f.selectslabel -text "Available Atom Type Selections (i.e. AU H C):"] \
-      -row $row -column 0 -sticky w
-    grid [entry $f.selects -width 20 \
-      -textvariable ${ns}::guiState(addDNATypes)] \
-      -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
-    incr row
 
     
   } elseif { [string equal $type "custom"] || [string equal $type "amine"]\
 		  || [string equal $type "thiol"] || [string equal $type "cabo"]\
-		  || [string equal $type "hyox"]} {
+		  || [string equal $type "hyox"] || [string equal $type "peg2"]\
+		  || [string equal $type "dna2"]} {
 
     set guiState(addCUSTTypes) $guiState(addSurfTypes)
     
@@ -2963,7 +2951,22 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
 		set guiState(addStructType) "custom"
 		set guiState(addCustomK) 428.00
 		set guiState(addCustomX) 1.4200
+		
+	} elseif { [string equal $type "peg2"]  } { 
+		set guiState(currentCustPDB) "auto-generated PEG"
+		set guiState($topokey_struct) [file normalize [file join $homePath "topology" "par_all35_ethers-oh.prm"]]
+		set guiState(addStructType) "custom"
+		set guiState(addCustomK) 200.00
+		set guiState(addCustomX) 2.8800
+		
+	} elseif { [string equal $type "dna2"]  } { 
+		set guiState(currentCustPDB) "auto-generated DNA"
+		set guiState($topokey_struct) [file normalize [file join $homePath "topology" "par_all36_na_3s.prm"]]
+		set guiState(addStructType) "custom"
+		set guiState(addCustomK) 200.00
+		set guiState(addCustomX) 2.8800
 	}
+	
 	  
     grid [label $f.pdblabel -text "PDB: "] \
       -row $row -column 0 -sticky w
@@ -2997,6 +3000,48 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
 #      -textvariable ${ns}::guiState(addCustomSurfDetail)] \
 #      -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
 #    incr row
+
+    if { [string equal $type "peg2"] } {
+		
+        grid [label $f.xoriglabelpeg2 -text "PEG Chain Length:"] \
+          -row $row -column 0 -sticky w
+        grid [entry $f.xorigpeg2 -width 20 \
+          -textvariable ${ns}::guiState(addPEGLength)] \
+          -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
+        incr row
+
+    } elseif { [string equal $type "dna2"] } {	  	  	  
+		
+        grid [label $f.xstrandlabeladna2 -text "Strand Type:"] \
+          -row $row -column 0 -sticky w
+        grid [label $f.xstrandlabel -text ""] \
+          -row $row -column 2 -sticky w
+        grid [radiobutton $f.xstrandlabeldna2.strand1 \
+              -variable ${ns}::guiState(addDNAStrand) -value "1" \
+              -text "Single" \
+              -anchor e] \
+          -row $row -column 3 -sticky ew -padx 4
+        grid [radiobutton $f.xstrandlabeldna2.strand2 \
+              -variable ${ns}::guiState(addDNAStrand) -value "2" \
+              -text "Double" \
+              -anchor e] \
+          -row $row -column 4 -sticky ew -padx 4
+        incr row
+
+        grid [label $f.xoriglabeldna2 -text "DNA Nucleotide Number:"] \
+          -row $row -column 0 -sticky w
+        grid [entry $f.xorigdna2 -width 20 \
+          -textvariable ${ns}::guiState(addDNALength)] \
+          -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
+        incr row
+
+        grid [label $f.xoriglabelbdna2 -text "DNA Sequence (i.e. 'ATCG...'):"] \
+          -row $row -column 0 -sticky w
+        grid [entry $f.xorigbdna2 -width 20 \
+          -textvariable ${ns}::guiState(addDNASEQ)] \
+          -row $row -column 1 -columnspan 4 -sticky ew -padx 4       
+        incr row
+    }
 
     grid [label $f.dnaslabel -text "Available Atom Types for bonding are: $guiState(addCUSTTypes)"] \
       -row $row -column 0 -sticky w
@@ -3035,7 +3080,8 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
 
     if { [string equal $type "amine"]\
 		  || [string equal $type "thiol"] || [string equal $type "cabo"]\
-		  || [string equal $type "hyox"] } {
+		  || [string equal $type "hyox"] || [string equal $type "peg2"]\
+		  || [string equal $type "dna2"]  } {
 	  if { [winfo exists $f.cxorig3] } {
 
 	    $f.pdbpath configure -state disabled
@@ -3503,6 +3549,10 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
          return;
        }
        set dsa_index 0
+       # Covalent bond DNA can only bond to gold
+       if {$guiState(addStructType) == "dna"} {
+		   set guiState(addDNATypes) "AU"
+	   }
        set dsa_sel [atomselect $molid [concat "index" $dsurface_area]]
        foreach dsaname [$dsa_sel get name] {
            set dsa_name [lindex [split $dsaname {[1,2,3,4,5,6,7,8,9]}] 0]
@@ -3557,6 +3607,10 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
          return;
        }
        set dsa_index 0
+       # Covalent bond PEG can only bond to gold
+       if {$guiState(addStructType) == "peg"} {
+		   set guiState(addDNATypes) "AU"
+	   }
        set dsa_sel [atomselect $molid [concat "index" $dsurface_area]]
        foreach dsaname [$dsa_sel get name] {
            set dsa_name [lindex [split $dsaname {[1,2,3,4,5,6,7,8,9]}] 0]
@@ -3571,12 +3625,50 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
 
 
   } else {
+       if { $guiState(currentCustPDB) == "auto-generated PEG" } {
+		   
+         source [file normalize [file join $homePath "mkPEG" "mkPEG.tcl"]]
+         set pegname PEG$guiState(addPEGLength)      
+         mkPEG $guiState(addPEGLength) $pegname $homePath
+         set guiState(currentCustPDB) [file normalize $pegname.pdb]
+         # Quickly grab the atom number of the anchor atom desired for this PEG
+         set tempAll [mol new $pegname.psf]
+         mol addfile $pegname.pdb
+         
+         set structC [atomselect $tempAll "all"]
+         set finalresC [lindex [$structC get residue] end]
+         set finalC [atomselect $tempAll "name C2 and residue $finalresC"]
+         set guiState(addCustomStructDetail) [$finalC get index]
+         $structC delete
+         $finalC delete
+         mol delete $tempAll
+
+       } elseif { $guiState(currentCustPDB) == "auto-generated DNA" } {
+		   
+         source [file normalize [file join $homePath "mkDNA" "mkDNA.tcl"]]
+         set pegname DNA$guiState(addDNALength)
+         mkDNA $guiState(addDNAStrand) $guiState(addDNALength) $pegname $homePath $guiState(addDNASEQ)
+         set guiState(currentCustPDB) [file normalize $pegname.pdb]
+         # Quickly grab the atom number of the anchor atom desired for this DNA
+         set tempAll [mol new $pegname.psf]
+         mol addfile $pegname.pdb
+         
+         set structO [atomselect $tempAll "all"]
+         set finalresO [lindex [$structO get residue] end]
+         set finalO [atomselect $tempAll "name O3' and residue $finalresO"]
+         set guiState(addCustomStructDetail) [$finalO get index]
+         $structO delete
+         $finalO delete
+         mol delete $tempAll
+
+	   }
+
        source [file normalize [file join $homePath "mkCUST" "mod_pdb.tcl"]]
        set guiState(topofile_struct) [file normalize $guiState(topofile_struct)]
        set guiState(pdbfile_struct) [file normalize $guiState(currentCustPDB)]
        set pegname CUST$guiState(addCustomStructDetail)
        mod_pdb $guiState(pdbfile_struct) $guiState(topofile_struct) $pegname $guiState(addCustomStructDetail)
-       
+         	       
        set guiState(pdbfile_struct) $pegname.pdb
        set guiState(psffile_struct) $pegname.psf
 
@@ -4190,7 +4282,7 @@ proc ::inorganicBuilder::AlignDense { } {
         set temp1 [string range $line 13 end]
 
           # Write the new line.
-        puts $out2 ${temp0}${segNameNew}${temp1}
+        puts $out2 "${temp0}${segNameNew} ${temp1}"
       }
     }
     close $in2
@@ -5051,8 +5143,11 @@ proc ::inorganicBuilder::guiRunNAMD {} {
   grid [button $aw.buttons.con -text "Continue Simulation" \
     -command "destroy $aw; ${ns}::RunNAMD 1"] \
     -row $row -column 1
-  grid [button $aw.buttons.cancel -text Cancel -command "destroy $aw"] \
+  grid [button $aw.buttons.pack -text "Pack NAMD files as .tar" \
+    -command "destroy $aw; ${ns}::RunNAMD 2"] \
     -row $row -column 2
+  grid [button $aw.buttons.cancel -text Cancel -command "destroy $aw"] \
+    -row $row -column 3
 
   guiRepackRunNAMD  
   
@@ -5183,6 +5278,11 @@ proc ::inorganicBuilder::RunNAMD { type } {
          $guiState(gridforceCont2) $guiState(gridforceCont3)
 
   file copy -force $namdfilepath $namdpackpath
+
+  if { $type == 2 } {
+	  set alphabeta [catch {exec tar -c -f "${namdpackpath}.tar" $namdpackpath &}]
+	  return
+  }
 
   set alpha [catch {exec $guiState(namdhandle) $namdFile &} namdPID]
   if {$alpha != 0} {
