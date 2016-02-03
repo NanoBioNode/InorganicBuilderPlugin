@@ -47,7 +47,7 @@ $funA delete
 # Unify segname in subPdb
 set id [mol new [lindex $argv 1]]
 set all [atomselect top all]
-$all set segname S0
+#$all set segname S0
 $all writepdb tmp.pdb
 mol delete top
 $all delete
@@ -206,7 +206,7 @@ set all [atomselect top all]
 $all set beta 0
 #$all set occupancy 0
 
-set sub [atomselect top "segname S0"]
+set sub [atomselect top "segname U0"]
 
 $sub set beta 20
 #$sub set occupancy 20
