@@ -27,11 +27,7 @@ set allSet [atomselect top all]
 set pegAtomNum [$allSet num]
 mol delete $id
 $allSet delete
-set id2 [mol new [lindex $argv 1]]
-set allSet2 [atomselect top "not resname AU4"]
-set nonAUNum [$allSet2 num]
-mol delete $id2
-$allSet2 delete
+
 
 # Combine PEG and Au pdb
 set p0 [open [lindex $argv 0] r]
@@ -43,8 +39,8 @@ while {[gets $p0 line] > 0} {
 while {[gets $p1 line] > 0} {
     if {[lindex $line 0] == "ATOM"} {
 		 puts $out $line
-		 if {[lindex $line 10] != 0} {
-			lappend bau_list [expr [lindex $line 1] + $pegAtomNum + $nonAUNum - [llength $aulist]-1]
+		 if {[lindex $line 10] == 1.10} {
+			lappend bau_list [expr [lindex $line 1] + $pegAtomNum - [llength $aulist] - 1]
 		 }
 	}
 }
@@ -61,11 +57,12 @@ close $out
 
 foreach cval $clist auval $aulist {
     lappend c_list $cval
-    lappend au_list [expr $auval + $pegAtomNum + $nonAUNum]
-    lappend bau_list [expr $auval + $pegAtomNum + $nonAUNum - [llength $aulist]]
+    lappend au_list  [expr $auval + $pegAtomNum]
+    lappend bau_list [expr $auval + $pegAtomNum - [llength $aulist]]
 }
 puts $c_list
 puts $au_list
+
 
 #tk_messageBox -icon error -message \
       "outcoming Clist is: $c_list  ...   C's AuList is: $au_list" \
@@ -77,7 +74,7 @@ set all [atomselect top all]
 set segnames [lsort -unique [$all get segname]]
 
 # Correct Au name and resid
-set AU [atomselect top "resname AU4"]
+set AU [atomselect top "resname AU4 AU"]
 $AU set resname AU
 $AU set name AU
 set AU_n [$AU num]
@@ -101,7 +98,6 @@ foreach i $AU_index {
 $all writepdb tmp_reindex.pdb
 mol delete top
 $all delete
-
 
 set id [mol new tmp_reindex.pdb]
 
@@ -135,7 +131,6 @@ puts $au_resid_list
 file delete -force "tmp.pdb"
 
 
-
 ####################### psfgen #########################################
 
 
@@ -161,6 +156,7 @@ foreach seg $segnames {
 		set sel [atomselect $id "segname $seg"]
 		set tmpPdb tmp.pdb
 		$sel writepdb $tmpPdb
+
 		for {set i 0} { $i <= $counte } { incr i } {
 			if {$seg == "U$i"} {
 
@@ -201,7 +197,6 @@ set betasel [atomselect $betas "index $bau_list"]
 set betaful [atomselect $betas all]
 $betasel set beta 1.1
 $betaful writepdb [lindex $argv 3].pdb
-
 
 mol delete $id
 mol delete $betas

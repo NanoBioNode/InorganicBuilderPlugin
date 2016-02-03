@@ -42,11 +42,6 @@ set funA [atomselect top all]
 set funAtomNum [$funA num]
 mol delete top
 $funA delete
-set id2 [mol new [lindex $argv 1]]
-set allSet2 [atomselect top "not resname AU"]
-set nonAUNum [$allSet2 num]
-mol delete $id2
-$allSet2 delete
 
 
 # Unify segname in subPdb
@@ -68,8 +63,8 @@ while {[gets $p0 line] >= 0} {
 while {[gets $p1 line] >= 0} {
     if {[lindex $line 0] == "ATOM"} {
 		 puts $out $line
-		 if {[lindex $line 10] != 0} {
-			lappend bau_list [expr [lindex $line 1] + $funAtomNum + $nonAUNum - [llength $ancaulist]-1]
+		 if {[lindex $line 10] == 1.10} {
+			lappend bau_list [expr [lindex $line 1] + $funAtomNum - [llength $ancaulist] - 1]
 		 }
 	}
 }
@@ -83,7 +78,7 @@ close $out
 foreach ancval $anclist ancauval $ancaulist {
     lappend fun_list $ancval
     lappend sub_list [expr $ancauval + $funAtomNum]
-    lappend bau_list [expr $ancauval + $funAtomNum + $nonAUNum - [llength $ancaulist]]
+    lappend bau_list [expr $ancauval + $funAtomNum - [llength $ancaulist]]
 }
 
 puts $fun_list

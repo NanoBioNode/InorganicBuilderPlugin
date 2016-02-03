@@ -204,6 +204,7 @@ namespace eval ::inorganicBuilder:: {
     addPEGLength ""
     addPEGTypes ""
     addSurfTypes ""
+    addSurfSegs ""
     all_struct ""
     atomsBeforeAU 0
     DNATypes ""
@@ -3454,6 +3455,72 @@ proc ::inorganicBuilder::guiStoreStruct { } {
   return
 }
 
+
+# *** ADDED ***
+proc ::inorganicBuilder::iter_segname { } {
+    variable guiState
+    
+  # Generate valid character list
+    set string_c_list {}
+#  for {set i 128} {$i < 160} {incr i} {
+#      lappend string_c_list $i
+#  }
+#  for {set i 162} {$i < 173} {incr i} {
+#      lappend string_c_list $i
+#  }
+#  for {set i 174} {$i < 256} {incr i} {
+#      lappend string_c_list $i
+#  }
+##  for {set i 48} {$i < 57} {incr i} {
+##      lappend string_c_list $i
+##  }
+    for {set i 65} {$i <= 90} {incr i} {
+      lappend string_c_list $i
+    }
+##  for {set i 97} {$i < 122} {incr i} {
+##      lappend string_c_list $i
+##  }
+
+
+  # Generate a unique segname
+  #if { [expr [expr $guiState(structureIndex) + 1]%126 ] == 0 } {}
+    if { [expr [expr $guiState(structureIndex)]%26 ] == 0 } {
+		incr guiState(structureY)
+		set guiState(structureZ) 0
+    }
+  #if { [expr [expr $guiState(structureIndex) + 1]%15876 ] == 0 } {}
+    if { [expr [expr $guiState(structureIndex)]%676 ] == 0 } {
+		incr guiState(structureX)
+		set guiState(structureY) 0
+    }
+
+  # set first symbols
+      
+    set j1z [format %c [lindex $string_c_list $guiState(structureZ)]]
+
+  # set second symbols
+    if { ($guiState(structureY) != -1) } {
+      set j1y [format %c [lindex $string_c_list $guiState(structureY)]]
+    } else {
+      set j1y " "
+    }
+
+  # set third symbols
+
+    if { $guiState(structureX) != -1 } {
+      set j1x [format %c [lindex $string_c_list $guiState(structureX)]]
+    } else {
+      set j1x " "
+	}
+
+
+    set pegseg "${j1x}${j1y}${j1z}"
+    incr guiState(structureIndex)
+    incr guiState(structureZ)
+    return $pegseg
+
+}
+
 # *** ADDED ***
 proc Kcomb { x y } { set x }
 # *** ADDED ***
@@ -4108,26 +4175,6 @@ proc ::inorganicBuilder::AlignDense { } {
 
   # Part 2, create and align PDBs for each atom found
 
-  # Generate valid character list
-  set string_c_list {}
-#  for {set i 128} {$i < 160} {incr i} {
-#      lappend string_c_list $i
-#  }
-#  for {set i 162} {$i < 173} {incr i} {
-#      lappend string_c_list $i
-#  }
-#  for {set i 174} {$i < 256} {incr i} {
-#      lappend string_c_list $i
-#  }
-##  for {set i 48} {$i < 57} {incr i} {
-##      lappend string_c_list $i
-##  }
-  for {set i 65} {$i <= 90} {incr i} {
-      lappend string_c_list $i
-  }
-##  for {set i 97} {$i < 122} {incr i} {
-##      lappend string_c_list $i
-##  }
 
   # Also, create the index file for "Attach PEG to Gold" script at this stage.
 
@@ -4141,6 +4188,14 @@ proc ::inorganicBuilder::AlignDense { } {
   array unset vecnormas
   array set vecnormas {}		 
   
+  # Grab the already used segnames before doing unique segnaming
+  array unset usedSegname
+  array set usedSegname {}
+  foreach usedName $guiState(addSurfSegs) {
+	  set usedSegname($usedName) 1
+  }
+  
+  
   foreach atom $densearea {
 
     puts "$countb / $catoms placements made. Last placement took: $tdiff microseconds"
@@ -4150,41 +4205,11 @@ proc ::inorganicBuilder::AlignDense { } {
 
 
   # Generate a unique segname
-  #if { [expr [expr $guiState(structureIndex) + 1]%126 ] == 0 } {}
-    if { [expr [expr $guiState(structureIndex)]%26 ] == 0 } {
-		incr guiState(structureY)
-		set guiState(structureZ) 0
+    set testseg [::inorganicBuilder::iter_segname]
+    while { [info exists usedSegname($testseg)] } {
+      set testseg [::inorganicBuilder::iter_segname]
     }
-  #if { [expr [expr $guiState(structureIndex) + 1]%15876 ] == 0 } {}
-    if { [expr [expr $guiState(structureIndex)]%676 ] == 0 } {
-		incr guiState(structureX)
-		set guiState(structureY) 0
-    }
-
-  # set first symbols
-      
-    set j1z [format %c [lindex $string_c_list $guiState(structureZ)]]
-
-  # set second symbols
-    if { ($guiState(structureY) != -1) } {
-      set j1y [format %c [lindex $string_c_list $guiState(structureY)]]
-    } else {
-      set j1y " "
-    }
-
-  # set third symbols
-
-    if { $guiState(structureX) != -1 } {
-      set j1x [format %c [lindex $string_c_list $guiState(structureX)]]
-    } else {
-      set j1x " "
-	}
-
-
-    set pegseg "${j1x}${j1y}${j1z}"
-
-    incr guiState(structureIndex)
-    incr guiState(structureZ)
+    set pegseg $testseg
 
     if { $guiState(addStructType) == "dna" } {
       set pegnam DNA$guiState(addDNALength)_$guiState(structureIndex)
@@ -4951,7 +4976,7 @@ proc ::inorganicBuilder::getSurfaceAtomTypes { } {
   }
 
   set allsel [atomselect $molid all] 
-
+  set guiState(addSurfSegs) [lsort -unique [$allsel get segname]]
   set rs [measure surface $allsel 1.5 2.88 1.44 ] 
   $allsel delete
 
@@ -4967,6 +4992,7 @@ proc ::inorganicBuilder::getSurfaceAtomTypes { } {
 
   set unique_sa_names [lsort -unique $sa_names]
   set guiState(addSurfTypes) $unique_sa_names
+
 
   mol delete $molid
   $surface_area delete

@@ -70,6 +70,7 @@ $all1 writepdb ${outPdb}.pdb
 # this is a fake psf simply for processing using the same flow as built-in structs
 $all1 writepsf ${outPdb}.psf
 $all1 delete
+mol delete top
 return
 
 }
