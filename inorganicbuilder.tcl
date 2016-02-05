@@ -5016,7 +5016,6 @@ proc ::inorganicBuilder::guiBuildStructs {} {
     "System built." \
     -type ok  
   set guiState(systemBuilt) 1
-  file delete -force "tmp_reindex.pdb"
   
   # Save the newly built file into the temporary variables for AutoIonize and Solvate
   # This feature might not do anything on Windows systems. (User will have to enter the name)
@@ -9093,7 +9092,7 @@ proc ::inorganicBuilder::buildStructs { molid } {
 		
 	}
 
-    attach_PEG_Au All_PEG.pdb Surf.pdb $guiState(c_list) $guiState(cau_list)\
+    attach_PEG_Au All_PEG.pdb Surf.pdb Surf.psf $guiState(c_list) $guiState(cau_list)\
      $guiState(structedFile) $homePath
     file delete -force "tmp.pdb"
     file delete -force "Surf.pdb"
@@ -9120,7 +9119,7 @@ proc ::inorganicBuilder::buildStructs { molid } {
     set guiState(conFile) "${guiState(structedFile)}_con"
     set guiState(exb) 1
     set guiState(con) 1
-    attach_exb All_CUST.pdb Surf.pdb $guiState(anc_list) $guiState(ancau_list)\
+    attach_exb All_CUST.pdb Surf.pdb Surf.psf $guiState(anc_list) $guiState(ancau_list)\
      $guiState(structedFile) $homePath $guiState(exbFile) $guiState(addCustomK)\
       $guiState(addCustomX) $guiState(conFile) $guiState(topofile_struct)
     file delete -force "tmp.pdb"
