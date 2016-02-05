@@ -85,7 +85,7 @@ close $out
 
 # Get C - Au index
 
-tk_messageBox -icon error -message \
+#tk_messageBox -icon error -message \
       "incoming Clist is: $clist  ...   C's AuList is: $aulist" \
       -type ok
 
@@ -99,7 +99,7 @@ puts $c_list
 puts $au_list
 
 
-tk_messageBox -icon error -message \
+#tk_messageBox -icon error -message \
       "outcoming Clist is: $c_list  ...   C's AuList is: $au_list  ... Beta: $bau_list" \
       -type ok
 
