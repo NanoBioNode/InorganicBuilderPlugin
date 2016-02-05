@@ -79,7 +79,7 @@ close $out
 
 # Get C - Au index
 
-tk_messageBox -icon error -message \
+#tk_messageBox -icon error -message \
       "incoming Clist is: $anclist  ...   C's AuList is: $ancaulist ... Beta: $bau_list" \
       -type ok
 
@@ -95,7 +95,7 @@ foreach ancval $anclist ancauval $ancaulist {
 puts $fun_list
 puts $sub_list
 
-tk_messageBox -icon error -message \
+#tk_messageBox -icon error -message \
       "incoming Clist is: $fun_list  ...   C's AuList is: $sub_list ... Beta: $bau_list" \
       -type ok
 
