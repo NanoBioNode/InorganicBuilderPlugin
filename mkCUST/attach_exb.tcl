@@ -1,11 +1,11 @@
-# Usage: vmd -dispdev text -e attach_exb.tcl -args funPdb subPdb AnchorAtomList AnchorAUList combineName parDir exbFile k x conFile topoFile
+# Usage: vmd -dispdev text -e attach_exb.tcl -args funPdb subPdb subPsf AnchorAtomList AnchorAUList combineName parDir exbFile k x conFile topoFile
 # Combine funPdb and subPdb, make psf file, extrabond file and constrain file
 # Author: Chen-Yu Li <cli56@illinois.edu>
 # 2015/11/2
 
 
-proc attach_exb { funPdb subPdb anclist ancaulist combineName parDir exbFile k x conFile topoFile} {
-set argc 11
+proc attach_exb { funPdb subPdb subPsf anclist ancaulist combineName parDir exbFile k x conFile topoFile} {
+set argc 12
 set argv {}
 lappend argv $funPdb
 lappend argv $subPdb
@@ -17,8 +17,9 @@ lappend argv $k
 lappend argv $x
 lappend argv $conFile
 lappend argv $topoFile
+lappend argv $subPsf
 
-if {$argc != 11} {
+if {$argc != 12} {
     puts "Usage: vmd -dispdev text -e attach_exb.tcl -args funPdb subPdb indexFile combineName parDir exbFile k x conFile"
     puts "funPdb: The pdb file containing all the functional molecules."
     puts "subPdb: The pdb file containing the substrate."
@@ -40,6 +41,7 @@ if {$argc != 11} {
 set id [mol new [lindex $argv 0]]
 set funA [atomselect top all]
 set funAtomNum [$funA num]
+set funsegnames [lsort -unique [$funA get segname]]
 mol delete top
 $funA delete
 
@@ -48,6 +50,7 @@ $funA delete
 set id [mol new [lindex $argv 1]]
 set all [atomselect top all]
 #$all set segname S0
+set subsegnames [lsort -unique [$all get segname]]
 $all writepdb tmp.pdb
 mol delete top
 $all delete
@@ -63,8 +66,9 @@ while {[gets $p0 line] >= 0} {
 while {[gets $p1 line] >= 0} {
     if {[lindex $line 0] == "ATOM"} {
 		 puts $out $line
-		 if {[lindex $line 10] == 1.10} {
-			lappend bau_list [expr [lindex $line 1] + $funAtomNum - [llength $ancaulist] - 1]
+		 if {[lindex $line 10] == 1.10 || [lindex $line 9] == 1.10 } {
+			lappend bau_list [expr [lindex $line 1] + $funAtomNum\
+			 - [expr [llength $ancaulist]*2] - 1]
 		 }
 	}
 }
@@ -73,16 +77,27 @@ close $p1
 close $out
 
 
+# Get C - Au index
+
+tk_messageBox -icon error -message \
+      "incoming Clist is: $anclist  ...   C's AuList is: $ancaulist ... Beta: $bau_list" \
+      -type ok
+
+
 # Get fun - sub index
 
 foreach ancval $anclist ancauval $ancaulist {
     lappend fun_list $ancval
     lappend sub_list [expr $ancauval + $funAtomNum]
-    lappend bau_list [expr $ancauval + $funAtomNum - [llength $ancaulist]]
+    lappend bau_list [expr $ancauval + $funAtomNum - [expr [llength $ancaulist]*2]]
 }
 
 puts $fun_list
 puts $sub_list
+
+tk_messageBox -icon error -message \
+      "incoming Clist is: $fun_list  ...   C's AuList is: $sub_list ... Beta: $bau_list" \
+      -type ok
 
 
 # Finalize the pdb for psfgen
@@ -132,14 +147,14 @@ set parDir [file normalize [file join [lindex $argv 4] "topology"]]
 set topFiles [exec ls {*}[glob -nocomplain $parDir/*.top]]
 set topFiles [list {*}$topFiles {*}[exec ls {*}[glob -nocomplain $parDir/*.str]]]
 set topFiles [list {*}$topFiles {*}[exec ls {*}[glob -nocomplain $parDir/*.rtf]]]
-set topFiles [list {*}$topFiles {*}[exec ls {*}[glob -nocomplain $topoFile]]]
+#set topFiles [list {*}$topFiles {*}[exec ls {*}[glob -nocomplain $topoFile]]]
 
 foreach top $topFiles {
    topology $top
 }
 
 
-foreach seg $segnames {
+foreach seg $funsegnames {
     set sel [atomselect $id "segname $seg"]
     set tmpPdb tmp.pdb
     $sel writepdb $tmpPdb
@@ -153,6 +168,9 @@ foreach seg $segnames {
     $sel delete
 
 }
+
+readpsf  $subPsf
+coordpdb $subPdb
 
 guesscoord ;# guess the coordinates of missing atoms
 regenerate angles dihedrals ;# fixes problems with patching
@@ -215,5 +233,6 @@ $all writepdb [lindex $argv 8]
 
 $all delete
 $sub delete
+mol delete top
 
 }
