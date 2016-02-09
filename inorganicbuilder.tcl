@@ -2018,10 +2018,18 @@ proc ::inorganicBuilder::guiAddStructWin {} {
   menu $aw.type.menub.menu -tearoff no
     
   $aw.type.menub config -width 20
-  set typelist { {peg "Polyethylene Glycol for Gold (Covalent)"}\
+# Full typelist is currently hidden.
+#  set typelist { {peg "Polyethylene Glycol for Gold (Covalent)"}\
 				 {peg2 "Polyethylene Glycol (Non-Covalent)"} {dna "DNA (single or double) for Gold (Covalent)"} \
 				 {dna2 "DNA (single or double) (Non-Covalent)"} {thiol "Sulfhydryl Group"} {amine "Protonated Amino Group"}\
 				 {hyox "Hydroxyl Group"} {cabo "Carboxylate Group"} {custom "Custom Structure Selection"} }
+  set typelist { {peg2 "Polyethylene Glycol"}\
+				 {dna2 "DNA (single or double)"}\
+				 {thiol "Sulfhydryl Group"}\
+				 {amine "Protonated Amino Group"}\
+				 {hyox "Hydroxyl Group"}\
+				 {cabo "Carboxylate Group"}\
+				 {custom "Custom Structure Selection"} }
   
   if { ![info exists guiState(addStructType)] } {
     set guiState(addStructType) [lindex $typelist 1 0]
@@ -3015,14 +3023,14 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
 		
         grid [label $f.xstrandlabeladna2 -text "Strand Type:"] \
           -row $row -column 0 -sticky w
-        grid [label $f.xstrandlabel -text ""] \
+        grid [label $f.xstrandlabel2 -text ""] \
           -row $row -column 2 -sticky w
-        grid [radiobutton $f.xstrandlabeldna2.strand1 \
+        grid [radiobutton $f.xstrandlabel2.strand1 \
               -variable ${ns}::guiState(addDNAStrand) -value "1" \
               -text "Single" \
               -anchor e] \
           -row $row -column 3 -sticky ew -padx 4
-        grid [radiobutton $f.xstrandlabeldna2.strand2 \
+        grid [radiobutton $f.xstrandlabel2.strand2 \
               -variable ${ns}::guiState(addDNAStrand) -value "2" \
               -text "Double" \
               -anchor e] \
@@ -4197,6 +4205,7 @@ proc ::inorganicBuilder::AlignDense { } {
   
   
   foreach atom $densearea {
+    display update off
 
     puts "$countb / $catoms placements made. Last placement took: $tdiff microseconds"
     set tdiff [expr $t2 - $t1]
@@ -4516,6 +4525,7 @@ proc ::inorganicBuilder::AlignDense { } {
 
     
   # rotate
+    display update on  
     if { $guiState(addStructType) == "peg" } {
       $struct_full move [trans center $anchor_coord axis y 180]
     }
