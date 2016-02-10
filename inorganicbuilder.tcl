@@ -4873,7 +4873,7 @@ proc ::inorganicBuilder::getSurfaceAtoms { } {
 
   
   set aminmax [measure minmax $allsel]
-  set rs [measure surface $allsel 1.5 2.88 1.44 ] 
+  set rs [measure surface $allsel 1 6 10 ] 
   $allsel delete
 
 # Graphically display a highlighted region where Surface Area atoms have been found.
