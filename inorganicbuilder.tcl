@@ -2032,7 +2032,9 @@ proc ::inorganicBuilder::guiAddStructWin {} {
 				 {custom "Custom Structure Selection"} }
   
   if { ![info exists guiState(addStructType)] } {
-    set guiState(addStructType) [lindex $typelist 1 0]
+    set guiState(addStructType) [lindex $typelist 0 0]
+  } else {
+    set guiState(addStructType) $guiState(oldStructType)
   }
   foreach typ $typelist {
     foreach { shortname longname } $typ {}
@@ -2934,6 +2936,7 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
 		set guiState($topokey_struct) [file normalize [file join $homePath "topology" "AMIN.str"]]
 		set guiState(addCustomStructDetail) 0
 		set guiState(addStructType) "custom"
+		set guiState(oldStructType) "amine"
 		set guiState(addCustomK) 200.00
 		set guiState(addCustomX) 1.4800
 	    
@@ -2942,6 +2945,7 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
 		set guiState($topokey_struct) [file normalize [file join $homePath "topology" "THIO.str"]]
 		set guiState(addCustomStructDetail) 0
 		set guiState(addStructType) "custom"
+		set guiState(oldStructType) "thiol"
 		set guiState(addCustomK) 198.00
 		set guiState(addCustomX) 1.8180
 		
@@ -2950,6 +2954,7 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
 		set guiState($topokey_struct) [file normalize [file join $homePath "topology" "CABO.str"]]
 		set guiState(addCustomStructDetail) 0
 		set guiState(addStructType) "custom"
+		set guiState(oldStructType) "cabo"
 		set guiState(addCustomK) 200.00
 		set guiState(addCustomX) 1.5220
 
@@ -2958,6 +2963,7 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
 		set guiState($topokey_struct) [file normalize [file join $homePath "topology" "HYOX.str"]]
 		set guiState(addCustomStructDetail) 0
 		set guiState(addStructType) "custom"
+		set guiState(oldStructType) "hyox"
 		set guiState(addCustomK) 428.00
 		set guiState(addCustomX) 1.4200
 		
@@ -2965,6 +2971,7 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
 		set guiState(currentCustPDB) "auto-generated PEG"
 		set guiState($topokey_struct) [file normalize [file join $homePath "topology" "par_all35_ethers-oh.prm"]]
 		set guiState(addStructType) "custom"
+		set guiState(oldStructType) "peg2"
 		set guiState(addCustomK) 200.00
 		set guiState(addCustomX) 2.8800
 		
@@ -2972,8 +2979,17 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
 		set guiState(currentCustPDB) "auto-generated DNA"
 		set guiState($topokey_struct) [file normalize [file join $homePath "topology" "par_all36_na_3s.prm"]]
 		set guiState(addStructType) "custom"
+		set guiState(oldStructType) "dna2"
 		set guiState(addCustomK) 200.00
 		set guiState(addCustomX) 2.8800
+
+	} elseif { [string equal $type "custom"]  } { 
+		set guiState(currentCustPDB) ""
+		set guiState($topokey_struct) ""
+		set guiState(addStructType) "custom"
+		set guiState(oldStructType) "custom"
+		set guiState(addCustomK) 200.00
+		set guiState(addCustomX) 1.0000
 	}
 	
 	  
