@@ -3581,7 +3581,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
   variable guiState
   variable homePath
 
-#  display update off
+  display update on
 
   if { $guiState(addStructType) == "dna" } {
 
