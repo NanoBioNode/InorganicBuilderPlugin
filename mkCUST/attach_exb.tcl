@@ -127,6 +127,9 @@ package require psfgen             ;# load psfgen
 resetpsf                           ;# Destroys any previous attempts
 psfcontext reset                   ;# Tosses out any previously declared topology files
 
+# alias
+pdbalias residue HIS HSE
+
 # Add topology files
 set parDir [file normalize [file join [lindex $argv 4] "topology"]]
 set topFiles [exec ls {*}[glob -nocomplain $parDir/*.top]]
