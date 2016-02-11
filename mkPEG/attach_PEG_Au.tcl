@@ -7,16 +7,17 @@
 
 
 
-proc attach_PEG_Au { pegPDB goldPDB clist aulist outputname homePath} {
-set argc 5
+proc attach_PEG_Au { pegPDB goldPDB goldPSF clist aulist outputname homePath} {
+set argc 6
 set argv {}
 lappend argv $pegPDB
 lappend argv $goldPDB
 lappend argv "noIndexFile"
 lappend argv $outputname
+lappend argv $goldPSF
 
 
-if {$argc != 5} {
+if {$argc != 6} {
     puts "Usage: vmd -dispdev text -e attach_PEG_Au.tcl -args pegPDB goldPDB indexFile outputname"
     exit
 }
@@ -25,13 +26,47 @@ if {$argc != 5} {
 set id [mol new [lindex $argv 0]]
 set allSet [atomselect top all]
 set pegAtomNum [$allSet num]
+set pegsegnames [lsort -unique [$allSet get segname]]
 mol delete $id
 $allSet delete
 
 
+# Correct the incoming surface if it has gold atoms
+mol new Surf.psf
+mol addfile Surf.pdb
+set all2 [atomselect top all]
+# Correct Au name and resid
+set AU [atomselect top "resname AU4 AU"]
+$AU set resname AU
+$AU set name AU
+set AU_n [$AU num]
+set AU_index [$AU get index]
+$AU delete
+set count 1
+set counte 0
+foreach i $AU_index {
+	if {[expr $count % 10000] == 0} {
+		incr counte
+		set count 1
+		#lappend segnames "U$counte"
+	}
+    set AU_m [atomselect top "resname AU and index $i"]
+    $AU_m set resid [expr $count]
+    $AU_m set segname "U$counte"
+    incr count
+    $AU_m delete
+}
+
+$all2 writepdb Surf2.pdb
+$all2 writepsf Surf2.psf
+$all2 delete
+mol delete top
+
+
+
 # Combine PEG and Au pdb
 set p0 [open [lindex $argv 0] r]
-set p1 [open [lindex $argv 1] r]
+set p1 [open Surf2.pdb r]
 set out [open "tmp.pdb" w]
 while {[gets $p0 line] > 0} {
     if {[lindex $line 0] == "ATOM"} { puts $out $line }
@@ -39,7 +74,7 @@ while {[gets $p0 line] > 0} {
 while {[gets $p1 line] > 0} {
     if {[lindex $line 0] == "ATOM"} {
 		 puts $out $line
-		 if {[lindex $line 10] == 1.10} {
+		 if {[lindex $line 10] == 1.10 || [lindex $line 9] == 1.10 } {
 			lappend bau_list [expr [lindex $line 1] + $pegAtomNum - [llength $aulist] - 1]
 		 }
 	}
@@ -65,41 +100,10 @@ puts $au_list
 
 
 #tk_messageBox -icon error -message \
-      "outcoming Clist is: $c_list  ...   C's AuList is: $au_list" \
+      "outcoming Clist is: $c_list  ...   C's AuList is: $au_list  ... Beta: $bau_list" \
       -type ok
 
-# Finalize the pdb for psfgen
 set id [mol new tmp.pdb]
-set all [atomselect top all]
-set segnames [lsort -unique [$all get segname]]
-
-# Correct Au name and resid
-set AU [atomselect top "resname AU4 AU"]
-$AU set resname AU
-$AU set name AU
-set AU_n [$AU num]
-set AU_index [$AU get index]
-$AU delete
-set count 1
-set counte 0
-foreach i $AU_index {
-	if {[expr $count % 10000] == 0} {
-		incr counte
-		set count 1
-		lappend segnames "U$counte"
-	}
-    set AU_m [atomselect top "resname AU and index $i"]
-    $AU_m set resid [expr $count]
-    $AU_m set segname "U$counte"
-    incr count
-    $AU_m delete
-}
-
-$all writepdb tmp_reindex.pdb
-mol delete top
-$all delete
-
-set id [mol new tmp_reindex.pdb]
 
 set c_segname_list ""
 set au_segname_list ""
@@ -128,7 +132,7 @@ puts $c_segname_list
 puts $au_segname_list
 puts $c_resid_list
 puts $au_resid_list
-file delete -force "tmp.pdb"
+#file delete -force "tmp.pdb"
 
 
 ####################### psfgen #########################################
@@ -150,7 +154,7 @@ foreach top $topFiles {
    topology $top
 }
 
-foreach seg $segnames {
+foreach seg $pegsegnames {
 
 		set founder 0
 		set sel [atomselect $id "segname $seg"]
@@ -181,6 +185,10 @@ foreach seg $segnames {
 		}
 		$sel delete
 }
+
+readpsf Surf2.psf
+coordpdb Surf2.pdb
+
 foreach c_segname $c_segname_list c_resid $c_resid_list au_segname $au_segname_list au_resid $au_resid_list {
 
     patch PEGA $c_segname:$c_resid $au_segname:$au_resid
@@ -203,4 +211,6 @@ mol delete $betas
 $betasel delete
 $betaful delete
 file delete -force "setBetas.pdb"
+file delete -force "Surf2.pdb"
+file delete -force "Surf2.psf"
 }

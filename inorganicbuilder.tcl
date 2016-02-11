@@ -2018,10 +2018,18 @@ proc ::inorganicBuilder::guiAddStructWin {} {
   menu $aw.type.menub.menu -tearoff no
     
   $aw.type.menub config -width 20
-  set typelist { {peg "Polyethylene Glycol for Gold (Covalent)"}\
+# Full typelist is currently hidden.
+#  set typelist { {peg "Polyethylene Glycol for Gold (Covalent)"}\
 				 {peg2 "Polyethylene Glycol (Non-Covalent)"} {dna "DNA (single or double) for Gold (Covalent)"} \
 				 {dna2 "DNA (single or double) (Non-Covalent)"} {thiol "Sulfhydryl Group"} {amine "Protonated Amino Group"}\
 				 {hyox "Hydroxyl Group"} {cabo "Carboxylate Group"} {custom "Custom Structure Selection"} }
+  set typelist { {peg2 "Polyethylene Glycol"}\
+				 {dna2 "DNA (single or double)"}\
+				 {thiol "Sulfhydryl Group"}\
+				 {amine "Protonated Amino Group"}\
+				 {hyox "Hydroxyl Group"}\
+				 {cabo "Carboxylate Group"}\
+				 {custom "Custom Structure Selection"} }
   
   if { ![info exists guiState(addStructType)] } {
     set guiState(addStructType) [lindex $typelist 1 0]
@@ -3015,14 +3023,14 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
 		
         grid [label $f.xstrandlabeladna2 -text "Strand Type:"] \
           -row $row -column 0 -sticky w
-        grid [label $f.xstrandlabel -text ""] \
+        grid [label $f.xstrandlabel2 -text ""] \
           -row $row -column 2 -sticky w
-        grid [radiobutton $f.xstrandlabeldna2.strand1 \
+        grid [radiobutton $f.xstrandlabel2.strand1 \
               -variable ${ns}::guiState(addDNAStrand) -value "1" \
               -text "Single" \
               -anchor e] \
           -row $row -column 3 -sticky ew -padx 4
-        grid [radiobutton $f.xstrandlabeldna2.strand2 \
+        grid [radiobutton $f.xstrandlabel2.strand2 \
               -variable ${ns}::guiState(addDNAStrand) -value "2" \
               -text "Double" \
               -anchor e] \
@@ -4197,6 +4205,7 @@ proc ::inorganicBuilder::AlignDense { } {
   
   
   foreach atom $densearea {
+    display update off
 
     puts "$countb / $catoms placements made. Last placement took: $tdiff microseconds"
     set tdiff [expr $t2 - $t1]
@@ -4516,6 +4525,7 @@ proc ::inorganicBuilder::AlignDense { } {
 
     
   # rotate
+    display update on  
     if { $guiState(addStructType) == "peg" } {
       $struct_full move [trans center $anchor_coord axis y 180]
     }
@@ -4863,7 +4873,7 @@ proc ::inorganicBuilder::getSurfaceAtoms { } {
 
   
   set aminmax [measure minmax $allsel]
-  set rs [measure surface $allsel 1.5 2.88 1.44 ] 
+  set rs [measure surface $allsel 1 6 10 ] 
   $allsel delete
 
 # Graphically display a highlighted region where Surface Area atoms have been found.
@@ -5016,7 +5026,6 @@ proc ::inorganicBuilder::guiBuildStructs {} {
     "System built." \
     -type ok  
   set guiState(systemBuilt) 1
-  file delete -force "tmp_reindex.pdb"
   
   # Save the newly built file into the temporary variables for AutoIonize and Solvate
   # This feature might not do anything on Windows systems. (User will have to enter the name)
@@ -9093,7 +9102,7 @@ proc ::inorganicBuilder::buildStructs { molid } {
 		
 	}
 
-    attach_PEG_Au All_PEG.pdb Surf.pdb $guiState(c_list) $guiState(cau_list)\
+    attach_PEG_Au All_PEG.pdb Surf.pdb Surf.psf $guiState(c_list) $guiState(cau_list)\
      $guiState(structedFile) $homePath
     file delete -force "tmp.pdb"
     file delete -force "Surf.pdb"
@@ -9120,7 +9129,7 @@ proc ::inorganicBuilder::buildStructs { molid } {
     set guiState(conFile) "${guiState(structedFile)}_con"
     set guiState(exb) 1
     set guiState(con) 1
-    attach_exb All_CUST.pdb Surf.pdb $guiState(anc_list) $guiState(ancau_list)\
+    attach_exb All_CUST.pdb Surf.pdb Surf.psf $guiState(anc_list) $guiState(ancau_list)\
      $guiState(structedFile) $homePath $guiState(exbFile) $guiState(addCustomK)\
       $guiState(addCustomX) $guiState(conFile) $guiState(topofile_struct)
     file delete -force "tmp.pdb"
