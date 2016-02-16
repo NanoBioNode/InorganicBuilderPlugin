@@ -216,6 +216,7 @@ namespace eval ::inorganicBuilder:: {
     StructSurfPeriodx 0
     StructSurfPeriody 0
     StructSurfPeriodz 0
+    noOrient 0
     addMoleculeOrientX ""
     addMoleculeOrientY ""
     addMoleculeOrientZ ""
@@ -1665,7 +1666,7 @@ proc ::inorganicBuilder::guiBuildSurfaceStructsWin {} {
        ]\
       -row $row -column 2
   incr row
-
+  set guiState(btablist) $w.structs.btab.list
   frame $w.structs
   set row 0
   grid columnconfigure $w.structs 0 -weight 1
@@ -4542,17 +4543,24 @@ proc ::inorganicBuilder::AlignDense { } {
     
   # rotate
     display update on  
-    if { $guiState(addStructType) == "peg" } {
-      $struct_full move [trans center $anchor_coord axis y 180]
-    }
-    $struct_full move [trans center $anchor_coord axis x $orientX]
-    $struct_full move [trans center $anchor_coord axis y $orientY]
-    $struct_full move [trans center $anchor_coord axis z $orientZ]
+
+    if { [info exists orientX] } { 
+      if { $guiState(addStructType) == "peg" } {
+        $struct_full move [trans center $anchor_coord axis y 180]
+      }
+
+      $struct_full move [trans center $anchor_coord axis x $orientX]
+      $struct_full move [trans center $anchor_coord axis y $orientY]
+      $struct_full move [trans center $anchor_coord axis z $orientZ]
 
   # for custom structures, now place the Equilibrium bond length b/w connection atoms
-    if { $guiState(addStructType) == "custom" } {
-		$struct_full moveby [vecscale $vecnorma $guiState(addCustomX)]
-    }
+      if { $guiState(addStructType) == "custom" } {
+		  $struct_full moveby [vecscale $vecnorma $guiState(addCustomX)]
+      }
+    } else {
+		set guiState(noOrient) 1
+	}
+
 
     set fullglobname [string replace $guiState(filename_index_glob)_$guiState(pdbfile_struct) end-3 end]
     lappend structnames $fullglobname
@@ -4574,7 +4582,6 @@ proc ::inorganicBuilder::AlignDense { } {
     $struct_full delete
   }
   
-
 
   # Part 2.5, merge files
 
@@ -4604,10 +4611,20 @@ proc ::inorganicBuilder::AlignDense { } {
   lappend guiState(all_struct) [lindex $structnames 0]
 
   set final_density [expr $countb / $guiState(snm2)]
+  if { $guiState(noOrient) == 1 } { 
+		  tk_messageBox -icon info -message \
+    "Warning: The surface area volume does not match the atom cloud closely enough. \n\n\
+    Go to Graphics>Representations for 'GetSurfaceAtoms'\
+    and change the QuickSurf volume so that it more closely fits the figure.\n\n\
+    (i.e. Reduce the Radius Scale parameter)\n\n\
+    The structures will be placed, but 1 or more may be oriented improperly\n\n\
+    " \
+    -type ok  
+    set guiState(noOrient) 0
+  }
   tk_messageBox -icon info -message \
              "Succeeded in placement of $countb / $catoms structures for a density of $final_density" \
              -type ok  
-
 
 }
 
@@ -4648,6 +4665,10 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
   variable guiState
 
   set deletelist [lsort -integer -decreasing [$listid curselection]]
+  # if performing a deletelast then select only the last element
+  if {$deleteType == "end"} {
+	  set deletelist [llength $guiState(all_struct)]
+  }
   if { $deleteType == 0 } {
 	  set deletelist "0"
   }
