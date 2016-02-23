@@ -4219,10 +4219,19 @@ proc ::inorganicBuilder::AlignDense { } {
   foreach usedName $guiState(addSurfSegs) {
 	  set usedSegname($usedName) 1
   }
-  
+
+
   
   foreach atom $densearea {
     display update off
+
+  # Keep track of the local unique chains in the incoming structure
+    array unset chain_list
+    array set chain_list {}
+
+  # Keep track of where (if) the segname changes for unique chains
+    array unset psfsegarray
+    array set psfsegarray {}
 
     puts "$countb / $catoms placements made. Last placement took: $tdiff microseconds"
     set tdiff [expr $t2 - $t1]
@@ -4236,7 +4245,8 @@ proc ::inorganicBuilder::AlignDense { } {
       set testseg [::inorganicBuilder::iter_segname]
     }
     set pegseg $testseg
-
+    set psfsegarray(1) $testseg
+    
     if { $guiState(addStructType) == "dna" } {
       set pegnam DNA$guiState(addDNALength)_$guiState(structureIndex)
     } elseif { $guiState(addStructType) == "peg" } {
@@ -4254,7 +4264,12 @@ proc ::inorganicBuilder::AlignDense { } {
 #################################################################################
 
   # Open the pdb to extract the atom records.
-
+  # Also grab any unique chains
+    mol new ${pegnam}.pdb
+    set unichain [atomselect top all]
+    set chainlist [lsort -unique [$unichain get chain]]
+    $unichain delete
+    mol delete top
     set out [open ${pegnam}_mod.pdb w]
     set in [open ${pegnam}.pdb r]
 
@@ -4266,7 +4281,33 @@ proc ::inorganicBuilder::AlignDense { } {
         continue
       }
 
-  # Get the segment name.
+  # Check if the segment name should change again (i.e. unique chains in a Protein).
+  # Right now I'm trusting that the chain is a single char in position 21
+      set current_pegseg $pegseg  
+      if {[llength $chainlist] > 1} {  
+        set old_chain [string range $line 21 21]
+        if { (![info exists chain_list($old_chain)]) && ($old_chain != "") } {        
+          while { [info exists usedSegname($testseg)] } {
+            set testseg [::inorganicBuilder::iter_segname]
+          }          
+          set usedSegname($testseg) 1
+          set pegseg $testseg
+          set chain_list($old_chain) $testseg
+        } else {
+		  set pegseg $chain_list($old_chain)
+	    }
+      }
+
+  # Save where the pegseg changes and with what value.
+  # This is going to be used for the PSF which does not have chain info.
+      if {$current_pegseg != $pegseg} {
+		  set atomN [regexp -all -inline {\S+} $line]
+		  set atomN [lindex $atomN 1]
+		  set psfsegarray($atomN) $pegseg
+	  }
+	  
+	  
+	  
       set segNaming $pegseg
     
   # Generate the new pdb line.
@@ -4296,7 +4337,7 @@ proc ::inorganicBuilder::AlignDense { } {
 #################################################################################
 ######################## Redo the PSF File with the custom segname ##############
 #################################################################################
-
+    set psfatomsegs [lsort -increasing [array names psfsegarray]]
   # Open the pdb to extract the atom records.
     set out2 [open ${pegnam}_mod.psf w]
     set in2 [open ${pegnam}.psf r]
@@ -4304,6 +4345,8 @@ proc ::inorganicBuilder::AlignDense { } {
 
     set record 0
     set n 0
+    set psfas 0
+    set psfaslist [lindex $psfatomsegs $psfas]
     set num 1
 
     foreach line [split [read $in2] \n] {
@@ -4327,8 +4370,28 @@ proc ::inorganicBuilder::AlignDense { } {
       } else {
         incr n
 
-        
+
+        # apply segnames if multiple chains
+        if { $n == $psfaslist } {  
+          set pegseg $psfsegarray($psfaslist)
+          incr psfas
+          set psfaslist [lindex $psfatomsegs $psfas]
+        }
+
+
         set segNameNew $pegseg
+        if {$guiState(addDNAStrand) == "2"} {
+          set old_seggy [string range $line 9 11]
+          if {$old_seggy == "DS1"} {
+            set segNameNew "${pegseg}1"
+          } elseif {$old_seggy == "DS2"} {
+            set segNameNew "${pegseg}2"
+          }
+        }
+
+
+        
+          # the spacing here could be done better?
         set temp0 [string range $line 0 8]
         set temp1 [string range $line 13 end]
 
@@ -4667,7 +4730,7 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
   set deletelist [lsort -integer -decreasing [$listid curselection]]
   # if performing a deletelast then select only the last element
   if {$deleteType == "end"} {
-	  set deletelist [llength $guiState(all_struct)]
+	  set deletelist [llength $guiState(all_struct) - 1]
   }
   if { $deleteType == 0 } {
 	  set deletelist "0"
