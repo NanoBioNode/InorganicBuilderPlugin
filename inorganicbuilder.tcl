@@ -4728,13 +4728,22 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
   variable guiState
 
   set deletelist [lsort -integer -decreasing [$listid curselection]]
+
+
+  
   # if performing a deletelast then select only the last element
   if {$deleteType == "end"} {
 	  set deletelist [llength $guiState(all_struct) - 1]
   }
   if { $deleteType == 0 } {
 	  set deletelist "0"
-  }
+  }  elseif {$deletelist == ""} {
+	  tk_messageBox -icon info -message \
+	  "Please select a structure to be removed." \
+	  -type ok  
+	  return
+  }  
+  
 # deletelist is the discrete integer value of the array element, i.e. single element
 # returns a value of '0' to delete the first item.
 
