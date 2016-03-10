@@ -21,6 +21,23 @@ if {$argc != 5} {
     exit
 }
 
+# Rewrite file to only have ATOM lines from PDB...everything else is removed.
+set out [open "${inPdb}mod" w]
+set in  [open ${inPdb} r]
+
+foreach line [split [read $in] \n] {
+  set string0 [string range $line 0 3]
+  if {[string match $string0 "ATOM"]} {
+	puts $out $line
+	continue
+  }
+}
+close $in
+close $out
+file delete -force ${inPdb}
+file rename -force "${inPdb}mod" ${inPdb}
+
+
 # orient the incoming molecule along x-axis [1,0,0]
 set molsel [mol new ${inPdb}]
 
