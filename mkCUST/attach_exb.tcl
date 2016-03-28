@@ -36,7 +36,7 @@ if {$argc != 12} {
 }
 
 
-
+set bau_list {}
 # Get total atom number in funPdb
 set id [mol new [lindex $argv 0]]
 set funA [atomselect top all]
@@ -67,7 +67,8 @@ while {[gets $p1 line] >= 0} {
     if {[lindex $line 0] == "ATOM"} {
 		 puts $out $line
 		 if {[lindex $line 10] == 1.10 || [lindex $line 9] == 1.10 } {
-			lappend bau_list [expr [lindex $line 1] + $funAtomNum\
+			lappend bau_list [expr [lindex $line 1] + $funAtomNum - 1]
+#			lappend bau_list [expr [lindex $line 1] + $funAtomNum\
 			 - [expr [llength $ancaulist]*2] - 1]
 		 }
 	}
@@ -89,7 +90,7 @@ close $out
 foreach ancval $anclist ancauval $ancaulist {
     lappend fun_list $ancval
     lappend sub_list [expr $ancauval + $funAtomNum]
-    lappend bau_list [expr $ancauval + $funAtomNum - [expr [llength $ancaulist]*2]]
+#    lappend bau_list [expr $ancauval + $funAtomNum - [expr [llength $ancaulist]*2]]
 }
 
 puts $fun_list
@@ -133,6 +134,22 @@ foreach i0 $fun_list i1 $sub_list {
     $fl delete
     $sl delete
 }
+
+# Save the coordinates of all the "used atoms" since their indices will be shifted after guessing.
+# Coordinates and atom Type will be used to re-calculate the correct index.
+set fselect [atomselect top "index $fun_list"]
+set sselect [atomselect top "index $sub_list"]
+set fcoord [$fselect get {x y z}]
+set scoord [$sselect get {x y z}]
+$fselect delete
+$sselect delete
+
+if {$bau_list != {}} {
+  set bcoord [$bselect get {x y z}]
+  set bselect [atomselect top "index $bau_list"]
+  $bselect delete
+}
+
 
 
 ####################### psfgen #########################################
@@ -240,6 +257,49 @@ regenerate angles dihedrals ;# fixes problems with patching
 writepdb setBetas.pdb
 writepsf [lindex $argv 3].psf
 set betas [mol new setBetas.pdb]
+
+# Regenerate the "used atom" list in case of new guessed atoms appearing
+set bau_list {}
+set fun_list {}
+set sub_list {}
+if {[info exists bcoord]} {
+	foreach batom $bcoord {
+		set xval [lindex $batom 0]
+		set yval [lindex $batom 1]
+		set zval [lindex $batom 2]
+	#	set typeval [lindex $batom 3]
+	#	set sel [atomselect top "x=$xval and y=$yval and z=$zval and type $typeval"]
+		set sel [atomselect top "x=$xval and y=$yval and z=$zval"]
+		set bindex [$sel get index]
+		lappend bau_list $bindex
+		$sel delete
+	}
+}
+foreach fatom $fcoord {
+	set xval [lindex $fatom 0]
+	set yval [lindex $fatom 1]
+	set zval [lindex $fatom 2]
+#	set typeval [lindex $batom 3]
+#	set sel [atomselect top "x=$xval and y=$yval and z=$zval and type $typeval"]
+	set sel [atomselect top "x=$xval and y=$yval and z=$zval"]
+	set findex [$sel get index]
+	lappend bau_list $findex
+	lappend fun_list $findex
+	$sel delete
+}
+foreach satom $scoord {
+	set xval [lindex $satom 0]
+	set yval [lindex $satom 1]
+	set zval [lindex $satom 2]
+#	set typeval [lindex $batom 3]
+#	set sel [atomselect top "x=$xval and y=$yval and z=$zval and type $typeval"]
+	set sel [atomselect top "x=$xval and y=$yval and z=$zval"]
+	set sindex [$sel get index]
+	lappend bau_list $sindex
+	lappend sub_list $sindex
+	$sel delete
+}
+
 set betasel [atomselect $betas "index $bau_list"]
 set betaful [atomselect $betas all]
 $betasel set beta 1.1
