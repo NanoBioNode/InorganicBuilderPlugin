@@ -37,6 +37,12 @@ close $out
 file delete -force ${inPdb}
 file rename -force "${inPdb}mod" ${inPdb}
 
+####################### psfgen #########################################
+
+
+package require psfgen             ;# load psfgen
+resetpsf                           ;# Destroys any previous attempts
+psfcontext reset                   ;# Tosses out any previously declared topology files
 
 # orient the incoming molecule along x-axis [1,0,0]
 set molsel [mol new ${inPdb}]
