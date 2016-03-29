@@ -9362,8 +9362,8 @@ proc ::inorganicBuilder::buildStructs { molid } {
     attach_exb All_CUST.pdb Surf.pdb Surf.psf $guiState(anc_list) $guiState(ancau_list)\
      $guiState(structedFile) $homePath $guiState(exbFile) $guiState(addCustomK)\
       $guiState(addCustomX) $guiState(conFile) $guiState(topofile_struct)
-    set guiState(anc_list) [lindex $exb_obj 0]
-    set guiState(ancau_list) [lindex $exb_obj 1]
+#    set guiState(anc_list) [lindex $exb_obj 0]
+#    set guiState(ancau_list) [lindex $exb_obj 1]
     file delete -force "tmp.pdb"
     file delete -force "Surf.pdb"
     file delete -force "Surf.psf"
