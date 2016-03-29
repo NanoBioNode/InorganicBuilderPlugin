@@ -1660,11 +1660,14 @@ proc ::inorganicBuilder::guiBuildSurfaceStructsWin {} {
     -row $row -column 0 -sticky w
   grid [button $w.body3.addstructs -text "Add Structure" \
           -command "${ns}::guiAddStructWin"] \
-    -row $row -column 1
+    -row $row -column 0 -sticky e    
   grid [button $w.body3.remove -text "Remove Structure" \
         -command "${ns}::guiRemoveStruct $w.structs.btab.list 1; ${ns}::guiBuildSurfaceStructsWin" \
        ]\
-      -row $row -column 2
+      -row $row -column 1
+  grid [button $w.body3.packstructs -text "Pack Structs as .STL" \
+          -command "${ns}::guiPackStructs"] \
+    -row $row -column 2
   incr row
   set guiState(btablist) $w.structs.btab.list
   frame $w.structs
@@ -1686,10 +1689,12 @@ proc ::inorganicBuilder::guiBuildSurfaceStructsWin {} {
 
   if { [llength $guiState(surfacearea)] == 0 } {
 	  $w.body3.addstructs configure -state disabled
+	  $w.body3.packstructs configure -state disabled
 	  set structlist {}	  
 	  set guiState(structlist) {}
   } else {
 	  $w.body3.addstructs configure -state normal
+	  $w.body3.packstructs configure -state normal
   }
   if { [llength $structlist] == 0 } {
     $w.body3.remove configure -state disabled 
@@ -1995,6 +2000,121 @@ proc ::inorganicBuilder::guiAddBlockWin {} {
   guiAddBlockParams $aw.params
   guiRepackAdd
 }
+
+# *** ADDED ***
+proc ::inorganicBuilder::guiPackStructs {} {
+  variable guiState
+  
+
+  set save_the_axes [axes location]
+  axes location off
+
+  set time1 [clock seconds]
+  set STLpackdir "STLFiles_$time1"
+  file mkdir $STLpackdir
+  set STLpackpath [file normalize $STLpackdir]
+  
+  # decipher the names in guiState(all_struct) as molID numbers
+  set current_mols [molinfo list]
+  set all_struct2 {}
+  foreach molecular_id $current_mols {
+    set current_name [molinfo $molecular_id get name]
+      foreach namer $guiState(all_struct) {
+        if {[string match $namer* $current_name]} {
+          lappend all_struct2 $molecular_id
+          break
+        }        
+      }
+  }
+  
+  set molList "$guiState(currentMol) $all_struct2"
+  set molid $guiState(currentMol)
+
+  foreach surfacemol $molList {
+    set draw_status {}
+    foreach moll [molinfo list] {
+      lappend draw_status [molinfo $moll get drawn]
+      if {$moll != $surfacemol} {
+        mol off $moll
+      } elseif {$moll == $surfacemol} {
+        mol on $moll
+      }
+    }
+  
+    # turn off the representations of the atoms too
+    for {set i 0} {$i < 2} {incr i} {
+      catch {mol showrep $surfacemol $i off} err
+    }
+
+    # turn on a new representation of the molecule's surface
+    # if it is a struct molecule
+    if { $surfacemol != $molid } {    
+      mol addrep $surfacemol
+      mol showrep $surfacemol 1 on
+      mol modselect 1 $surfacemol "all"
+      mol modcolor 1 $surfacemol ColorID 6
+      mol modmaterial 1 $surfacemol Transparent
+      mol modstyle 1 $surfacemol QuickSurf 1.1 2.6 1 max
+    }
+
+    
+
+    set identityvpts {
+     {{1.000000 0.000000 0.000000 0.000000}
+     {0.000000 1.000000 0.000000 0.000000}
+     {0.000000 0.000000 1.000000 0.000000}
+     {0.000000 0.000000 0.000000 1.000000}}
+     {{1.000000 0.000000 0.000000 0.000000}
+     {0.000000 1.000000 0.000000 0.000000}
+     {0.000000 0.000000 1.000000 0.000000}
+     {0.000000 0.000000 0.000000 1.000000}}
+     {{1.000000 0.000000 0.000000 0.000000}
+     {0.000000 1.000000 0.000000 0.000000}
+     {0.000000 0.000000 1.000000 0.000000}
+     {0.000000 0.000000 0.000000 1.000000}}
+     {{1.000000 0.000000 0.000000 0.000000}
+     {0.000000 1.000000 0.000000 0.000000}
+     {0.000000 0.000000 1.000000 0.000000}
+     {0.000000 0.000000 0.000000 1.000000}}
+    }
+
+    set saveView [molinfo $surfacemol get {center_matrix rotate_matrix scale_matrix global_matrix}]
+    display update on
+    #display resetview
+    molinfo $surfacemol set {center_matrix rotate_matrix scale_matrix global_matrix} $identityvpts
+    render STL "temp_mesh_$surfacemol.stl"
+    file copy -force "temp_mesh_$surfacemol.stl" $STLpackpath
+    file delete -force "temp_mesh_$surfacemol.stl"
+    if { $surfacemol != $molid } {  
+      mol delrep 1 $surfacemol
+    }
+    molinfo $surfacemol set {center_matrix rotate_matrix scale_matrix global_matrix} $saveView
+    display update off
+
+  
+    # restore the draw statuses
+    foreach moll [molinfo list] dstat $draw_status {
+      if {$dstat == 1} {
+        mol on $moll
+      }
+    }
+
+    for {set i 0} {$i < 2} {incr i} {
+      catch {mol showrep $surfacemol $i on} err
+    }
+  }
+      
+
+  set alphabeta [catch {exec tar -c -f "${STLpackpath}.tar" $STLpackdir &}]
+  
+  after 2000
+  file delete -force $STLpackpath
+  axes location $save_the_axes
+  display update on
+  return
+
+}
+
 
 # *** ADDED ***
 proc ::inorganicBuilder::guiAddStructWin {} {
@@ -2970,7 +3090,7 @@ proc ::inorganicBuilder::guiAddStructParams { f } {
 		
 	} elseif { [string equal $type "peg2"]  } { 
 		set guiState(currentCustPDB) "auto-generated PEG"
-		set guiState($topokey_struct) [file normalize [file join $homePath "topology" "par_all35_ethers-oh.prm"]]
+		set guiState($topokey_struct) [file normalize [file join $homePath "topology" "par_all35_ethers.prm"]]
 		set guiState(addStructType) "custom"
 		set guiState(oldStructType) "peg2"
 		set guiState(addCustomK) 200.00
@@ -5024,7 +5144,7 @@ proc ::inorganicBuilder::getSurfaceAtoms { } {
   mol modcolor 2 $molid ColorID 6
   mol modmaterial 2 $molid Transparent
   mol colupdate 2 $molid 1 
-  mol modstyle 2 $molid QuickSurf 2 2.6 1 high
+  mol modstyle 2 $molid QuickSurf 1.7 2.6 1 high
 
   puts "Surface Atoms Available for Construction: [$surface_area get index]"
 
@@ -5287,11 +5407,12 @@ proc ::inorganicBuilder::guiRunNAMD {} {
   grid [button $aw.buttons.con -text "Continue Simulation" \
     -command "destroy $aw; ${ns}::RunNAMD 1"] \
     -row $row -column 1
+  incr row
   grid [button $aw.buttons.pack -text "Pack NAMD files as .tar" \
     -command "destroy $aw; ${ns}::RunNAMD 2"] \
-    -row $row -column 2
+    -row $row -column 1
   grid [button $aw.buttons.cancel -text Cancel -command "destroy $aw"] \
-    -row $row -column 3
+    -row $row -column 0
 
   guiRepackRunNAMD  
   
@@ -5424,7 +5545,7 @@ proc ::inorganicBuilder::RunNAMD { type } {
   file copy -force $namdfilepath $namdpackpath
 
   if { $type == 2 } {
-	  set alphabeta [catch {exec tar -c -f "${namdpackpath}.tar" $namdpackpath &}]
+	  set alphabeta [catch {exec tar -c -f "${namdpackpath}.tar" $namdpackdir &}]
 	  return
   }
 
@@ -9238,9 +9359,11 @@ proc ::inorganicBuilder::buildStructs { molid } {
     set guiState(conFile) "${guiState(structedFile)}_con"
     set guiState(exb) 1
     set guiState(con) 1
-    attach_exb All_CUST.pdb Surf.pdb Surf.psf $guiState(anc_list) $guiState(ancau_list)\
+    set exb_obj [attach_exb All_CUST.pdb Surf.pdb Surf.psf $guiState(anc_list) $guiState(ancau_list)\
      $guiState(structedFile) $homePath $guiState(exbFile) $guiState(addCustomK)\
-      $guiState(addCustomX) $guiState(conFile) $guiState(topofile_struct)
+      $guiState(addCustomX) $guiState(conFile) $guiState(topofile_struct)]
+    set guiState(anc_list) [lindex $exb_obj 0]
+    set guiState(ancau_list) [lindex $exb_obj 1]
     file delete -force "tmp.pdb"
     file delete -force "Surf.pdb"
     file delete -force "Surf.psf"
