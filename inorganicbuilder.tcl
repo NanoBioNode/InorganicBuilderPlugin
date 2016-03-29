@@ -9359,9 +9359,9 @@ proc ::inorganicBuilder::buildStructs { molid } {
     set guiState(conFile) "${guiState(structedFile)}_con"
     set guiState(exb) 1
     set guiState(con) 1
-    set exb_obj [attach_exb All_CUST.pdb Surf.pdb Surf.psf $guiState(anc_list) $guiState(ancau_list)\
+    attach_exb All_CUST.pdb Surf.pdb Surf.psf $guiState(anc_list) $guiState(ancau_list)\
      $guiState(structedFile) $homePath $guiState(exbFile) $guiState(addCustomK)\
-      $guiState(addCustomX) $guiState(conFile) $guiState(topofile_struct)]
+      $guiState(addCustomX) $guiState(conFile) $guiState(topofile_struct)
     set guiState(anc_list) [lindex $exb_obj 0]
     set guiState(ancau_list) [lindex $exb_obj 1]
     file delete -force "tmp.pdb"
