@@ -145,8 +145,8 @@ $fselect delete
 $sselect delete
 
 if {$bau_list != {}} {
-  set bcoord [$bselect get {x y z}]
   set bselect [atomselect top "index $bau_list"]
+  set bcoord [$bselect get {x y z}]
   $bselect delete
 }
 
