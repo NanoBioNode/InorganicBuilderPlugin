@@ -356,5 +356,5 @@ $all writepdb [lindex $argv 8]
 $all delete
 $sub delete
 mol delete top
-
+file delete -force "combine_reindex.pdb"
 }
