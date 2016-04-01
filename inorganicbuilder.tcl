@@ -3973,6 +3973,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
          set guiState(previous_densearea) {}
          }
          ::inorganicBuilder::AlignDense
+         file delete -force "temp_mesh_qs.stl"
          set dens_printer [lsort -dictionary $guiState(densearea)]
          set guiState(dens_printer) $dens_printer
          set guiState(global_useddense) $dens_printer
