@@ -5068,6 +5068,15 @@ proc ::inorganicBuilder::getSurfaceAtoms { } {
 
   variable guiState
   set ns [namespace current]
+	 
+
+  if {$guiState(addSurfTypes) == ""} {
+		  tk_messageBox -icon error -message \
+    "No atom types were specified
+    " \
+    -type ok  
+    return
+  }
   
   display update on  
 
