@@ -266,6 +266,7 @@ namespace eval ::inorganicBuilder:: {
     currentMol1 "none"
     currentMol2 "none"
     currentCustPDB ""
+    currentType ""
     linemols {}
     bondCutoff 1.0
     gridSz 1
@@ -3842,6 +3843,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
          source [file normalize [file join $homePath "mkPEG" "mkPEG.tcl"]]
          set pegname PEG$guiState(addPEGLength)      
          mkPEG $guiState(addPEGLength) $pegname $homePath
+         set guiState(currentType) $guiState(currentCustPDB)
          set guiState(currentCustPDB) [file normalize $pegname.pdb]
          # Quickly grab the atom number of the anchor atom desired for this PEG
          set tempAll [mol new $pegname.psf]
@@ -3860,6 +3862,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
          source [file normalize [file join $homePath "mkDNA" "mkDNA.tcl"]]
          set pegname DNA$guiState(addDNALength)
          mkDNA $guiState(addDNAStrand) $guiState(addDNALength) $pegname $homePath $guiState(addDNASEQ)
+         set guiState(currentType) $guiState(currentCustPDB)
          set guiState(currentCustPDB) [file normalize $pegname.pdb]
          # Quickly grab the atom number of the anchor atom desired for this DNA
          set tempAll [mol new $pegname.psf]
@@ -4405,7 +4408,7 @@ proc ::inorganicBuilder::AlignDense { } {
   # Check if the segment name should change again (i.e. unique chains in a Protein).
   # Right now I'm trusting that the chain is a single char in position 21
       set current_pegseg $pegseg  
-      if {[llength $chainlist] > 1} {  
+      if {([llength $chainlist] > 1) && ($guiState(currentType) != "auto-generated DNA")} {  
         set old_chain [string range $line 21 21]
         if { (![info exists chain_list($old_chain)]) && ($old_chain != "") } {        
           while { [info exists usedSegname($testseg)] } {
@@ -5511,6 +5514,8 @@ proc ::inorganicBuilder::RunNAMD { type } {
   set parDir [file normalize [file join $namdpackpath topology]]
   set pdbpath [file normalize [file join $namdpackpath $guiState(structedFile).pdb]]
   set psfpath [file normalize [file join $namdpackpath $guiState(structedFile).psf]]
+  set conpath [file normalize [file join $namdpackpath $guiState(structedFile)_con]]
+  set exbpath [file normalize [file join $namdpackpath $guiState(structedFile)_exb]]
   
   if {[file exists $namdpackpath]} {
     if {[file exists [lindex [glob -directory $namdpackpath -nocomplain $guiState(simFile).*] 0] ] && ($type == 0) } {
@@ -5524,11 +5529,15 @@ proc ::inorganicBuilder::RunNAMD { type } {
     file mkdir $namdpackdir
     set pdbpath_copy [file normalize $guiState(structedFile).pdb]
     set psfpath_copy [file normalize $guiState(structedFile).psf]
+    set conpath_copy [file normalize $guiState(structedFile)_con]
+    set exbpath_copy [file normalize $guiState(structedFile)_exb]
 
 #  set readmepath [file normalize $readmeFile]
     file copy -force $parDirpre $namdpackpath
     file copy -force $pdbpath_copy $namdpackpath
     file copy -force $psfpath_copy $namdpackpath
+    file copy -force $conpath_copy $namdpackpath
+    file copy -force $exbpath_copy $namdpackpath
   }
 
 # fake the unused parameters to have valid values so that mkNAMD will run,
@@ -5599,7 +5608,7 @@ proc ::inorganicBuilder::RunNAMD { type } {
   if {$checkPID == 1 && $alpha == 0} {
 	  mol delete top
 	  set movieid [mol new]
-	  mol addfile $guiState(structedFile).pdb type psf autobonds off waitfor all
+	  mol addfile $guiState(structedFile).psf type psf autobonds off waitfor all
 	  mol addfile $guiState(structedFile).pdb type pdb autobonds off waitfor all
 	  set addFiles [glob -nocomplain -- $namdpackpath/*.dcd]
 	  set addFLen [llength $addFiles]
