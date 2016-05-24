@@ -280,6 +280,7 @@ namespace eval ::inorganicBuilder:: {
     loadResult 1
     addGenericInclude 0
     addDXFile {}
+    alignSF 1
     exb 0
     con 0
     exbFile ""
@@ -1670,7 +1671,7 @@ proc ::inorganicBuilder::guiBuildSurfaceStructsWin {} {
           -command "${ns}::guiPackStructs"] \
     -row $row -column 2
   incr row
-  set guiState(btablist) $w.structs.btab.list
+
   frame $w.structs
   set row 0
   grid columnconfigure $w.structs 0 -weight 1
@@ -2182,8 +2183,10 @@ proc ::inorganicBuilder::guiAddStructWin {} {
   
   set guiState(awframe) $aw
   grid [button $aw.buttons.add -text Add \
-    -command "${ns}::guiHighlightStruct $mode; \
-     ${ns}::guiStoreStruct;"] \
+    -command "\
+     ${ns}::guiHighlightStruct $mode; \
+     ${ns}::guiStoreStruct; \
+     ${ns}::guiASF $guiState(alignSF); "] \
     -row $row -column 0
   grid [button $aw.buttons.cancel -text Cancel -command "destroy $aw"] \
     -row $row -column 1
@@ -2192,6 +2195,19 @@ proc ::inorganicBuilder::guiAddStructWin {} {
   guiRepackStructAdd
 }
 
+# *** ADDED ***
+# Note sure why, but I have to return from guiHighlightStruct
+# before running this small subroutine (the guiState variable won't update).
+# Instead of doing everything first inside of guiHighlightStruct and then returning.
+proc ::inorganicBuilder::guiASF { alignSF } {
+	  set ns [namespace current]
+	  variable guiState
+	  if {$guiState(alignSF) == 0} { 
+		 ${ns}::guiRemoveStruct $guiState(structListID) "end"
+		 ${ns}::guiBuildSurfaceStructsWin
+	  }
+	  return
+}
 
 
 proc ::inorganicBuilder::guiSelectLoadedMolWin { psffile pdbfile \
@@ -3975,7 +3991,10 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
          set guiState(temp_surfacearea) $guiState(previous_tempsurf) 
          set guiState(previous_densearea) {}
          }
-         ::inorganicBuilder::AlignDense
+         set guiState(alignSF) [::inorganicBuilder::AlignDense]
+         if { $guiState(alignSF) == 0 || $guiState(alignSF) == "0" } {
+			 return;
+		 }
          file delete -force "temp_mesh_qs.stl"
          set dens_printer [lsort -dictionary $guiState(densearea)]
          set guiState(dens_printer) $dens_printer
@@ -4798,21 +4817,24 @@ proc ::inorganicBuilder::AlignDense { } {
   lappend guiState(all_struct) [lindex $structnames 0]
 
   set final_density [expr $countb / $guiState(snm2)]
+
   if { $guiState(noOrient) == 1 } { 
 		  tk_messageBox -icon info -message \
     "Warning: The surface area volume does not match the atom cloud closely enough. \n\n\
     Go to Graphics>Representations for 'GetSurfaceAtoms'\
     and change the QuickSurf volume so that it more closely fits the figure.\n\n\
     (i.e. Reduce the Radius Scale parameter)\n\n\
-    The structures will be placed, but 1 or more may be oriented improperly\n\n\
+    The structures will not be placed.\n\n\
     " \
     -type ok  
     set guiState(noOrient) 0
+    return 0
   }
+
   tk_messageBox -icon info -message \
              "Succeeded in placement of $countb / $catoms structures for a density of $final_density" \
              -type ok  
-
+  return 1
 }
 
 
@@ -4853,11 +4875,13 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
 
   set deletelist [lsort -integer -decreasing [$listid curselection]]
 
-
+  tk_messageBox -icon info -message \
+	  "$listid $deleteType $deletelist" \
+	  -type ok  
   
   # if performing a deletelast then select only the last element
   if {$deleteType == "end"} {
-	  set deletelist [llength $guiState(all_struct) - 1]
+	  set deletelist [expr [llength $guiState(all_struct)] - 1]
   }
   if { $deleteType == 0 } {
 	  set deletelist "0"
@@ -4870,6 +4894,10 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
   
 # deletelist is the discrete integer value of the array element, i.e. single element
 # returns a value of '0' to delete the first item.
+
+  tk_messageBox -icon info -message \
+	  "$guiState(all_struct) $deleteType $deletelist" \
+	  -type ok  
 
   set guiState(all_struct) [lreplace $guiState(all_struct) $deletelist $deletelist]
 
