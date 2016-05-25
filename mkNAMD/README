@@ -1,0 +1,36 @@
+Thanks for using Functionalization Workbench.
+
+
+## CONTENT OF THE ARCHIVE
+CombinedStructSurf.psf and CombinedStructSurf.pdb: The psf file (ref. 1) and pdb file (ref. 2) of the simulation system built by Functionalization Workbench.
+CombinedStructSurf.namd.conf: The configuration file for performing MD simulation with NAMD. 
+CombinedStructSurf_con: The pdb file used for positional harmonic constraint. Please see ref. 3 for more details.
+CombinedStructSurf_exb: A text file used for applying harmonic bonds between the surface and the functionalized molecule. Please see ref. 4 for more details.  
+topology: A directory containing the necessary parameter files for MD simulation.
+
+
+## NAMD 
+Download and install NAMD from
+http://www.ks.uiuc.edu/Development/Download/download.cgi?PackageName=NAMD
+
+
+## UNIX
+Open a terminal in this directory and type:
+
+namd2 CombinedStructSurf.namd.conf > sim0.log &
+
+Depending on your hardware, the size of your simulation system, and the number of simulation steps, it may take several days for the simulation to finish. We recommend monitoring your simulation
+using VMD (http://www.ks.uiuc.edu/Research/vmd/).
+
+
+## WINDOWS 
+You will need to install Cygwin (http://www.cygwin.com/), with openssh installed and configured. You can then start a bash session and follow the instructions for Unix.
+
+
+## REFERENCE
+1. http://www.ks.uiuc.edu/Training/Tutorials/namd/namd-tutorial-win-html/node24.html 
+2. http://www.ks.uiuc.edu/Training/Tutorials/namd/namd-tutorial-win-html/node23.html
+3. http://www.ks.uiuc.edu/Research/namd/2.9/ug/node27.html#SECTION00086200000000000000 
+4. http://www.ks.uiuc.edu/Research/namd/2.9/ug/node27.html#SECTION00086400000000000000
+
+ 
