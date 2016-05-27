@@ -4875,6 +4875,9 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
 
   set deletelist [lsort -integer -decreasing [$listid curselection]]
 
+  tk_messageBox -icon info -message \
+	  "$listid $deleteType $deletelist" \
+	  -type ok  
   
   # if performing a deletelast then select only the last element
   if {$deleteType == "end"} {
@@ -4891,6 +4894,10 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
   
 # deletelist is the discrete integer value of the array element, i.e. single element
 # returns a value of '0' to delete the first item.
+
+  tk_messageBox -icon info -message \
+	  "$guiState(all_struct) $deleteType $deletelist" \
+	  -type ok  
 
   set guiState(all_struct) [lreplace $guiState(all_struct) $deletelist $deletelist]
 
@@ -5552,13 +5559,14 @@ proc ::inorganicBuilder::RunNAMD { type } {
     set psfpath_copy [file normalize $guiState(structedFile).psf]
     set conpath_copy [file normalize $guiState(structedFile)_con]
     set exbpath_copy [file normalize $guiState(structedFile)_exb]
+    set readmepath_copy [file normalize [file join $homePath "mkNAMD" "README"]]
 
-#  set readmepath [file normalize $readmeFile]
     file copy -force $parDirpre $namdpackpath
     file copy -force $pdbpath_copy $namdpackpath
     file copy -force $psfpath_copy $namdpackpath
     file copy -force $conpath_copy $namdpackpath
     file copy -force $exbpath_copy $namdpackpath
+    file copy -force $readmepath_copy $namdpackpath
   }
 
 # fake the unused parameters to have valid values so that mkNAMD will run,
@@ -5580,7 +5588,7 @@ proc ::inorganicBuilder::RunNAMD { type } {
       $guiState(exb) $guiState(exbFile) $guiState(con) $guiState(conFile)\
        $guiState(topofile_struct) $guiState(constPressure) $guiState(gridforce)\
         $guiState(gridforceFile) $guiState(gridforcePotFile) $guiState(gridforceCont1)\
-         $guiState(gridforceCont2) $guiState(gridforceCont3)
+         $guiState(gridforceCont2) $guiState(gridforceCont3) $type
 
   file copy -force $namdfilepath $namdpackpath
 
