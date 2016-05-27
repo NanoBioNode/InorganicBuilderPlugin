@@ -4,9 +4,13 @@
 # 2015/6/30
 #
 
-proc mkNAMD { builtPSF builtPDB outDir parDir dimFactor namdFile simFile Temperature Dielectric Damping minimStep simStep setIMD sspVecs exb exbFile con conFile topoFile constPressure gridforce gridforceFile gridforcePotFile gridforceCont1 gridforceCont2 gridforceCont3} {
-set argc 26
+proc mkNAMD { builtPSF builtPDB outDir parDir dimFactor namdFile simFile Temperature Dielectric Damping minimStep simStep setIMD sspVecs exb exbFile con conFile topoFile constPressure gridforce gridforceFile gridforcePotFile gridforceCont1 gridforceCont2 gridforceCont3 packNAMD} {
+set argc 27
 set argv {}
+
+if {$packNAMD == 2} {
+	set outDir ""
+}
 
 lappend argv $builtPSF
 lappend argv $builtPDB
@@ -27,8 +31,9 @@ lappend argv $con
 lappend argv $conFile
 lappend argv $topoFile
 lappend argv $simFile
+lappend argv $packNAMD
 
-if {$argc != 26} {
+if {$argc != 27} {
     puts "vmd -dispdev text -e mkNAMD.tcl -args psf pdb outDir parDir dimFactor namdFile"
     puts "psf: psf file"
     puts "pdb: pdb file"
@@ -233,12 +238,11 @@ set parFiles [list {*}$parFiles {*}[glob -nocomplain -- $parDir/*.str]]
 set parFiles [list {*}$parFiles {*}[glob -nocomplain -- $parDir/*.inp]]
 set parFiles [list {*}$parFiles {*}[glob -nocomplain -- $topoFile]]
 
-#set parDirFull [string trimright $parDir "topology"]
-
 foreach par $parFiles {
-#	set parr [string trimleft $par $parDirFull]
-#	set parr [string trimleft $parr "y/"]
-#    puts $namdFile "parameters      $parr"
+	if { $packNAMD == 2} {
+		set parr [lindex [file split $par] end]
+		set par "/topology/$parr"
+	}
     puts $namdFile "parameters      $par"
 }
 
