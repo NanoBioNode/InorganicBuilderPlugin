@@ -4875,7 +4875,7 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
 
   set deletelist [lsort -integer -decreasing [$listid curselection]]
 
-  tk_messageBox -icon info -message \
+  #tk_messageBox -icon info -message \
 	  "$listid $deleteType $deletelist" \
 	  -type ok  
   
@@ -4895,7 +4895,7 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
 # deletelist is the discrete integer value of the array element, i.e. single element
 # returns a value of '0' to delete the first item.
 
-  tk_messageBox -icon info -message \
+ # tk_messageBox -icon info -message \
 	  "$guiState(all_struct) $deleteType $deletelist" \
 	  -type ok  
 
