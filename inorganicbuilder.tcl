@@ -139,8 +139,8 @@ namespace eval ::inorganicBuilder:: {
   variable materialList
   variable materialPath [file join $env(INORGANICBUILDERDIR) materials]
   variable homePath $env(INORGANICBUILDERDIR)
-  variable surfingPath [lindex [glob [file join $env(INORGANICBUILDERDIR) ../../../../surf_*] ] 0]
-#  variable surfingPath [file join $env(INORGANICBUILDERDIR) ../../../../lib/surf/]
+#  variable surfingPath [lindex [glob [file join $env(INORGANICBUILDERDIR) ../../../../surf_*] ] 0]
+  variable surfingPath [file join $env(INORGANICBUILDERDIR) ../../../../lib/surf/]
   variable compvacuumPath [file join $env(INORGANICBUILDERDIR) compvacuum]
   variable guiStateVers 1.0
   variable guiState
@@ -3854,6 +3854,12 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
 
 
   } else {
+	  
+       set aminpdb [file normalize [file join $homePath "functionalGroup" "AMIN.pdb"]]
+       set thiopdb [file normalize [file join $homePath "functionalGroup" "THIO.pdb"]]
+       set cabopdb [file normalize [file join $homePath "functionalGroup" "CABO.pdb"]]
+       set hyoxpdb [file normalize [file join $homePath "functionalGroup" "HYOX.pdb"]]
+       
        if { $guiState(currentCustPDB) == "auto-generated PEG" } {
 		   
          source [file normalize [file join $homePath "mkPEG" "mkPEG.tcl"]]
@@ -3892,6 +3898,13 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
          $finalO delete
          mol delete $tempAll
 
+	   } elseif { $guiState(currentCustPDB) in [list $aminpdb $thiopdb $cabopdb $hyoxpdb] } {
+		   set handle [lindex [file split $guiState(currentCustPDB)] end]
+		   set hfile [open $handle "w"]
+		   close $hfile
+		   set handle [file normalize $hfile]		   
+		   file copy -force $guiState(currentCustPDB) $handle
+		   set guiState(currentCustPDB) $handle
 	   }
 
        source [file normalize [file join $homePath "mkCUST" "mod_pdb.tcl"]]
