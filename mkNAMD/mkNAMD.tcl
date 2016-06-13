@@ -1,10 +1,10 @@
-# Usage: vmd -dispdev text -e mkNAMD.tcl -args builtPSF builtPDB outDir parDir dimFactor namdFile simFile Temperature Dielectric Damping minimStep simStep setIMD sspVecs exb exbFile con conFile
+# Usage: vmd -dispdev text -e mkNAMD.tcl -args builtPSF builtPDB outDir parDir simBoxX simBoxY simBoxZ namdFile simFile Temperature Dielectric Damping minimStep simStep setIMD sspVecs exb exbFile con conFile
 # Generate a NAMD config file
 # Author: Chen-Yu Li <cli56@illinois.edu>
 # 2015/6/30
 #
 
-proc mkNAMD { builtPSF builtPDB outDir parDir dimFactor namdFile simFile Temperature Dielectric Damping minimStep simStep setIMD sspVecs exb exbFile con conFile topoFile constPressure gridforce gridforceFile gridforcePotFile gridforceCont1 gridforceCont2 gridforceCont3 packNAMD} {
+proc mkNAMD { builtPSF builtPDB outDir parDir simBoxX simBoxY simBoxZ namdFile simFile Temperature Dielectric Damping minimStep simStep setIMD sspVecs exb exbFile con conFile topoFile constPressure gridforce gridforceFile gridforcePotFile gridforceCont1 gridforceCont2 gridforceCont3 packNAMD} {
 set argc 27
 set argv {}
 
@@ -16,7 +16,9 @@ lappend argv $builtPSF
 lappend argv $builtPDB
 lappend argv $outDir
 lappend argv $parDir
-lappend argv $dimFactor
+lappend argv $simBoxX 
+lappend argv $simBoxY 
+lappend argv $simBoxZ 
 lappend argv $namdFile
 lappend argv $Temperature
 lappend argv $Dielectric
@@ -34,12 +36,11 @@ lappend argv $simFile
 lappend argv $packNAMD
 
 if {$argc != 27} {
-    puts "vmd -dispdev text -e mkNAMD.tcl -args psf pdb outDir parDir dimFactor namdFile"
+    puts "vmd -dispdev text -e mkNAMD.tcl -args psf pdb outDir parDir simBoxX simBoxY simBoxZ namdFile"
     puts "psf: psf file"
     puts "pdb: pdb file"
     puts "outDir: the directory to save simulation output"
     puts "parDir: the directory to find parameter files"
-    puts "dimFactor: the simulation box will be dimFactor times the dimension of the molecule in pdb"
     puts "namdFile: final namdFile name"
     puts "Temperature: simulation temperature in Kelvin"
     puts "Dielectric: dielectric constant of the system"
@@ -54,7 +55,9 @@ set outDir [lindex $argv 2]
 if {[string index $outDir end] == "/"} {set outDir [string trimright $outDir "/"]}
 set parDir [lindex $argv 3]
 if {[string index $parDir end] == "/"} {set parDir [string trimright $parDir "/"]}
-set dimFactor [lindex $argv 4]
+set simBoxX   [lindex $argv 4]
+set simBoxY   [lindex $argv 5]
+set simBoxZ   [lindex $argv 6]
 
 set id [mol load psf $psf pdb $pdb]
 set all [atomselect top all]
@@ -63,15 +66,15 @@ $all delete
 #set x [expr [lindex $MinMax 1 0] - [lindex $MinMax 0 0]]
 #set y [expr [lindex $MinMax 1 1] - [lindex $MinMax 0 1]]
 #set z [expr [lindex $MinMax 1 2] - [lindex $MinMax 0 2]]
-set xvec [vecscale [lindex $sspVecs 0] $dimFactor]
-set yvec [vecscale [lindex $sspVecs 1] $dimFactor]
-set zvec [vecscale [lindex $sspVecs 2] $dimFactor]
+#set xvec [vecscale [lindex $sspVecs 0] $dimFactor]
+#set yvec [vecscale [lindex $sspVecs 1] $dimFactor]
+#set zvec [vecscale [lindex $sspVecs 2] $dimFactor]
 set ovec [vecscale [lindex $sspVecs 3] 1]
 
-set namdFile [open [lindex $argv 5] w]
-set Temperature [lindex $argv 6]
-set Dielectric [lindex $argv 7]
-set Damping [lindex $argv 8]
+set namdFile [open [lindex $argv 7] w]
+set Temperature [lindex $argv 8]
+set Dielectric [lindex $argv 9]
+set Damping [lindex $argv 10]
 
 if {$gridforceCont1} {
     set gridforceCont1 "on"
@@ -117,9 +120,9 @@ puts $namdFile "   set ts \[lindex \$line 0\]"
 puts $namdFile "   close \$fd"
 puts $namdFile "   firsttimestep      \$ts"
 puts $namdFile "} else {"
-puts $namdFile "   cellBasisVector1                $xvec"
-puts $namdFile "   cellBasisVector2                $yvec"
-puts $namdFile "   cellBasisVector3                $zvec"
+puts $namdFile "   cellBasisVector1                $simBoxX 0 0"
+puts $namdFile "   cellBasisVector2                0 $simBoxY 0"
+puts $namdFile "   cellBasisVector3                0 0 $simBoxZ"
 puts $namdFile "   cellOrigin                      $ovec"
 puts $namdFile "   temperature \$temperature"
 puts $namdFile "   firsttimestep 0"
