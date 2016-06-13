@@ -272,6 +272,7 @@ namespace eval ::inorganicBuilder:: {
     gridSz 1
     gridRad 6
     thickness 10
+    surfRad 1.7
     shellFile "shell"
     interiorFile "interior"
     mergedFile "merged"
@@ -2183,10 +2184,7 @@ proc ::inorganicBuilder::guiAddStructWin {} {
   
   set guiState(awframe) $aw
   grid [button $aw.buttons.add -text Add \
-    -command "\
-     ${ns}::guiHighlightStruct $mode; \
-     ${ns}::guiStoreStruct; \
-     ${ns}::guiASF $guiState(alignSF); "] \
+    -command "${ns}::guiAddButton $guiState(alignSF) $mode; "] \
     -row $row -column 0
   grid [button $aw.buttons.cancel -text Cancel -command "destroy $aw"] \
     -row $row -column 1
@@ -2196,15 +2194,48 @@ proc ::inorganicBuilder::guiAddStructWin {} {
 }
 
 # *** ADDED ***
+# These values correspond to hitting the "Add" button...
+# For some reason, mapping them directly to the button didn't cause the values to update.
+proc ::inorganicBuilder::guiAddButton { alignSF mode} {
+  set ns [namespace current]
+  variable guiState
+
+  set guiState(alignSF) 1
+  set guiState(answer) "yes"
+  ${ns}::guiHighlightStruct $mode; \
+  ${ns}::guiStoreStruct; \
+  ${ns}::guiASF $guiState(alignSF) $mode;
+}
+
+
+
+# *** ADDED ***
 # Note sure why, but I have to return from guiHighlightStruct
 # before running this small subroutine (the guiState variable won't update).
 # Instead of doing everything first inside of guiHighlightStruct and then returning.
-proc ::inorganicBuilder::guiASF { alignSF } {
+proc ::inorganicBuilder::guiASF { alignSF mode } {
 	  set ns [namespace current]
 	  variable guiState
-	  if {$guiState(alignSF) == 0} { 
+	  while {$guiState(alignSF) == 0 && $guiState(answer) == "yes"} { 
 		 ${ns}::guiRemoveStruct $guiState(structListID) "end"
 		 ${ns}::guiBuildSurfaceStructsWin
+		 # Reduce the radius size and try again...max out when the radius is just too small, theoretically.
+		 set guiState(surfRad) [expr $guiState(surfRad) - 0.1]
+		 if {$guiState(surfRad) == 1} {
+			 set guiState(surfRad) 1.7
+			 tk_messageBox -icon info -message \
+				"Warning: The surface area volume does not match the atom cloud closely enough. \n\n\
+				Go to Graphics>Representations for 'GetSurfaceAtoms'\
+				and change the QuickSurf volume so that it more closely fits the figure.\n\n\
+				The structures will not be placed.\n\n\
+				" \
+				-type ok      
+			 mol modstyle 2 $guiState(getSurfMol) QuickSurf $guiState(surfRad) 2.6 1 "High"
+			 return
+		 }
+		 ${ns}::guiHighlightStruct $mode;
+		 ${ns}::guiStoreStruct; 
+
 	  }
 	  return
 }
@@ -3737,6 +3768,7 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
 
   display update on
 
+  
   if { $guiState(addStructType) == "dna" } {
 
        source [file normalize [file join $homePath "mkDNA" "mkDNA.tcl"]]
@@ -4162,14 +4194,27 @@ proc ::inorganicBuilder::DensityPDBGen { start_atom } {
   set rdensity [expr $catoms / $guiState(snm2)]
   
   if {$imcd != [llength $guiState(densearea)]} {
-		
-		set guiState(answer) [tk_messageBox -icon info -message \
-             "Due to the constraints set only $catoms/$imcd structures can be placed, giving a reduced density of $rdensity. Would you like to continue?" \
-             -type yesno]
+		if { $guiState(alignSF) == 0 } {
+			set guiState(answer) [tk_messageBox -icon info -message \
+			 " The placement failed using the current surface. The surface will be reduced automatically.\n\n \
+			 Due to the constraints set only $catoms/$imcd structures can be placed, giving a reduced density of $rdensity. Would you like to continue?" \
+			 -type yesno]			
+		} else {
+			set guiState(answer) [tk_messageBox -icon info -message \
+			 "Due to the constraints set only $catoms/$imcd structures can be placed, giving a reduced density of $rdensity. Would you like to continue?" \
+			 -type yesno]
+		 }
   } else {
-		set guiState(answer) [tk_messageBox -icon info -message \
+		if { $guiState(alignSF) == 0 } {
+			set guiState(answer) [tk_messageBox -icon info -message \
+			 " The placement failed using the current surface. The surface will be reduced automatically.\n\n \
+			 $catoms/$imcd structures can be placed, giving a density of $rdensity. Would you like to continue?" \
+			 -type yesno]			
+		} else {
+			set guiState(answer) [tk_messageBox -icon info -message \
              "$catoms/$imcd structures can be placed, giving a density of $rdensity. Would you like to continue?" \
              -type yesno]
+		 }
   }
   
 
@@ -4832,14 +4877,6 @@ proc ::inorganicBuilder::AlignDense { } {
   set final_density [expr $countb / $guiState(snm2)]
 
   if { $guiState(noOrient) == 1 } { 
-		  tk_messageBox -icon info -message \
-    "Warning: The surface area volume does not match the atom cloud closely enough. \n\n\
-    Go to Graphics>Representations for 'GetSurfaceAtoms'\
-    and change the QuickSurf volume so that it more closely fits the figure.\n\n\
-    (i.e. Reduce the Radius Scale parameter)\n\n\
-    The structures will not be placed.\n\n\
-    " \
-    -type ok  
     set guiState(noOrient) 0
     return 0
   }
@@ -5198,7 +5235,7 @@ proc ::inorganicBuilder::getSurfaceAtoms { } {
   mol modcolor 2 $molid ColorID 6
   mol modmaterial 2 $molid Transparent
   mol colupdate 2 $molid 1 
-  mol modstyle 2 $molid QuickSurf 1.7 2.6 1 high
+  mol modstyle 2 $molid QuickSurf $guiState(surfRad) 2.6 1 "High"
 
   puts "Surface Atoms Available for Construction: [$surface_area get index]"
 
