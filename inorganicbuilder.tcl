@@ -278,10 +278,12 @@ namespace eval ::inorganicBuilder:: {
     mergedFile "merged"
     geomView {}
     geomMol -1
+    DenseGuess ""
     loadResult 1
     addGenericInclude 0
     addDXFile {}
-    alignSF 1
+    alignSF 0
+    passedASF 0
     exb 0
     con 0
     exbFile ""
@@ -2194,35 +2196,52 @@ proc ::inorganicBuilder::guiAddStructWin {} {
 }
 
 # *** ADDED ***
-# These values correspond to hitting the "Add" button...
-# For some reason, mapping them directly to the button didn't cause the values to update.
+# The values/function correspond to hitting the "Add" button.
+# I couldn't get values to update when mapping directly on the button.
+# Plus, it looks a little nicer this way.
 proc ::inorganicBuilder::guiAddButton { alignSF mode} {
   set ns [namespace current]
   variable guiState
-
-  set guiState(alignSF) 1
+  set guiState(DenseGuess) ""
+  set guiState(alignSF) 0
+  set guiState(passedASF) 0
+  set guiState(noOrient) 0
   set guiState(answer) "yes"
-  ${ns}::guiHighlightStruct $mode; \
-  ${ns}::guiStoreStruct; \
-  ${ns}::guiASF $guiState(alignSF) $mode;
+  set guiState(surfRad) [lindex [lindex [molinfo $guiState(getSurfMol) get "{rep 2}"] 0] 1]
+		 
+  ${ns}::guiASF $guiState(alignSF) $mode
 }
 
 
-
 # *** ADDED ***
-# Note sure why, but I have to return from guiHighlightStruct
-# before running this small subroutine (the guiState variable won't update).
-# Instead of doing everything first inside of guiHighlightStruct and then returning.
+# Automatically try some different surface options for structure placement.
 proc ::inorganicBuilder::guiASF { alignSF mode } {
 	  set ns [namespace current]
 	  variable guiState
-	  while {$guiState(alignSF) == 0 && $guiState(answer) == "yes"} { 
+	  set originalSurfRad $guiState(surfRad)
+	  while {($guiState(passedASF) == 0) && ($guiState(answer) == "yes") } { 
+		 ${ns}::guiHighlightStruct $mode
+		 ${ns}::guiStoreStruct
+		 if {$guiState(passedASF) == 1} {
+			 continue
+		 }
+		 # ---- non-guaranteed instructions  ----
 		 ${ns}::guiRemoveStruct $guiState(structListID) "end"
 		 ${ns}::guiBuildSurfaceStructsWin
+		
 		 # Reduce the radius size and try again...max out when the radius is just too small, theoretically.
-		 set guiState(surfRad) [expr $guiState(surfRad) - 0.1]
+		 # Note that TCL doesn't like to subtract 0.1 from things... it insists on subtracting 0.1000000001
+		 set guiState(surfRad) [expr round(100*($guiState(surfRad) - 0.1))/double(100)]
+		 mol modstyle 2 $guiState(getSurfMol) QuickSurf $guiState(surfRad) 2.6 1
+		 # note use "2" to get "High" quality QuickSurf, if desired.
+		 # mol modstyle 2 $guiState(getSurfMol) QuickSurf $guiState(surfRad) 2.6 1 2
+
+#		 tk_messageBox -icon info -message \
+				"$guiState(DenseGuess) $guiState(surfRad)" \
+				-type ok      
+
 		 if {$guiState(surfRad) == 1} {
-			 set guiState(surfRad) 1.7
+			 set guiState(surfRad) $originalSurfRad
 			 tk_messageBox -icon info -message \
 				"Warning: The surface area volume does not match the atom cloud closely enough. \n\n\
 				Go to Graphics>Representations for 'GetSurfaceAtoms'\
@@ -2230,13 +2249,11 @@ proc ::inorganicBuilder::guiASF { alignSF mode } {
 				The structures will not be placed.\n\n\
 				" \
 				-type ok      
-			 mol modstyle 2 $guiState(getSurfMol) QuickSurf $guiState(surfRad) 2.6 1 "High"
+			 mol modstyle 2 $guiState(getSurfMol) QuickSurf $guiState(surfRad) 2.6 1
 			 return
 		 }
-		 ${ns}::guiHighlightStruct $mode;
-		 ${ns}::guiStoreStruct; 
-
 	  }
+
 	  return
 }
 
@@ -3619,13 +3636,16 @@ proc ::inorganicBuilder::guiStoreBlock { } {
 proc ::inorganicBuilder::guiStoreStruct { } {
   variable guiState
 
-  if { $guiState(dens_printer) == "" } {
+  if { $guiState(dens_printer) == ""  && $guiState(DenseGuess) == ""} {
       return
   }
 
   set btype $guiState(addStructType)
   set bname $guiState(addStructName)
   set useddense $guiState(dens_printer)
+  if { $guiState(DenseGuess) != "" } {
+	  set useddense $guiState(DenseGuess)
+  }
   
   if {[string equal $btype "peg"] } {
     set params [list $guiState(addPEGLength) "placeholder" $useddense]
@@ -4036,17 +4056,31 @@ proc ::inorganicBuilder::guiHighlightStruct {mode} {
          set guiState(temp_surfacearea) $guiState(previous_tempsurf) 
          set guiState(previous_densearea) {}
          }
-         set guiState(alignSF) [::inorganicBuilder::AlignDense]
-         if { $guiState(alignSF) == 0 || $guiState(alignSF) == "0" } {
-			 return;
-		 }
+         
+         set guiState(noOrient) 0
+         if { $guiState(DenseGuess) != "" } {
+			set guiState(alignSF) [::inorganicBuilder::AlignDense $guiState(DenseGuess)]			 
+         } else {
+			set guiState(alignSF) [::inorganicBuilder::AlignDense $guiState(densearea)]
+			if { $guiState(alignSF) != 0 } {
+			   set guiState(passedASF) 1
+			}
+         }
+#         tk_messageBox -icon info -message \
+			"success1fail0 $guiState(alignSF)... $guiState(anc_list)...DG $guiState(DenseGuess)" \
+			-type ok  
+
+         if { $guiState(alignSF) == 0 } {
+			 return
+         }
+         
          file delete -force "temp_mesh_qs.stl"
          set dens_printer [lsort -dictionary $guiState(densearea)]
          set guiState(dens_printer) $dens_printer
          set guiState(global_useddense) $dens_printer
          foreach built_structure $guiState(structlist) {
            set guiState(global_useddense) [concat $guiState(global_useddense) [lindex [lindex $built_structure 2] 2]]
-		 }
+         }
 
        }
 
@@ -4193,28 +4227,21 @@ proc ::inorganicBuilder::DensityPDBGen { start_atom } {
   set catoms [llength $guiState(densearea)]
   set rdensity [expr $catoms / $guiState(snm2)]
   
-  if {$imcd != [llength $guiState(densearea)]} {
-		if { $guiState(alignSF) == 0 } {
-			set guiState(answer) [tk_messageBox -icon info -message \
-			 " The placement failed using the current surface. The surface will be reduced automatically.\n\n \
-			 Due to the constraints set only $catoms/$imcd structures can be placed, giving a reduced density of $rdensity. Would you like to continue?" \
-			 -type yesno]			
-		} else {
-			set guiState(answer) [tk_messageBox -icon info -message \
-			 "Due to the constraints set only $catoms/$imcd structures can be placed, giving a reduced density of $rdensity. Would you like to continue?" \
-			 -type yesno]
-		 }
+  if { ($imcd != [llength $guiState(densearea)]) && ($guiState(DenseGuess) == "") } {
+
+		set guiState(answer) [tk_messageBox -icon info -message \
+		 "Due to the constraints set only $catoms/$imcd structures can be placed, giving a reduced density of $rdensity. Would you like to continue?" \
+		 -type yesno]
+			 
+  } elseif { $guiState(DenseGuess) != "" || $guiState(alignSF) == 1 } {
+		 set guiState(answer) "yes"
+
   } else {
-		if { $guiState(alignSF) == 0 } {
-			set guiState(answer) [tk_messageBox -icon info -message \
-			 " The placement failed using the current surface. The surface will be reduced automatically.\n\n \
-			 $catoms/$imcd structures can be placed, giving a density of $rdensity. Would you like to continue?" \
-			 -type yesno]			
-		} else {
-			set guiState(answer) [tk_messageBox -icon info -message \
-             "$catoms/$imcd structures can be placed, giving a density of $rdensity. Would you like to continue?" \
-             -type yesno]
-		 }
+
+		set guiState(answer) [tk_messageBox -icon info -message \
+		 "$catoms/$imcd structures can be placed, giving a density of $rdensity. Would you like to continue?" \
+		 -type yesno]
+
   }
   
 
@@ -4225,7 +4252,7 @@ proc ::inorganicBuilder::DensityPDBGen { start_atom } {
 
 
 # *** ADDED ***
-proc ::inorganicBuilder::AlignDense { } {
+proc ::inorganicBuilder::AlignDense { densearea } {
   variable guiState
   variable homePath
   variable surfingPath
@@ -4234,7 +4261,6 @@ proc ::inorganicBuilder::AlignDense { } {
   mol delete $guiState(linemols)
   
   set molid $guiState(currentMol)
-  set densearea $guiState(densearea)
   set structnames {}
   set draw_status {}
 
@@ -4424,6 +4450,22 @@ proc ::inorganicBuilder::AlignDense { } {
 
   
   foreach atom $densearea {
+	  
+	# if the OrientX bug was found, just complete the attachment lists
+	# and skip any further processing.
+	# Filling out the lists may or may not actually affect anything (i.e. just like a break)
+    if { $guiState(noOrient) == 1 } {
+		if { $guiState(addStructType) == "dna" } {
+		  lappend guiState(oau_list) $atom
+		# PEG
+		} elseif { $guiState(addStructType) == "peg" } {
+		  lappend guiState(cau_list) $atom
+		# CUSTOM
+		} elseif { $guiState(addStructType) == "custom" } {
+		  lappend guiState(ancau_list) $atom
+		}
+		continue
+    }
     display update off
 
   # Keep track of the local unique chains in the incoming structure
@@ -4821,7 +4863,10 @@ proc ::inorganicBuilder::AlignDense { } {
       if { $guiState(addStructType) == "custom" } {
 		  $struct_full moveby [vecscale $vecnorma $guiState(addCustomX)]
       }
+      set guiState(DenseGuess) ""
     } else {
+		set guiState(DenseGuess) "$atom"
+		#set guiState(DenseGuess) "$guiState(DenseGuess) $atom"
 		set guiState(noOrient) 1
 	}
 
@@ -4845,8 +4890,7 @@ proc ::inorganicBuilder::AlignDense { } {
     $struct_indexed delete
     $struct_full delete
   }
-  
-
+    
   # Part 2.5, merge files
 
   resetpsf
@@ -4880,10 +4924,11 @@ proc ::inorganicBuilder::AlignDense { } {
     set guiState(noOrient) 0
     return 0
   }
-
-  tk_messageBox -icon info -message \
+  if { $guiState(DenseGuess) == "" && ($densearea == $guiState(densearea))} {
+	tk_messageBox -icon info -message \
              "Succeeded in placement of $countb / $catoms structures for a density of $final_density" \
              -type ok  
+  }
   return 1
 }
 
@@ -4945,11 +4990,16 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
 # deletelist is the discrete integer value of the array element, i.e. single element
 # returns a value of '0' to delete the first item.
 
- # tk_messageBox -icon info -message \
+#  tk_messageBox -icon info -message \
 	  "$guiState(all_struct) $deleteType $deletelist" \
 	  -type ok  
 
   set guiState(all_struct) [lreplace $guiState(all_struct) $deletelist $deletelist]
+
+
+#  tk_messageBox -icon info -message \
+	  "$guiState(all_struct) after, $guiState(buildPreviewMode)" \
+	  -type ok  
 
 # set the o_list, oau_list, c_list, cau_lists accordingly to account for removed struct
   array unset molecules_counted
@@ -4987,7 +5037,7 @@ proc ::inorganicBuilder::guiRemoveStruct { listid deleteType } {
    incr structs_counted
   }
 
-  
+
   if {[lindex [lindex $guiState(structlist) $deletelist] 0] == "dna"} {
     set guiState(oau_list) [lreplace $guiState(oau_list) $moldel_start(dna) $moldel_end(dna)]
 
@@ -5235,7 +5285,9 @@ proc ::inorganicBuilder::getSurfaceAtoms { } {
   mol modcolor 2 $molid ColorID 6
   mol modmaterial 2 $molid Transparent
   mol colupdate 2 $molid 1 
-  mol modstyle 2 $molid QuickSurf $guiState(surfRad) 2.6 1 "High"
+  # note use "2" to get "High" quality QuickSurf, if desired.
+  # mol modstyle 2 $guiState(getSurfMol) QuickSurf $guiState(surfRad) 2.6 1 2
+  mol modstyle 2 $molid QuickSurf $guiState(surfRad) 2.6 1 
 
   puts "Surface Atoms Available for Construction: [$surface_area get index]"
 
@@ -9457,6 +9509,9 @@ proc ::inorganicBuilder::buildStructs { molid } {
     set guiState(conFile) "${guiState(structedFile)}_con"
     set guiState(exb) 1
     set guiState(con) 1
+#    tk_messageBox -icon info -message \
+			"$guiState(anc_list) ... $guiState(ancau_list)" \
+			-type ok  
     attach_exb All_CUST.pdb Surf.pdb Surf.psf $guiState(anc_list) $guiState(ancau_list)\
      $guiState(structedFile) $homePath $guiState(exbFile) $guiState(addCustomK)\
       $guiState(addCustomX) $guiState(conFile) $guiState(topofile_struct)
