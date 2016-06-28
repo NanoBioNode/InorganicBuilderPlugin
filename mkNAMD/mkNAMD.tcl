@@ -241,7 +241,7 @@ set parFiles [list {*}$parFiles {*}[glob -nocomplain -- $topoFile]]
 foreach par $parFiles {
 	if { $packNAMD == 2} {
 		set parr [lindex [file split $par] end]
-		set par "/topology/$parr"
+		set par "topology/$parr"
 	}
     puts $namdFile "parameters      $par"
 }
