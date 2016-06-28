@@ -50,11 +50,19 @@ if {$argc != 27} {
 
 set psf [lindex $argv 0]
 set pdb [lindex $argv 1]
+
 set outDir [lindex $argv 2]
 if {[string index $outDir end] == "/"} {set outDir [string trimright $outDir "/"]}
+if {[string index $outDir 0] == "/"} {set outDir [string trimleft $outDir "/"]}
+
 set parDir [lindex $argv 3]
 if {[string index $parDir end] == "/"} {set parDir [string trimright $parDir "/"]}
+if {[string index $parDir 0] == "/"} {set parDir [string trimleft $parDir "/"]}
+
 set dimFactor [lindex $argv 4]
+
+
+
 
 set id [mol load psf $psf pdb $pdb]
 set all [atomselect top all]
