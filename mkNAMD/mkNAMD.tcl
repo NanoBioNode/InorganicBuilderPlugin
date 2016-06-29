@@ -57,7 +57,6 @@ if {[string index $outDir 0] == "/"} {set outDir [string trimleft $outDir "/"]}
 
 set parDir [lindex $argv 3]
 if {[string index $parDir end] == "/"} {set parDir [string trimright $parDir "/"]}
-if {[string index $parDir 0] == "/"} {set parDir [string trimleft $parDir "/"]}
 
 set dimFactor [lindex $argv 4]
 
