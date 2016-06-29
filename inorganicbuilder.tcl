@@ -19,7 +19,7 @@
 # NAMD File Generator Script: Chen-Yu Li
 
 package provide inorganicbuilder 0.1
-
+display projection orthographic
 namespace eval ::drawenv:: {
   namespace export draw
   namespace export recolor
