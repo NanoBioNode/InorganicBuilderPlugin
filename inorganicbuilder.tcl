@@ -5616,6 +5616,17 @@ proc ::inorganicBuilder::RunNAMD { type } {
   variable guiState
   variable homePath
 
+# Create the constraint file again from the PDB about to be used,
+# in order to account for solvated atom count.
+set constr [mol new $guiState(structedFile).pdb]
+set all [atomselect top all]
+$all set beta 0
+set sub [atomselect top "segname U0"]
+$sub set beta 20
+$all writepdb $guiState(structedFile)_con
+$all delete
+$sub delete
+mol delete $constr
 
 
 #  set dimFactor 2
