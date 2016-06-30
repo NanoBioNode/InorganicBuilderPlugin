@@ -53,7 +53,6 @@ set pdb [lindex $argv 1]
 
 set outDir [lindex $argv 2]
 if {[string index $outDir end] == "/"} {set outDir [string trimright $outDir "/"]}
-if {[string index $outDir 0] == "/"} {set outDir [string trimleft $outDir "/"]}
 
 set parDir [lindex $argv 3]
 if {[string index $parDir end] == "/"} {set parDir [string trimright $parDir "/"]}
