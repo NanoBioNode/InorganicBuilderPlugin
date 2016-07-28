@@ -9,12 +9,12 @@ Install the latest version in the VMD plugin directory by copying this repo's co
 
 The code for Visual Molecular Dynamics (VMD) and Molecular Dynamics (NAMD) was developed by the Theoretical and Computational Biophysics Group at the University of Illinois.
 
-Credits:
-Original Inorganic Builder v0.1 Author:  Robert Brunner
-Surface-Structure Builder Author: AbderRahman N. Sobh
-PEG Generator, PEG Attachment Scripts Author: Chen-Yu Li
-DNA Generator, DNA Attachment Scripts Author: Chen-Yu Li
-NAMD File Generator Script: Chen-Yu Li
-Testing: Maxim Belkin
+<br><b>Credits:</b></br>
+<br><b>Original Inorganic Builder v0.1 Author:</b>  Robert Brunner
+<br><b>Surface-Structure Builder Author:</b> AbderRahman N. Sobh
+<br><b>PEG Generator, PEG Attachment Scripts Author:</b> Chen-Yu Li
+<br><b>DNA Generator, DNA Attachment Scripts Author:</b> Chen-Yu Li
+<br><b>NAMD File Generator Script:</b> Chen-Yu Li
+<br><b>Testing:</b> Maxim Belkin
 
-Project Advisors: Alexei Aksimentiev, Nahil Sobh
+<br><b>Project Advisors:</b> Alexei Aksimentiev, Nahil A. Sobh
